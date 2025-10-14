@@ -1941,7 +1941,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             embed_params = {
                 "model": "models/text-embedding-004",
                 "content": description,
-                "task_type": "retrieval_query",
+                "task_type": "retrieval_document",  # FIXED: Changed from retrieval_query to retrieval_document
                 "output_dimensionality": 768
             }
             

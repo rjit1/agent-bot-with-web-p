@@ -281,40 +281,35 @@ class ImageHandler:
                     return None
             
             # Create product-focused prompt
-            prompt = """You are a product search expert. Analyze this image to understand what product the customer is looking for.
+            prompt = """You are a product search expert. Analyze this image to understand what EXACT product the customer is looking for.
 
 **Your Task:**
-Generate a detailed description that would help find similar products in a toy store database.
+Generate a DETAILED description that would help find the EXACT same product in a toy store database.
 
-**Focus on:**
-1. **Product Type**: What kind of product? (electric jeep, bike, scooter, doll, puzzle, etc.)
-2. **Design & Style**: Describe the overall design and appearance
-3. **Colors**: List ALL visible colors (primary and secondary)
-4. **Key Features**: Identify visible features (lights, wheels, seats, steering, buttons, etc.)
-5. **Size Category**: Estimate size (small, medium, large, extra-large)
-6. **Age Suitability**: Estimate appropriate age range
-7. **Material & Build**: Describe visible materials (plastic, metal, rubber wheels, etc.)
+**Focus on SPECIFIC details:**
+1. **Exact Product Type**: Be very specific (e.g., "Gurtoy electric tricycle motorcycle", not just "tricycle")
+2. **Specific Brand/Model**: If visible, include brand and model information
+3. **Exact Colors**: List specific color names and shades
+4. **Unique Features**: Identify distinctive features that make this product unique
+5. **Exact Specifications**: Size, wheel type, seat style, etc.
+6. **Visual Characteristics**: Any unique visual elements
 
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
 {
-    "product_type": "specific product category",
-    "detailed_description": "comprehensive description for embedding (3-5 sentences)",
-    "colors": ["color1", "color2", "color3"],
-    "primary_color": "main color",
-    "key_features": ["feature1", "feature2", "feature3", "feature4"],
+    "product_type": "VERY SPECIFIC product category with brand/model if visible",
+    "detailed_description": "COMPREHENSIVE description with ALL specific details (5-7 sentences)",
+    "colors": ["exact_color1", "exact_color2"],
+    "primary_color": "exact main color",
+    "key_features": ["specific_feature1", "specific_feature2", "specific_feature3"],
+    "brand_model": "brand and model if visible",
+    "unique_characteristics": ["unique_element1", "unique_element2"],
     "age_range": "X-Y years",
     "size_category": "small|medium|large|extra-large",
-    "style_keywords": ["keyword1", "keyword2", "keyword3"],
     "confidence": "high|medium|low"
 }
 
-**Important:**
-- Be specific and detailed in the description
-- Include all visible colors
-- Focus on searchable features
-- Use keywords that customers would use
-- Output ONLY the JSON, nothing else
+**CRITICAL:** Be as specific as possible. Include brand names, model numbers, exact colors, and unique features that would distinguish this exact product from similar ones.
 
 Now analyze the product image:"""
 
