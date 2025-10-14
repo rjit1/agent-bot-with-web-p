@@ -44,23 +44,7 @@ Write-Host ""
 # Step 2: Install system dependencies
 Write-Host "[2/6] Installing system dependencies..." -ForegroundColor Yellow
 
-$installCmd = @'
-# Wait for any apt locks to be released
-echo "Waiting for apt to be available..."
-for i in {1..30}; do
-    if ! sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then
-        echo "Apt is available"
-        break
-    fi
-    echo "Waiting... ($i/30)"
-    sleep 10
-done
-
-# Install dependencies
-sudo apt-get update
-sudo apt-get install -y git supervisor python3-venv python3-pip python3-dev build-essential
-echo "Dependencies installed"
-'@
+$installCmd = "echo 'Waiting for apt to be available...' && for i in {1..30}; do if ! sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; then echo 'Apt is available'; break; fi; echo 'Waiting... ('$i'/30)'; sleep 10; done && sudo apt-get update && sudo apt-get install -y git supervisor python3-venv python3-pip python3-dev build-essential && echo 'Dependencies installed'"
 
 & $GCLOUD compute ssh $INSTANCE_NAME --zone=$ZONE --project=$PROJECT_ID --command=$installCmd
 
@@ -75,11 +59,7 @@ Write-Host ""
 # Step 3: Create remote directory structure
 Write-Host "[3/6] Creating remote directory structure..." -ForegroundColor Yellow
 
-& $GCLOUD compute ssh $INSTANCE_NAME --zone=$ZONE --project=$PROJECT_ID --command=@"
-sudo mkdir -p /opt/gurtoy-bot
-sudo chown -R `$(whoami):`$(whoami) /opt/gurtoy-bot
-mkdir -p /opt/gurtoy-bot/temp_images /opt/gurtoy-bot/temp_audio /opt/gurtoy-bot/invoice/generated_invoice
-"@
+& $GCLOUD compute ssh $INSTANCE_NAME --zone=$ZONE --project=$PROJECT_ID --command="sudo mkdir -p /opt/gurtoy-bot && sudo chown -R \$(whoami):\$(whoami) /opt/gurtoy-bot && mkdir -p /opt/gurtoy-bot/temp_images /opt/gurtoy-bot/temp_audio /opt/gurtoy-bot/invoice/generated_invoice"
 
 Write-Host "Directory structure created" -ForegroundColor Green
 Write-Host ""
@@ -148,21 +128,7 @@ Write-Host ""
 # Step 5: Setup Python environment and install packages
 Write-Host "[5/6] Setting up Python environment..." -ForegroundColor Yellow
 
-$setupCmd = @'
-cd /opt/gurtoy-bot
-
-# Create virtual environment
-echo "Creating virtual environment..."
-python3 -m venv venv
-
-# Activate and install packages
-echo "Installing Python packages..."
-source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
-
-echo "Python environment ready"
-'@
+$setupCmd = "cd /opt/gurtoy-bot && echo 'Creating virtual environment...' && python3 -m venv venv && echo 'Installing Python packages...' && source venv/bin/activate && pip install --upgrade pip && pip install -r requirements.txt && echo 'Python environment ready'"
 
 & $GCLOUD compute ssh $INSTANCE_NAME --zone=$ZONE --project=$PROJECT_ID --command=$setupCmd
 
@@ -177,9 +143,7 @@ Write-Host ""
 # Step 6: Configure Supervisor and start bot
 Write-Host "[6/6] Configuring Supervisor and starting bot..." -ForegroundColor Yellow
 
-$supervisorCmd = @'
-# Create supervisor config
-sudo tee /etc/supervisor/conf.d/gurtoy-bot.conf > /dev/null << 'EOF'
+$supervisorCmd = "sudo tee /etc/supervisor/conf.d/gurtoy-bot.conf > /dev/null << 'EOF'
 [program:gurtoy-bot]
 command=/opt/gurtoy-bot/venv/bin/python /opt/gurtoy-bot/run_bot.py
 directory=/opt/gurtoy-bot
@@ -187,31 +151,23 @@ autostart=true
 autorestart=true
 stderr_logfile=/var/log/gurtoy-bot.err.log
 stdout_logfile=/var/log/gurtoy-bot.out.log
-environment=PATH="/opt/gurtoy-bot/venv/bin"
+environment=PATH='/opt/gurtoy-bot/venv/bin'
 stopwaitsecs=10
 user=root
 EOF
-
-# Reload supervisor and start bot
-echo "Starting bot..."
+echo 'Starting bot...'
 sudo supervisorctl reread
 sudo supervisorctl update
 sudo supervisorctl restart gurtoy-bot
-
-# Wait a moment for bot to start
 sleep 5
-
-# Show status
-echo ""
-echo "=========================================="
-echo "Bot Status:"
-echo "=========================================="
+echo ''
+echo '=========================================='
+echo 'Bot Status:'
+echo '=========================================='
 sudo supervisorctl status gurtoy-bot
-
-echo ""
-echo "Recent Logs:"
-sudo tail -n 30 /var/log/gurtoy-bot.out.log
-'@
+echo ''
+echo 'Recent Logs:'
+sudo tail -n 30 /var/log/gurtoy-bot.out.log"
 
 & $GCLOUD compute ssh $INSTANCE_NAME --zone=$ZONE --project=$PROJECT_ID --command=$supervisorCmd
 
