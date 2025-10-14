@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-10-09T19:52:59.714573",
+  "duration_seconds": 78.282947,
+  "statistics": {
+    "total_products": 3,
+    "processed": 3,
+    "successful": 3,
+    "failed": 0,
+    "skipped": 0,
+    "start_time": "2025-10-09 19:51:41.315228",
+    "end_time": "2025-10-09 19:52:59.598175",
+    "rate_limit_waits": 0,
+    "total_wait_time": 0
+  }
+}

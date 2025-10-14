@@ -1,0 +1,6 @@
+# Ignore all audio files in this directory
+*
+
+# But keep these files
+!.gitignore
+!README.md

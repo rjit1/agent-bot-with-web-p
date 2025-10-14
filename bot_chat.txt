@@ -1,0 +1,112 @@
+🎯 Gurtoy Mercedes-Benz Inspired Electric Ride-On Jeep for Kids
+
+👶 Age: 1-4 years
+💰 Price: ~~₹17,000~~ → ₹1
+
+📝 Let your little adventurer enjoy thrilling rides in this stylish jeep! - Eye-catching red design ...
+
+🔋 Battery: 12V
+🎨 Colors: Red
+✨ Features: LED Lights, Music System, Remote Control
+
+📞 Order: Call 8300000086
+💬 Kya aapko koi product pasand aaya? Ya aur options chahiye? 😊
+🎯👶
+
+Ye Blue color me hai kya
+Maaf Sarvesh, abhi humare paas blue color mein koi jeep available nahi hai. Humare paas red, pink aur multicolor options mein jeeps hain. Kya aap inmein se koi dekhna chahenge? 😊
+🎯👶
+
+Achha iske baare me pura descriptions do?
+Zaroor! Aapko kis jeep ka description chahiye? Humare paas red, pink aur multicolor options mein jeeps hain. Kya aap inmein se koi specific dekhna chahenge, taaki main uski poori details bata sakoon? 😊
+
+
+
+
+terminal - 
+(venv) PS E:\project\agent> e:\project\agent\venv\Scripts\Activate.ps1; python e:\project\agent\run_bot.py
+
+============================================================
+🤖 GURTOY TELEGRAM BOT
+============================================================
+Mode: POLLING (No webhook required)
+Perfect for local development and testing!
+============================================================
+
+✅ Environment variables configured
+🚀 Starting bot in polling mode...
+💡 Tip: This mode doesn't require ngrok or public URL
+
+2025-10-03 22:05:27,494 - gurtoy_bot - INFO - Telegram Polling Bot initialized
+2025-10-03 22:05:27,495 - gurtoy_bot - INFO - 🤖 Starting Gurtoy Telegram Bot in POLLING mode...
+2025-10-03 22:05:27,495 - gurtoy_bot - INFO - ============================================================
+2025-10-03 22:05:28,825 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/deleteWebhook "HTTP/1.1 200 OK"
+2025-10-03 22:05:28,827 - gurtoy_bot - INFO - ✅ Webhook deleted, polling mode enabled
+2025-10-03 22:05:30,051 - httpx - INFO - HTTP Request: GET https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getMe "HTTP/1.1 200 OK"
+2025-10-03 22:05:30,053 - gurtoy_bot - INFO - ✅ Bot: @gurtoysbot (gurtoy)
+2025-10-03 22:05:30,053 - gurtoy_bot - INFO - 📱 Bot ID: 8188106484
+2025-10-03 22:05:30,054 - gurtoy_bot - INFO - ============================================================
+2025-10-03 22:05:30,055 - gurtoy_bot - INFO - 🟢 Bot is now running and listening for messages...  
+2025-10-03 22:05:30,055 - gurtoy_bot - INFO - Press Ctrl+C to stop
+2025-10-03 22:05:30,055 - gurtoy_bot - INFO - ============================================================
+2025-10-03 22:05:47,257 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:05:47,260 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): Hello...
+2025-10-03 22:05:49,312 - httpx - INFO - HTTP Request: GET https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-03 22:05:49,516 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-03 22:05:49,633 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-03 22:05:49,804 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+E0000 00:00:1759509349.909758   17220 alts_credentials.cc:93] ALTS creds ignored. Not running on GCP and untrusted ALTS is not enabled.
+2025-10-03 22:05:54,219 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendMessage "HTTP/1.1 200 OK"
+2025-10-03 22:05:54,425 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:05:54,430 - gurtoy_bot - INFO - ✅ Response sent to Sarvesh
+2025-10-03 22:06:05,995 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:06:05,997 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): Yes dikhao 1 ya 2...
+2025-10-03 22:06:06,201 - httpx - INFO - HTTP Request: GET https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-03 22:06:06,303 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-03 22:06:06,406 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-03 22:06:06,611 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:06:09,484 - gurtoy_bot - INFO - AI called function: search_products
+2025-10-03 22:06:10,296 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/search_products "HTTP/2 200 OK"
+2025-10-03 22:06:10,299 - gurtoy_bot - INFO - Found 10 products for query: jeeps for 5 year old
+2025-10-03 22:06:10,299 - gurtoy_bot - INFO - Stored 10 products to show
+2025-10-03 22:06:14,393 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendMessage "HTTP/1.1 200 OK"
+2025-10-03 22:06:16,236 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:18,284 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:20,332 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:22,380 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:24,383 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:26,272 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:28,128 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:30,059 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:32,009 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:34,055 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendPhoto "HTTP/1.1 200 OK"
+2025-10-03 22:06:35,796 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendMessage "HTTP/1.1 200 OK"
+2025-10-03 22:06:36,010 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:06:36,015 - gurtoy_bot - INFO - ✅ Showed 10 products to Sarvesh
+2025-10-03 22:06:42,657 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:06:42,659 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): Ye Blue color me hai kya...
+2025-10-03 22:06:42,872 - httpx - INFO - HTTP Request: GET https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-03 22:06:42,962 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-03 22:06:43,046 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-03 22:06:43,168 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:06:52,179 - gurtoy_bot - INFO - AI called function: search_products
+2025-10-03 22:06:52,928 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/search_products "HTTP/2 200 OK"
+2025-10-03 22:06:52,930 - gurtoy_bot - INFO - Found 10 products for query: blue jeep for 5 year old
+2025-10-03 22:06:52,930 - gurtoy_bot - INFO - Stored 10 products to show
+2025-10-03 22:06:58,017 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendMessage "HTTP/1.1 200 OK"
+2025-10-03 22:06:58,222 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:06:58,224 - gurtoy_bot - INFO - ✅ Response sent to Sarvesh
+2025-10-03 22:07:29,455 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:07:32,937 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:07:32,939 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): Achha iske baare me pura descriptions do?...
+2025-10-03 22:07:33,552 - httpx - INFO - HTTP Request: GET https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-03 22:07:33,653 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+equest: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/sendMessage "HTTP/1.1 200 OK"
+2025-10-03 22:07:56,079 - httpx - INFO - HTTP Request: POST https://iiiwxxzpailqoefipvdr.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-03 22:07:56,081 - gurtoy_bot - INFO - ✅ Response sent to Sarvesh
+2025-10-03 22:08:27,314 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:08:58,751 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+2025-10-03 22:09:30,289 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot8188106484:AAHh8vRGDOrKC8RQc1AX7Po62B9dXxMmNnc/getUpdates "HTTP/1.1 200 OK"
+
+

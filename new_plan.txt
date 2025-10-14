@@ -1,0 +1,97 @@
+Project: Telegram AI Commerce Bot – Enhanced Roadmap
+Updated: 2025-07-14
+Primary Stack: Telegram Bot API, Supabase (Postgres + Edge Functions + Vector Store), Gemini 2.5 Flash (function calling + multimodal), gemini-embedding-001, Razorpay APIs, Cloud Run / Supabase Functions for backend orchestration.
+
+Phase 1 – Intelligent Conversational Agent
+Objectives:
+- Deliver a multilingual, context-aware assistant that feels personable and trustworthy.
+Key Capabilities:
+1. Persona & Tone: Leverage Gemini 2.5 Flash system prompts to craft empathetic, culturally tuned responses (Hindi, English, Hinglish) with emoji and formatting for engagement.
+2. Dynamic Tool Routing: Use function calling to invoke profile lookup, conversation memory, support escalation, and policy guardrails.
+3. Sentiment & Intent Detection: Incorporate Gemini-generated sentiment tags and intent predictions stored in Supabase for personalized follow-ups.
+4. Compliance & Safety Layer: Add profanity/toxicity detection, PII redaction, and manual handoff triggers aligned with Indian regulations.
+Emerging Ideas from Research:
+- Adopt conversation analytics (e.g., n8n Gemini workflow templates) for daily summaries and proactive performance tuning.
+- Consider quick-reply buttons for FAQ shortcuts and persistent menu per Telegram best practices.
+Implementation Steps:
+- Supabase schemas: `users`, `sessions`, `conversation_logs`, `sentiment_tags`, `handoff_requests`.
+- Python FastAPI webhook receiver; integrate Telethon/pyTelegramBotAPI for advanced Telegram features (inline keyboards, media).
+- Prompt library (yaml/json) defining system, developer, and tool prompts; include fallback flows for low-confidence responses.
+- Monitoring setup: Supabase edge logs + Grafana dashboards tracking latency, fallback rate, sentiment trends.
+Exit Criteria:
+- >90% of top intents resolved autonomously with CSAT >=4/5 in pilot tests.
+- End-to-end latency (<2.5s) for text interactions, including analytics logging and safety checks.
+
+Phase 2 – Product Discovery & Smart Recommendations
+Objectives:
+- Turn conversations into guided shopping journeys with flexible discovery experiences.
+Key Capabilities:
+1. Multimodal Product Cards: Design message templates with image, price, CTA buttons (view, buy, ask questions) and optional carousel navigation.
+2. Preference Elicitation: Gemini orchestrator asks clarifying questions (budget, style, occasion) using intent-specific prompt chains.
+3. Hybrid Retrieval: Combine Supabase vector search (gemini-embedding-001) with rule-based filters (inventory, discounts, seasonal relevance).
+4. Contextual Memory: Store user preferences and browsing history for continuity across sessions.
+Research Highlights:
+- Supabase AI docs suggest vector dimensions of 3072 for Gemini embeddings; use HNSW index for faster recall.
+- Refer to GitHub community bots (e.g., GeminiTelegramBot, Shop-Assistant-Chatbot) for formatting inspiration and conversation flow patterns.
+Implementation Steps:
+- Supabase schemas: `products`, `product_media`, `embeddings`, `inventory`, `recommendation_events`, `user_preferences`.
+- CSV ingestion CLI with data validation, image upload (Supabase Storage), embedding generation, and upsert.
+- Edge function `search_products` returning ranked items plus explanation strings for Gemini to cite.
+- Conversation templates for multi-step discovery, including “show more”, “compare products”, and language toggles.
+Exit Criteria:
+- Users receive at least 3 relevant options with <1.8s retrieval time.
+- Preference data increases repeat visit conversion by ≥15% in A/B tests.
+
+Phase 3 – Seamless Payments & Order Orchestration (Razorpay)
+Objectives:
+- Enable in-chat checkout with minimal friction and robust fraud safeguards.
+Key Capabilities:
+1. Razorpay Orders + UPI: Generate payment links or in-chat pay flows, confirm status in real time.
+2. Order Lifecycle Management: Track states in Supabase (`orders`, `order_items`, `payments`, `refunds`) with automation hooks.
+3. Webhook Security: Verify signatures, handle retries, log events, and surface alerts in observability stack.
+4. Conversational Post-Payment Support: Provide invoices, shipping updates, reorder shortcuts, and human escalation when issues arise.
+Research Insights:
+- Razorpay docs emphasize webhook verification, idempotency keys, and retry-friendly flows; adopt recommended secret rotation practices.
+- Explore automation connectors (Zapier/Pabbly) for contingency operations (e.g., send Telegram group link post-payment) as backup flows.
+Implementation Steps:
+- Backend service exposing functions: `create_payment_intent`, `check_payment_status`, `issue_refund` callable via Gemini.
+- Supabase Row Level Security to restrict access to user-specific orders.
+- Integration tests covering success, failure, timeout, and refund scenarios.
+- Payment analytics dashboard (conversion funnel, drop-off reasons, revenue trends).
+Exit Criteria:
+- Successful payment completion rate ≥95% in beta run.
+- Webhook discrepancies auto-flagged within 30 seconds.
+- GST-compliant invoicing delivered instantly after payment confirmation.
+
+Phase 4 – Vision-Driven Product Matching & Multimodal Support
+Objectives:
+- Recognize and match products from user-submitted images and mixed-modal queries.
+Key Capabilities:
+1. Image Understanding: Gemini 2.5 Flash multimodal analysis to extract product attributes, brand cues, and style descriptors.
+2. Visual Search Pipeline: Compute embeddings for catalog images (gemini-embedding-001 vision mode or Vertex AI Image Embeddings) and perform similarity search.
+3. Mixed-Modal Dialogue: Combine image insights with text clarifications to refine matches and suggestions.
+4. Confidence-based Escalation: If confidence < threshold, prompt for more images/questions or offer human assistance.
+Research Highlights:
+- Vertex AI docs spotlight multimodal function calling for orchestrating image interpretation + retrieval steps.
+- Community projects demonstrate pairing Gemini vision output with Supabase vector store for image-to-product matching.
+Implementation Steps:
+- Update ingestion workflow to store image embeddings and metadata (color, texture tags) in Supabase.
+- Build `match_product_from_image` function returning candidate IDs, confidence, and highlight reasons.
+- Implement temporary storage with signed URLs for Telegram uploads; enforce auto-deletion policies for privacy.
+- Add abuse detection (e.g., NSFW filter) prior to processing images.
+Exit Criteria:
+- ≥80% top-3 accuracy on curated validation set of catalog images.
+- Image handling pipeline completes within 3s median time.
+- NSFW/inappropriate content filtered with >98% precision.
+
+Cross-Phase Enhancements & Feature Ideas
+- Automated Daily Briefings: Use Gemini to summarize conversation analytics, top product queries, and payment issues for the team.
+- Voice Note Support: Extend to speech-to-text via Gemini Audio API for Hindi/English voice commands.
+- Loyalty & Personalization: Integrate with CRM/loyalty systems, offer personalized coupons via Gemini-driven segmentation.
+- Proactive Outreach: Schedule broadcast messages for product launches or abandoned carts under Telegram policies.
+- Offline Monitoring: Implement alerting for service degradation and fallback to simple FAQ mode if Gemini/API unavailable.
+
+Next Actions
+1. Build “gemini-usage-examples” folder with sample code for function calling, embeddings, RAG, Telegram integration, and vision analysis.
+2. Define Supabase SQL migrations and seed scripts for Phase 1 schemas.
+3. Draft compliance checklist covering data residency, user consent, and payment guidelines for India.
