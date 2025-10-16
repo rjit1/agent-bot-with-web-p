@@ -1,5 +1,5 @@
 """
-Invoice Generator for Gurtoy Telegram Bot
+Invoice Generator for Fashion Mart Telegram Bot
 Generates professional PDF invoices for completed orders.
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ from PIL import Image as PILImage
 logger = logging.getLogger(__name__)
 
 class InvoiceGenerator:
-    """Generate professional PDF invoices for Gurtoy orders."""
+    """Generate professional PDF invoices for Fashion Mart orders."""
     
     def __init__(self, supabase_client):
         """
@@ -35,22 +35,23 @@ class InvoiceGenerator:
         """
         self.supabase = supabase_client
         self.invoice_dir = os.path.join(os.path.dirname(__file__), "invoice", "generated_invoice")
-        self.logo_path = os.path.join(os.path.dirname(__file__), "invoice", "GURTOY Registered Trademark Logo.png")
+        self.logo_path = os.path.join(os.path.dirname(__file__), "invoice", "FASHION_MART_Logo.png")
         
         # Ensure invoice directory exists
         os.makedirs(self.invoice_dir, exist_ok=True)
         
         # Company information
         self.company_info = {
-            "name": "GURTOY",
-            "tagline": "Premium Toy Store",
-            "address": "Shop No. 6/7, Char Khamba Road, Model Town",
-            "city": "Ludhiana, Punjab - 141001, India",
-            "phone": "8300000086",
-            "alt_phone": "9056010298",
-            "email": "thegurtoy@gmail.com",
-            "whatsapp": "8300000086",
-            "owner": "Kawardeep Singh Khurana"
+            "name": "FASHION MART",
+            "tagline": "Premium Women's Fashion Store",
+            "address": "PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD",
+            "city": "Chandigarh Rd, Ludhiana, Punjab - 141003, India",
+            "phone": "9876151585",
+            "alt_phone": "6283837649",
+            "email": "fashionmart@gmail.com",
+            "whatsapp": "9876151585",
+            "owner": "Fashion Mart",
+            "maps": "https://maps.app.goo.gl/koBoUFYEtE3mvdCC7"
         }
     
     async def generate_invoice(self, order_id: str) -> Optional[str]:
@@ -431,10 +432,11 @@ class InvoiceGenerator:
         # Terms and conditions
         story.append(Paragraph("TERMS & CONDITIONS", heading_style))
         terms = """
-        • 6 months manufacturer warranty on all products<br/>
-        • Returns accepted within 7 days with original packaging<br/>
-        • For any queries, contact us at 8300000086<br/>
-        • Thank you for shopping with Gurtoy! 🎉
+        • Quality guarantee on all fashion items<br/>
+        • No returns policy - all sales are final<br/>
+        • 48-hour replacement for defects only<br/>
+        • For any queries, contact us at 9876151585<br/>
+        • Thank you for shopping with Fashion Mart! 👗
         """
         story.append(Paragraph(terms, styles['Normal']))
         

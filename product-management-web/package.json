@@ -1,7 +1,7 @@
 {
   "name": "product-management-web",
   "version": "1.0.0",
-  "description": "Product Management Web Application for Gurtoy",
+  "description": "Product Management Web Application for Fashion Mart",
   "private": true,
   "scripts": {
     "dev": "next dev",

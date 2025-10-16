@@ -1,0 +1,205 @@
+#!/usr/bin/env python3
+"""
+Fashion Mart Knowledge Data
+Complete knowledge base for women's fashion business
+"""
+
+def get_fashion_mart_knowledge_chunks():
+    """Return all knowledge chunks for Fashion Mart business."""
+    return [
+        {
+            "chunk_id": "company_overview",
+            "title": "Fashion Mart Company Overview",
+            "content": "Fashion Mart is a premium women's fashion store specializing in contemporary and traditional clothing. We offer a curated collection of cardigans, tops, kurtas, and fashion accessories for modern women. Our mission is to provide stylish, comfortable, and affordable fashion that celebrates women's individuality. We serve customers across India with focus on quality, style, and customer satisfaction.",
+            "category": "company_info",
+            "keywords": ["fashion mart", "company", "overview", "women fashion", "clothing", "premium", "style"],
+            "priority": 1,
+            "language": "en",
+            "metadata": {
+                "word_count": 58,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "contact_information",
+            "title": "Fashion Mart Contact Information",
+            "content": "For inquiries: Call 9876151585. For purchases: Call 6283837649. Store Location: PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003. Google Maps: https://maps.app.goo.gl/koBoUFYEtE3mvdCC7. We welcome walk-in customers for personalized styling and expert fashion advice.",
+            "category": "contact_info",
+            "keywords": ["contact", "phone", "address", "location", "ludhiana", "punjab", "maps", "visit"],
+            "priority": 1,
+            "language": "en",
+            "metadata": {
+                "word_count": 45,
+                "char_count": 387
+            }
+        },
+        {
+            "chunk_id": "product_categories",
+            "title": "Fashion Mart Product Categories",
+            "content": "Our fashion collection includes: Cardigans (Regular, Long, SL, Self, Crop styles), Crop Tops (High neck, V neck, casual styles), Traditional Wear (Kot, Court sets, Tunics), Layering Pieces (Shrugs, Long cardigans), Contemporary Tops (High neck, V neck styles). We focus on mix of Western and Indian fashion, offering versatile pieces for different occasions and seasons.",
+            "category": "products",
+            "keywords": ["products", "cardigans", "crop tops", "traditional", "contemporary", "layering", "occasions", "seasons"],
+            "priority": 1,
+            "language": "en",
+            "metadata": {
+                "word_count": 55,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "sizing_information",
+            "title": "Size Guide and Fitting Information",
+            "content": "We offer sizes S, M, L, XL for most products. Size S fits bust 32-34 inches, Size M fits bust 34-36 inches, Size L fits bust 36-38 inches, Size XL fits bust 38-40 inches. For accurate sizing, please provide your measurements or visit our store for personal fitting. We recommend checking individual product descriptions for specific sizing details.",
+            "category": "sizing",
+            "keywords": ["sizing", "size guide", "measurements", "fitting", "bust", "S", "M", "L", "XL"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 48,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "pricing_policy",
+            "title": "Pricing and Value Proposition",
+            "content": "We offer competitive pricing with focus on value for money. Price range: ₹330 - ₹1,900. Regular promotions and seasonal discounts available. Transparent pricing with no hidden costs. Quality assurance ensures long-term value and durability. We provide budget-friendly fashion without compromising on style and quality.",
+            "category": "pricing",
+            "keywords": ["pricing", "competitive", "value", "promotions", "discounts", "transparent", "quality", "budget"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 42,
+                "char_count": 378
+            }
+        },
+        {
+            "chunk_id": "return_policy",
+            "title": "Return and Exchange Policy",
+            "content": "No return policy - we do not accept returns. However, we offer 48-hour replacement for damaged or defective items only. Replacement is available for manufacturing defects, not for size issues or change of mind. Items must be in original condition with tags attached. Contact us within 48 hours of delivery for replacement requests.",
+            "category": "policies",
+            "keywords": ["return", "exchange", "replacement", "damaged", "defective", "48 hours", "policy"],
+            "priority": 1,
+            "language": "en",
+            "metadata": {
+                "word_count": 45,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "shipping_delivery",
+            "title": "Shipping and Delivery Information",
+            "content": "We offer Pan-India shipping with reliable delivery partners. Local delivery available in Ludhiana area. Delivery time: 3-7 business days for outstation, 1-2 days for local. We ensure safe packaging and timely delivery. Tracking information provided for all orders. Free shipping on orders above ₹1000.",
+            "category": "services",
+            "keywords": ["shipping", "delivery", "pan-india", "tracking", "packaging", "free shipping"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 38,
+                "char_count": 378
+            }
+        },
+        {
+            "chunk_id": "styling_advice",
+            "title": "Fashion Styling and Advice",
+            "content": "Our team provides expert styling guidance: Occasion-based recommendations (casual, formal, traditional), Color coordination and matching, Layering techniques for different seasons, Size and fit recommendations, Budget-friendly styling options, Mix and match suggestions for versatile wardrobe. We help you create stylish looks that reflect your personality.",
+            "category": "advice",
+            "keywords": ["styling", "advice", "occasion", "color", "layering", "season", "wardrobe", "personality"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 42,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "quality_standards",
+            "title": "Quality and Material Standards",
+            "content": "All our products meet high quality standards with focus on comfort and durability. We use quality fabrics including cotton, wool, synthetic blends, and traditional materials. Quality assurance includes fabric testing, stitching quality checks, and finish inspection. We prioritize comfort, fit, and longevity in all our fashion pieces.",
+            "category": "quality",
+            "keywords": ["quality", "standards", "fabric", "cotton", "wool", "comfort", "durability", "testing"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 38,
+                "char_count": 378
+            }
+        },
+        {
+            "chunk_id": "customer_service",
+            "title": "Customer Service and Support",
+            "content": "Our customer service includes: Pre-purchase styling consultation, Size and fit recommendations, Product demonstrations (in-store), After-sales support and assistance, Order tracking and updates, Fashion advice and styling tips, Personalized shopping experience. We ensure every customer feels valued and receives expert fashion guidance.",
+            "category": "services",
+            "keywords": ["customer service", "consultation", "recommendations", "support", "tracking", "advice", "personalized"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 36,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "seasonal_collections",
+            "title": "Seasonal Fashion Collections",
+            "content": "We offer seasonal collections: Summer Collection (light fabrics, crop tops, breathable materials), Winter Collection (cardigans, layering pieces, warm fabrics), Festival Collection (traditional wear, festive colors), Casual Collection (everyday wear, comfortable styles). We update our inventory based on seasons and fashion trends.",
+            "category": "seasonal",
+            "keywords": ["seasonal", "summer", "winter", "festival", "casual", "collections", "trends"],
+            "priority": 3,
+            "language": "en",
+            "metadata": {
+                "word_count": 38,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "online_services",
+            "title": "Online Shopping Experience",
+            "content": "Online Ordering: Available for customers across India. Easy browsing by category, size, and price. Detailed product descriptions with size charts. High-quality product images from multiple angles. Secure payment processing. Order tracking and updates. Customer support via phone and WhatsApp. We make online fashion shopping convenient and reliable.",
+            "category": "services",
+            "keywords": ["online", "shopping", "browsing", "payment", "tracking", "support", "convenient"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 36,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "care_instructions",
+            "title": "Fabric Care and Maintenance",
+            "content": "Care Instructions: Cotton items - Machine wash cold, gentle cycle. Wool items - Hand wash or dry clean only. Synthetic blends - Machine wash warm, tumble dry low. Cardigans - Lay flat to dry, avoid hanging. Crop tops - Gentle cycle, air dry. Always check individual product labels for specific care instructions. Proper care ensures longevity of your fashion pieces.",
+            "category": "care",
+            "keywords": ["care", "instructions", "washing", "cotton", "wool", "synthetic", "maintenance"],
+            "priority": 3,
+            "language": "en",
+            "metadata": {
+                "word_count": 42,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "target_customers",
+            "title": "Target Customer Profile",
+            "content": "Our target customers are: Women aged 18-45 years, Style-conscious individuals, Budget-conscious shoppers, Working professionals, Students, Fashion enthusiasts, Those seeking mix of traditional and contemporary styles. We cater to diverse fashion needs from casual everyday wear to special occasion outfits.",
+            "category": "customers",
+            "keywords": ["target", "customers", "women", "age", "style", "budget", "professionals", "students"],
+            "priority": 3,
+            "language": "en",
+            "metadata": {
+                "word_count": 36,
+                "char_count": 456
+            }
+        },
+        {
+            "chunk_id": "business_hours",
+            "title": "Store Hours and Availability",
+            "content": "Store Hours: Monday to Saturday: 10:00 AM - 8:00 PM, Sunday: 11:00 AM - 6:00 PM. Online orders: Available 24/7. Customer support: Available during business hours via phone. WhatsApp support: Available during business hours. We are closed on major festivals and holidays. Check our social media for holiday schedules.",
+            "category": "contact_info",
+            "keywords": ["hours", "timings", "availability", "support", "whatsapp", "holidays"],
+            "priority": 2,
+            "language": "en",
+            "metadata": {
+                "word_count": 36,
+                "char_count": 456
+            }
+        }
+    ]

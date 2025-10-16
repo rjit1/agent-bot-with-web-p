@@ -1,8 +1,8 @@
-# 🎯 Gurtoy Telegram Bot - Complete Project Overview
+# 🎯 Fashion Mart Telegram Bot - Complete Project Overview
 
 ## 📋 Executive Summary
 
-**Gurtoy Telegram Bot** is a sophisticated, AI-powered conversational commerce platform for Gurtoy toy store. It combines advanced AI capabilities (Google Gemini 2.5 Flash), vector database search (Supabase), payment processing (Razorpay), and multimodal interactions (text, voice, images) to provide a seamless shopping experience through Telegram.
+**Fashion Mart Telegram Bot** is a sophisticated, AI-powered conversational commerce platform for Fashion Mart women's fashion store. It combines advanced AI capabilities (Google Gemini 2.5 Flash), vector database search (Supabase), payment processing (Razorpay), and multimodal interactions (text, voice, images) to provide a seamless shopping experience through Telegram.
 
 **Current Status:** ✅ **LIVE & DEPLOYED** on Google Cloud (e2-micro, FREE TIER)
 - **External IP:** 34.10.22.134
@@ -537,9 +537,9 @@ gcloud compute ssh gurtoy-bot --zone=us-central1-a --command="sudo supervisorctl
 
 ## 📝 License & Ownership
 
-**Proprietary Software** - This project is proprietary software for Gurtoy toy store.
+**Proprietary Software** - This project is proprietary software for Fashion Mart women's fashion store.
 
-**Copyright © 2024-2025 Gurtoy**
+**Copyright © 2024-2025 Fashion Mart**
 **All Rights Reserved**
 
 ---

@@ -79,7 +79,7 @@ ADMIN_PASSWORD=121233
 JWT_SECRET=your-super-secret-jwt-key-2024-production
 
 # App Configuration
-NEXT_PUBLIC_APP_NAME=Gurtoy Product Management
+NEXT_PUBLIC_APP_NAME=Fashion Mart Product Management
 NEXT_PUBLIC_CONTACT_TELEGRAM=@Sarvesh_101
 ```
 

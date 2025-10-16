@@ -1,6 +1,6 @@
 """
-Phase 3: Intelligent Response System for Gurtoy Telegram Bot
-Implements advanced message preprocessing, context-aware routing, and conversation flow management.
+Phase 6: Intelligent Response System for Fashion Mart Telegram Bot
+Implements advanced message preprocessing, context-aware routing, and fashion-specific conversation flow management.
 """
 
 import os
@@ -16,10 +16,13 @@ import google.generativeai as genai
 logger = logging.getLogger(__name__)
 
 class ConversationState(Enum):
-    """States of conversation flow."""
+    """States of conversation flow for fashion consultation."""
     INITIAL = "initial"
     BROWSING = "browsing"
     PRODUCT_INQUIRY = "product_inquiry"
+    SIZE_CONSULTATION = "size_consultation"
+    STYLE_CONSULTATION = "style_consultation"
+    OCCASION_BASED = "occasion_based"
     PRICING = "pricing"
     PURCHASING = "purchasing"
     ORDER_COLLECTION = "order_collection"
@@ -28,12 +31,21 @@ class ConversationState(Enum):
     COMPLETED = "completed"
 
 class IntentType(Enum):
-    """Types of user intents."""
+    """Types of user intents for fashion consultation."""
     # Product-related intents
     PRODUCT_SEARCH = "product_search"
     PRODUCT_QUESTION = "product_question"
     PRODUCT_COMPARISON = "product_comparison"
     PRODUCT_AVAILABILITY = "product_availability"
+    
+    # Fashion-specific intents
+    SIZE_RECOMMENDATION = "size_recommendation"
+    STYLE_ADVICE = "style_advice"
+    OCCASION_RECOMMENDATION = "occasion_recommendation"
+    COLOR_PREFERENCE = "color_preference"
+    FASHION_CONSULTATION = "fashion_consultation"
+    SIZE_GUIDE = "size_guide"
+    STYLING_TIPS = "styling_tips"
     
     # Purchase-related intents
     PURCHASE_INTENT = "purchase_intent"
@@ -88,7 +100,7 @@ class MessageContext:
     recent_products: List[Dict[str, Any]] = None
 
 class IntelligentResponseSystem:
-    """Phase 3: Intelligent Response System with advanced preprocessing and routing."""
+    """Phase 6: Intelligent Response System with fashion-specific preprocessing and routing."""
     
     def __init__(self, supabase_client):
         self.supabase = supabase_client
@@ -112,18 +124,27 @@ class IntelligentResponseSystem:
         self.intent_patterns = self._build_intent_patterns()
         
     def _get_intent_analysis_instruction(self) -> str:
-        """Get system instruction for intent analysis."""
-        return """You are an expert intent analysis system for a toy store chatbot.
+        """Get system instruction for fashion-specific intent analysis."""
+        return """You are an expert intent analysis system for a women's fashion store chatbot.
 
-Your task is to analyze user messages and determine their primary intent with high accuracy.
+Your task is to analyze user messages and determine their primary intent with high accuracy for fashion consultation.
 
 **INTENT CATEGORIES:**
 
 **Product-Related:**
-- PRODUCT_SEARCH: User wants to see/find products ("bike dikhao", "show me toys")
-- PRODUCT_QUESTION: User asks about specific product features ("battery kitne time chalti hai?")
+- PRODUCT_SEARCH: User wants to see/find fashion items ("kurtas dikhao", "show me cardigans")
+- PRODUCT_QUESTION: User asks about specific product features ("material kya hai?", "wash care kya hai?")
 - PRODUCT_COMPARISON: User compares products ("yeh wala better hai ya woh?")
 - PRODUCT_AVAILABILITY: User asks about stock/availability ("available hai?")
+
+**Fashion-Specific:**
+- SIZE_RECOMMENDATION: User asks for size advice ("mera size kya hai?", "size guide chahiye")
+- STYLE_ADVICE: User asks for styling help ("kaise pehnu?", "styling tips")
+- OCCASION_RECOMMENDATION: User asks for occasion-based suggestions ("wedding ke liye", "office wear")
+- COLOR_PREFERENCE: User mentions color preferences ("red color chahiye", "blue pasand hai")
+- FASHION_CONSULTATION: User wants general fashion advice ("fashion advice", "kya pehnu?")
+- SIZE_GUIDE: User asks about size measurements ("size chart", "measurements")
+- STYLING_TIPS: User asks for styling suggestions ("kaise style karein?")
 
 **Purchase-Related:**
 - PURCHASE_INTENT: User wants to buy ("order kar do", "buy this")
@@ -152,11 +173,12 @@ Your task is to analyze user messages and determine their primary intent with hi
 
 **ANALYSIS RULES:**
 1. Consider the FULL context, not just keywords
-2. Look for conversation patterns and flow
+2. Look for fashion-specific conversation patterns
 3. Consider reply-to-message context
 4. Analyze user's conversation state
 5. Provide confidence score (0.0-1.0)
 6. Suggest specific action to take
+7. Pay special attention to size, style, and occasion mentions
 
 **OUTPUT FORMAT:**
 Return JSON with:
@@ -167,28 +189,33 @@ Return JSON with:
     "context_clues": {
         "has_product_context": true,
         "is_reply_to_product": false,
-        "mentions_price": true,
-        "conversation_stage": "browsing"
+        "mentions_size": true,
+        "mentions_occasion": false,
+        "mentions_style": true,
+        "conversation_stage": "size_consultation"
     },
-    "suggested_action": "Call search_products function",
+    "suggested_action": "Call size recommendation function",
     "requires_function_call": true,
     "function_name": "search_products",
-    "function_params": {"query": "bike for 5 year old"}
+    "function_params": {"query": "cardigans", "size_range": "M", "occasion": "office"}
 }
 
-**CRITICAL:** Always return valid JSON. Be precise and accurate."""
+**CRITICAL:** Always return valid JSON. Be precise and accurate for fashion consultation."""
 
     def _get_conversation_flow_instruction(self) -> str:
-        """Get system instruction for conversation flow management."""
-        return """You are a conversation flow management system for a toy store chatbot.
+        """Get system instruction for fashion consultation flow management."""
+        return """You are a conversation flow management system for a women's fashion store chatbot.
 
-Your task is to analyze conversation context and determine the optimal conversation state and flow.
+Your task is to analyze conversation context and determine the optimal conversation state and flow for fashion consultation.
 
 **CONVERSATION STATES:**
 
 **INITIAL:** User just started conversation
-**BROWSING:** User is looking at products, exploring options
-**PRODUCT_INQUIRY:** User is asking specific questions about products
+**BROWSING:** User is looking at products, exploring fashion options
+**PRODUCT_INQUIRY:** User is asking specific questions about fashion items
+**SIZE_CONSULTATION:** User needs size recommendations and guidance
+**STYLE_CONSULTATION:** User needs styling advice and tips
+**OCCASION_BASED:** User is shopping for specific occasions
 **PRICING:** User is discussing prices, offers, payment
 **PURCHASING:** User has decided to buy, in purchase process
 **ORDER_COLLECTION:** User is providing order details
@@ -196,40 +223,90 @@ Your task is to analyze conversation context and determine the optimal conversat
 **SUPPORT:** User needs help, has issues
 **COMPLETED:** Conversation/transaction completed
 
+**FASHION CONSULTATION WORKFLOW:**
+
+1. **Initial Contact:** Greet and understand fashion needs
+2. **Style Assessment:** Determine user's style preferences
+3. **Size Consultation:** Help with size recommendations
+4. **Occasion Matching:** Suggest items for specific occasions
+5. **Product Presentation:** Show relevant fashion items
+6. **Styling Advice:** Provide styling tips and suggestions
+7. **Purchase Process:** Guide through ordering
+8. **Follow-up:** Ensure satisfaction and offer additional help
+
+**SIZE RECOMMENDATION PROCESS:**
+
+1. **Body Measurements:** Ask for or estimate measurements
+2. **Size Chart Reference:** Use size charts for different brands
+3. **Fit Preferences:** Understand loose/fitted preferences
+4. **Recommendation:** Suggest appropriate sizes
+5. **Verification:** Confirm size choice
+
+**STYLE ADVICE INTEGRATION:**
+
+1. **Style Assessment:** Determine user's style (casual, formal, ethnic)
+2. **Occasion Matching:** Match styles to occasions
+3. **Color Coordination:** Suggest color combinations
+4. **Accessory Pairing:** Recommend accessories
+5. **Trend Awareness:** Share current fashion trends
+
 **FLOW RULES:**
-1. Track conversation progression naturally
-2. Detect state transitions based on user intent
+1. Track conversation progression naturally for fashion consultation
+2. Detect state transitions based on user intent and fashion needs
 3. Maintain context across state changes
 4. Suggest appropriate responses for each state
 5. Handle interruptions and topic changes
+6. Focus on size, style, and occasion-based recommendations
 
 **OUTPUT FORMAT:**
 Return JSON with:
 {
     "current_state": "CONVERSATION_STATE",
-    "state_transition": "from_browsing_to_pricing",
+    "state_transition": "from_browsing_to_size_consultation",
     "confidence": 0.9,
     "context_factors": {
-        "user_intent": "price_inquiry",
+        "user_intent": "size_recommendation",
         "product_context": true,
-        "purchase_readiness": 0.7
+        "fashion_consultation_needed": true,
+        "size_help_required": true,
+        "occasion": "wedding"
     },
-    "suggested_response_strategy": "Provide pricing info and guide to purchase",
-    "next_expected_intent": "purchase_intent"
+    "suggested_response_strategy": "Provide size guidance and occasion-based recommendations",
+    "next_expected_intent": "style_advice"
 }
 
-**CRITICAL:** Always return valid JSON. Focus on natural conversation flow."""
+**CRITICAL:** Always return valid JSON. Focus on fashion consultation flow."""
 
     def _build_intent_patterns(self) -> Dict[IntentType, List[str]]:
         """Build keyword patterns for quick intent detection."""
         return {
             IntentType.PRODUCT_SEARCH: [
-                "dikhao", "show", "bike", "jeep", "toys", "kuch", "options",
-                "search", "find", "available", "hain", "products"
+                "dikhao", "show", "kurtas", "cardigans", "tops", "fashion", "clothes",
+                "search", "find", "available", "hain", "products", "dresses"
             ],
             IntentType.PRODUCT_QUESTION: [
-                "battery", "kitne time", "charger", "features", "specifications",
-                "kaise", "how", "what", "kya", "details", "info"
+                "material", "wash", "care", "instructions", "quality", "comfort", "fit",
+                "kaise", "how", "what", "kya", "details", "info", "stretch", "breathable"
+            ],
+            IntentType.SIZE_RECOMMENDATION: [
+                "size", "measurement", "chart", "guide", "mera size", "kya size",
+                "loose", "tight", "fitted", "comfortable", "perfect fit"
+            ],
+            IntentType.STYLE_ADVICE: [
+                "style", "styling", "tips", "advice", "kaise pehnu", "coordination",
+                "accessories", "matching", "combination", "trend", "fashionable"
+            ],
+            IntentType.OCCASION_RECOMMENDATION: [
+                "wedding", "office", "party", "casual", "formal", "occasion",
+                "function", "meeting", "date", "festival", "celebration"
+            ],
+            IntentType.COLOR_PREFERENCE: [
+                "color", "colour", "red", "blue", "green", "black", "white",
+                "pink", "purple", "yellow", "orange", "brown", "grey"
+            ],
+            IntentType.FASHION_CONSULTATION: [
+                "fashion advice", "consultation", "help", "guidance", "suggest",
+                "recommend", "what to wear", "kya pehnu", "fashion tips"
             ],
             IntentType.PURCHASE_INTENT: [
                 "order", "buy", "purchase", "le lunga", "lena hai", "kar do",
@@ -624,3 +701,227 @@ Determine the next conversation state and provide analysis.
         if telegram_user_id in self.conversation_states:
             del self.conversation_states[telegram_user_id]
             logger.info(f"🔄 Cleared conversation state for user {telegram_user_id}")
+
+    # Phase 6: Fashion-specific methods
+    
+    async def analyze_size_requirements(self, user_message: str, context: MessageContext) -> Dict[str, Any]:
+        """
+        Analyze user's size requirements and provide recommendations.
+        
+        Args:
+            user_message: User's message about size
+            context: Message context
+            
+        Returns:
+            Dict: Size analysis and recommendations
+        """
+        try:
+            size_prompt = f"""You are a fashion size consultant. Analyze the user's size requirements.
+
+**User Message:** "{user_message}"
+
+**Context:**
+- Previous products viewed: {context.recent_products}
+- User preferences: {context.user_preferences}
+
+**Size Analysis Tasks:**
+1. Extract size-related information (measurements, preferences, concerns)
+2. Determine size category (S, M, L, XL)
+3. Identify fit preferences (loose, fitted, comfortable)
+4. Suggest size recommendations
+5. Provide size guide information
+
+**Output Format:**
+{{
+    "size_category": "M",
+    "fit_preference": "comfortable",
+    "measurements_mentioned": false,
+    "size_concerns": ["not sure about fit"],
+    "recommendations": ["Try M size for comfortable fit"],
+    "size_guide_needed": true,
+    "confidence": 0.8
+}}
+
+**CRITICAL:** Always return valid JSON."""
+
+            response = self.intent_model.generate_content(size_prompt)
+            analysis = json.loads(response.text)
+            
+            logger.info(f"📏 Size analysis completed: {analysis.get('size_category', 'Unknown')}")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in size analysis: {e}")
+            return {
+                "size_category": "M",
+                "fit_preference": "comfortable",
+                "recommendations": ["Please try our size guide for accurate sizing"],
+                "confidence": 0.5
+            }
+
+    async def analyze_style_preferences(self, user_message: str, context: MessageContext) -> Dict[str, Any]:
+        """
+        Analyze user's style preferences and provide styling advice.
+        
+        Args:
+            user_message: User's message about style
+            context: Message context
+            
+        Returns:
+            Dict: Style analysis and recommendations
+        """
+        try:
+            style_prompt = f"""You are a fashion style consultant. Analyze the user's style preferences.
+
+**User Message:** "{user_message}"
+
+**Context:**
+- Previous products viewed: {context.recent_products}
+- User preferences: {context.user_preferences}
+
+**Style Analysis Tasks:**
+1. Identify style preferences (casual, formal, ethnic, western)
+2. Determine color preferences
+3. Analyze occasion requirements
+4. Suggest styling tips
+5. Recommend accessories
+
+**Output Format:**
+{{
+    "style_type": "ethnic",
+    "color_preferences": ["red", "blue"],
+    "occasion": "wedding",
+    "styling_tips": ["Pair with matching accessories"],
+    "accessory_suggestions": ["earrings", "bangles"],
+    "confidence": 0.9
+}}
+
+**CRITICAL:** Always return valid JSON."""
+
+            response = self.intent_model.generate_content(style_prompt)
+            analysis = json.loads(response.text)
+            
+            logger.info(f"👗 Style analysis completed: {analysis.get('style_type', 'Unknown')}")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in style analysis: {e}")
+            return {
+                "style_type": "casual",
+                "color_preferences": [],
+                "styling_tips": ["Choose colors that complement your skin tone"],
+                "confidence": 0.5
+            }
+
+    async def analyze_occasion_requirements(self, user_message: str, context: MessageContext) -> Dict[str, Any]:
+        """
+        Analyze user's occasion requirements and provide recommendations.
+        
+        Args:
+            user_message: User's message about occasion
+            context: Message context
+            
+        Returns:
+            Dict: Occasion analysis and recommendations
+        """
+        try:
+            occasion_prompt = f"""You are a fashion occasion consultant. Analyze the user's occasion requirements.
+
+**User Message:** "{user_message}"
+
+**Context:**
+- Previous products viewed: {context.recent_products}
+- User preferences: {context.user_preferences}
+
+**Occasion Analysis Tasks:**
+1. Identify the occasion (wedding, office, party, casual, formal)
+2. Determine dress code requirements
+3. Suggest appropriate styles
+4. Recommend color choices
+5. Provide occasion-specific tips
+
+**Output Format:**
+{{
+    "occasion": "wedding",
+    "dress_code": "formal",
+    "recommended_styles": ["kurtas", "cardigans"],
+    "color_suggestions": ["red", "maroon", "gold"],
+    "occasion_tips": ["Choose comfortable fabrics for long events"],
+    "confidence": 0.9
+}}
+
+**CRITICAL:** Always return valid JSON."""
+
+            response = self.intent_model.generate_content(occasion_prompt)
+            analysis = json.loads(response.text)
+            
+            logger.info(f"🎉 Occasion analysis completed: {analysis.get('occasion', 'Unknown')}")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in occasion analysis: {e}")
+            return {
+                "occasion": "casual",
+                "dress_code": "casual",
+                "recommended_styles": ["comfortable tops"],
+                "confidence": 0.5
+            }
+
+    async def provide_fashion_consultation(self, user_message: str, context: MessageContext) -> Dict[str, Any]:
+        """
+        Provide comprehensive fashion consultation based on user needs.
+        
+        Args:
+            user_message: User's message requesting consultation
+            context: Message context
+            
+        Returns:
+            Dict: Comprehensive fashion consultation
+        """
+        try:
+            consultation_prompt = f"""You are a comprehensive fashion consultant. Provide detailed fashion advice.
+
+**User Message:** "{user_message}"
+
+**Context:**
+- Previous products viewed: {context.recent_products}
+- User preferences: {context.user_preferences}
+- Conversation state: {context.conversation_state}
+
+**Consultation Tasks:**
+1. Analyze user's fashion needs
+2. Provide size recommendations
+3. Suggest style advice
+4. Recommend occasion-appropriate items
+5. Offer styling tips
+6. Suggest color combinations
+
+**Output Format:**
+{{
+    "consultation_type": "comprehensive",
+    "size_recommendation": "M",
+    "style_advice": "Choose comfortable, breathable fabrics",
+    "occasion_suggestions": ["office wear", "casual outings"],
+    "color_recommendations": ["navy blue", "white", "pastels"],
+    "styling_tips": ["Layer with cardigans for versatility"],
+    "product_suggestions": ["kurtas", "cardigans", "tops"],
+    "confidence": 0.9
+}}
+
+**CRITICAL:** Always return valid JSON."""
+
+            response = self.intent_model.generate_content(consultation_prompt)
+            analysis = json.loads(response.text)
+            
+            logger.info(f"👩‍💼 Fashion consultation completed: {analysis.get('consultation_type', 'Unknown')}")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in fashion consultation: {e}")
+            return {
+                "consultation_type": "basic",
+                "size_recommendation": "M",
+                "style_advice": "Choose items that make you feel confident",
+                "product_suggestions": ["versatile pieces"],
+                "confidence": 0.5
+            }

@@ -1,6 +1,6 @@
 """
-Image Handler Module for Gurtoy Telegram Bot
-Handles image download, analysis with Gemini, and cleanup.
+Image Handler Module for Fashion Mart Telegram Bot - Phase 7
+Handles fashion image download, analysis with Gemini, and fashion-specific recognition.
 """
 import os
 import asyncio
@@ -18,7 +18,7 @@ import google.generativeai as genai
 logger = logging.getLogger(__name__)
 
 class ImageHandler:
-    """Handles image processing with Gemini 2.5 Flash."""
+    """Handles fashion image processing with Gemini 2.5 Flash for Fashion Mart."""
     
     # Directory for temporary image storage
     TEMP_IMAGE_DIR = Path(__file__).parent / "temp_images"
@@ -130,20 +130,24 @@ class ImageHandler:
         caption: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
-        Analyze one or more images using Gemini 2.5 Flash.
+        Analyze one or more fashion images using Gemini 2.5 Flash.
         
         Args:
             image_paths: List of paths to image files
             caption: Optional caption/text from user
             
         Returns:
-            Dictionary with analysis results:
+            Dictionary with fashion analysis results:
             {
-                "image_type": "toy|product_screenshot|reference|child_photo|comparison|damaged|unrelated|unclear",
-                "description": "Brief description",
-                "analysis": "Detailed analysis for conversation",
-                "key_features": ["feature1", "feature2"],
-                "suggested_age": "age range if applicable",
+                "image_type": "fashion_item|style_reference|outfit_inspiration|size_reference|color_coordination|unrelated|unclear",
+                "description": "Brief description of fashion item",
+                "analysis": "Detailed fashion analysis for conversation",
+                "fashion_category": "kurta|cardigan|top|dress|accessory",
+                "style_type": "casual|formal|ethnic|western|traditional",
+                "color_analysis": ["primary_color", "secondary_colors"],
+                "size_estimation": "S|M|L|XL",
+                "occasion_suitability": ["office", "party", "casual", "wedding"],
+                "styling_suggestions": ["suggestion1", "suggestion2"],
                 "confidence": "high|medium|low",
                 "num_images": 1
             }
@@ -354,46 +358,46 @@ Now analyze the product image:"""
     
     def _create_analysis_prompt(self, num_images: int, caption: Optional[str]) -> str:
         """
-        Create intelligent prompt for image analysis.
+        Create intelligent prompt for fashion image analysis.
         
         Args:
             num_images: Number of images being analyzed
             caption: Optional user caption
             
         Returns:
-            Formatted prompt string
+            Formatted prompt string for fashion analysis
         """
         if num_images == 1:
-            prompt = """You are an intelligent assistant for Gurtoy toy store.
+            prompt = """You are an intelligent fashion consultant for Fashion Mart women's fashion store.
 
 **Your Task:**
-Analyze this image carefully and respond appropriately based on what you see.
+Analyze this fashion image carefully and provide comprehensive fashion analysis.
 
 **Possible Scenarios:**
 
-1. **TOY/PRODUCT IMAGE:**
-   - Identify: toy type, brand, colors, age suitability, features
-   - Response: Describe the toy and offer to help find similar products
+1. **FASHION ITEM (Clothing):**
+   - Identify: garment type, style, colors, fabric, fit, occasion suitability
+   - Response: Describe the fashion item and offer styling suggestions
 
-2. **PRODUCT SCREENSHOT (from other websites/apps):**
-   - Identify: product details, price (if visible), features
-   - Response: Acknowledge and offer to find similar items in store
+2. **STYLE REFERENCE (Inspiration):**
+   - Identify: outfit style, color coordination, fashion trends
+   - Response: Understand style preferences and suggest similar items
 
-3. **REFERENCE IMAGE (what user wants):**
-   - Identify: key features, colors, style, type
-   - Response: Understand requirements and offer to search
+3. **OUTFIT INSPIRATION (Complete Look):**
+   - Identify: complete outfit, styling, accessories, occasion
+   - Response: Break down the look and suggest individual pieces
 
-4. **CHILD'S PHOTO:**
-   - Identify: approximate age (if visible)
-   - Response: Offer age-appropriate toy suggestions
+4. **SIZE REFERENCE (Fit Check):**
+   - Identify: garment fit, size estimation, styling advice
+   - Response: Provide size recommendations and fit guidance
 
-5. **DAMAGED/DEFECTIVE TOY:**
-   - Identify: product issue or damage
-   - Response: Offer support and replacement options
+5. **COLOR COORDINATION (Color Matching):**
+   - Identify: color palette, coordination, complementary colors
+   - Response: Suggest color combinations and styling tips
 
-6. **UNRELATED IMAGE (selfie, food, scenery, etc.):**
-   - Identify: not toy-related
-   - Response: Politely acknowledge and redirect to toy shopping
+6. **UNRELATED IMAGE (Non-fashion):**
+   - Identify: not fashion-related
+   - Response: Politely acknowledge and redirect to fashion shopping
 
 7. **UNCLEAR/BLURRY IMAGE:**
    - Identify: image quality issues
@@ -402,63 +406,71 @@ Analyze this image carefully and respond appropriately based on what you see.
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
 {
-    "image_type": "toy|product_screenshot|reference|child_photo|damaged|unrelated|unclear",
-    "description": "Brief description of what you see (1-2 sentences)",
-    "analysis": "Detailed analysis for AI conversation context (what the user likely wants)",
-    "key_features": ["feature1", "feature2", "feature3"],
-    "suggested_age": "age range if applicable or null",
+    "image_type": "fashion_item|style_reference|outfit_inspiration|size_reference|color_coordination|unrelated|unclear",
+    "description": "Brief description of fashion item/style (1-2 sentences)",
+    "analysis": "Detailed fashion analysis for conversation context",
+    "fashion_category": "kurta|cardigan|top|dress|accessory",
+    "style_type": "casual|formal|ethnic|western|traditional",
+    "color_analysis": ["primary_color", "secondary_colors"],
+    "size_estimation": "S|M|L|XL",
+    "occasion_suitability": ["office", "party", "casual", "wedding"],
+    "styling_suggestions": ["suggestion1", "suggestion2"],
     "confidence": "high|medium|low"
 }
 
 **Important:**
-- Be accurate and describe what you actually see
-- Don't make assumptions beyond what's visible
-- Always relate back to toy shopping context
+- Focus on fashion-specific details (style, color, occasion, fit)
+- Provide practical styling advice
+- Consider Indian women's fashion preferences
 - Output ONLY the JSON, nothing else"""
         
         else:
-            prompt = f"""You are an intelligent assistant for Gurtoy toy store.
+            prompt = f"""You are an intelligent fashion consultant for Fashion Mart women's fashion store.
 
 **Your Task:**
-Analyze these {num_images} images carefully. The user sent multiple images together.
+Analyze these {num_images} fashion images carefully. The user sent multiple images together.
 
 **Possible Scenarios:**
 
-1. **MULTIPLE TOYS (Comparison):**
-   - User wants to compare different toys
-   - Identify each toy and help them decide
+1. **MULTIPLE FASHION ITEMS (Comparison):**
+   - User wants to compare different fashion items
+   - Identify each item and help them decide
 
-2. **SAME TOY (Different Angles):**
-   - User showing one toy from multiple angles
+2. **SAME ITEM (Different Angles):**
+   - User showing one fashion item from multiple angles
    - Provide comprehensive understanding
 
-3. **PRODUCT COLLECTION:**
-   - User showing their collection or wishlist
-   - Understand their preferences
+3. **OUTFIT COLLECTION:**
+   - User showing their outfit collection or inspiration
+   - Understand their style preferences
 
-4. **BEFORE/AFTER (Damaged Product):**
-   - User showing product condition
-   - Offer support
+4. **STYLE VARIATIONS:**
+   - User showing different styling options
+   - Provide styling advice and recommendations
 
-5. **MIXED IMAGES:**
-   - Combination of different types
-   - Analyze the overall intent
+5. **MIXED FASHION IMAGES:**
+   - Combination of different fashion types
+   - Analyze the overall style intent
 
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
 {{
-    "image_type": "comparison|same_product|collection|damaged|mixed",
-    "description": "Brief description of all images (2-3 sentences)",
-    "analysis": "Detailed analysis combining all images for conversation context",
-    "key_features": ["feature1", "feature2", "feature3"],
-    "suggested_age": "age range if applicable or null",
+    "image_type": "comparison|same_item|collection|style_variations|mixed",
+    "description": "Brief description of all fashion images (2-3 sentences)",
+    "analysis": "Detailed fashion analysis combining all images for conversation context",
+    "fashion_category": "kurta|cardigan|top|dress|accessory",
+    "style_type": "casual|formal|ethnic|western|traditional",
+    "color_analysis": ["primary_color", "secondary_colors"],
+    "size_estimation": "S|M|L|XL",
+    "occasion_suitability": ["office", "party", "casual", "wedding"],
+    "styling_suggestions": ["suggestion1", "suggestion2"],
     "confidence": "high|medium|low"
 }}
 
 **Important:**
-- Analyze ALL {num_images} images together
-- Find connections between images
-- Understand the user's overall intent
+- Focus on fashion-specific details across all images
+- Provide comprehensive styling advice
+- Consider Indian women's fashion preferences
 - Output ONLY the JSON, nothing else"""
         
         if caption:
@@ -468,6 +480,272 @@ Return ONLY valid JSON (no markdown, no extra text):
         
         return prompt
     
+    # Phase 7: Fashion-specific image analysis methods
+    
+    async def analyze_fashion_item(self, image_paths: List[str], caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """
+        Analyze fashion items in images for detailed fashion recognition.
+        
+        Args:
+            image_paths: List of paths to image files
+            caption: Optional caption/text from user
+            
+        Returns:
+            Dictionary with detailed fashion analysis
+        """
+        try:
+            logger.info(f"👗 Analyzing fashion items in {len(image_paths)} image(s)")
+            
+            # Use the main analysis method
+            analysis = await self.analyze_images(image_paths, caption)
+            
+            if analysis and analysis.get("image_type") in ["fashion_item", "style_reference", "outfit_inspiration"]:
+                # Enhance with additional fashion-specific analysis
+                enhanced_analysis = await self._enhance_fashion_analysis(analysis, image_paths)
+                return enhanced_analysis
+            
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in fashion item analysis: {e}")
+            return None
+
+    async def analyze_style_and_color(self, image_paths: List[str], caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """
+        Analyze style and color coordination in fashion images.
+        
+        Args:
+            image_paths: List of paths to image files
+            caption: Optional caption/text from user
+            
+        Returns:
+            Dictionary with style and color analysis
+        """
+        try:
+            logger.info(f"🎨 Analyzing style and color in {len(image_paths)} image(s)")
+            
+            # Upload images to Gemini
+            uploaded_files = []
+            for image_path in image_paths:
+                uploaded_file = await asyncio.to_thread(
+                    genai.upload_file,
+                    path=image_path,
+                    display_name=f"style_color_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                )
+                uploaded_files.append(uploaded_file)
+            
+            # Wait for processing
+            for uploaded_file in uploaded_files:
+                while uploaded_file.state.name == "PROCESSING":
+                    await asyncio.sleep(1)
+                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+            
+            # Create style and color analysis prompt
+            prompt = """You are a fashion style and color expert for Fashion Mart.
+
+**Your Task:**
+Analyze the style and color coordination in these fashion images.
+
+**Focus Areas:**
+1. **Style Analysis**: Identify the overall style (casual, formal, ethnic, western, traditional)
+2. **Color Analysis**: Identify primary and secondary colors, color harmony
+3. **Color Coordination**: Suggest complementary colors and color combinations
+4. **Style Recommendations**: Provide styling tips and suggestions
+5. **Occasion Suitability**: Determine appropriate occasions for the style
+
+**Response Format:**
+Return ONLY valid JSON:
+{
+    "style_type": "casual|formal|ethnic|western|traditional",
+    "primary_colors": ["color1", "color2"],
+    "secondary_colors": ["color1", "color2"],
+    "color_harmony": "monochromatic|complementary|analogous|triadic",
+    "color_coordination_suggestions": ["suggestion1", "suggestion2"],
+    "styling_tips": ["tip1", "tip2"],
+    "occasion_suitability": ["office", "party", "casual", "wedding"],
+    "accessory_suggestions": ["accessory1", "accessory2"],
+    "confidence": "high|medium|low"
+}
+
+**Important:**
+- Focus on Indian women's fashion preferences
+- Provide practical styling advice
+- Consider color theory and coordination
+- Output ONLY the JSON, nothing else"""
+
+            if caption:
+                prompt += f"\n\n**User's Caption/Message:** {caption}"
+            
+            prompt += "\n\nNow analyze the style and color coordination:"
+            
+            # Create Gemini model and analyze
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            content_parts = [prompt] + uploaded_files
+            
+            response = await asyncio.to_thread(model.generate_content, content_parts)
+            
+            # Parse response
+            response_text = response.text.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif response_text.startswith("```"):
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            analysis = json.loads(response_text)
+            
+            # Cleanup uploaded files
+            for uploaded_file in uploaded_files:
+                try:
+                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
+                except Exception:
+                    pass
+            
+            logger.info(f"✅ Style and color analysis complete")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in style and color analysis: {e}")
+            return None
+
+    async def estimate_size_from_image(self, image_paths: List[str], caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
+        """
+        Estimate size from fashion images for size recommendations.
+        
+        Args:
+            image_paths: List of paths to image files
+            caption: Optional caption/text from user
+            
+        Returns:
+            Dictionary with size estimation analysis
+        """
+        try:
+            logger.info(f"📏 Estimating size from {len(image_paths)} image(s)")
+            
+            # Upload images to Gemini
+            uploaded_files = []
+            for image_path in image_paths:
+                uploaded_file = await asyncio.to_thread(
+                    genai.upload_file,
+                    path=image_path,
+                    display_name=f"size_estimation_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                )
+                uploaded_files.append(uploaded_file)
+            
+            # Wait for processing
+            for uploaded_file in uploaded_files:
+                while uploaded_file.state.name == "PROCESSING":
+                    await asyncio.sleep(1)
+                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+            
+            # Create size estimation prompt
+            prompt = """You are a fashion size expert for Fashion Mart.
+
+**Your Task:**
+Analyze the fashion images to estimate appropriate sizes for Indian women.
+
+**Size Estimation Focus:**
+1. **Fit Analysis**: Analyze how the garment fits on the person
+2. **Size Estimation**: Estimate appropriate size (S, M, L, XL)
+3. **Fit Preferences**: Determine if loose, fitted, or comfortable fit
+4. **Size Recommendations**: Provide size guidance and tips
+5. **Fit Concerns**: Identify any potential fit issues
+
+**Response Format:**
+Return ONLY valid JSON:
+{
+    "estimated_size": "S|M|L|XL",
+    "fit_analysis": "loose|fitted|comfortable|tight",
+    "size_recommendation": "recommended size with reasoning",
+    "fit_preferences": ["preference1", "preference2"],
+    "size_concerns": ["concern1", "concern2"],
+    "size_guide_needed": true|false,
+    "confidence": "high|medium|low"
+}
+
+**Important:**
+- Consider Indian women's body types and preferences
+- Provide practical size guidance
+- Be conservative in size recommendations
+- Output ONLY the JSON, nothing else"""
+
+            if caption:
+                prompt += f"\n\n**User's Caption/Message:** {caption}"
+            
+            prompt += "\n\nNow estimate the appropriate size:"
+            
+            # Create Gemini model and analyze
+            model = genai.GenerativeModel('gemini-2.5-flash')
+            content_parts = [prompt] + uploaded_files
+            
+            response = await asyncio.to_thread(model.generate_content, content_parts)
+            
+            # Parse response
+            response_text = response.text.strip()
+            if response_text.startswith("```json"):
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif response_text.startswith("```"):
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            analysis = json.loads(response_text)
+            
+            # Cleanup uploaded files
+            for uploaded_file in uploaded_files:
+                try:
+                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
+                except Exception:
+                    pass
+            
+            logger.info(f"✅ Size estimation complete: {analysis.get('estimated_size', 'Unknown')}")
+            return analysis
+            
+        except Exception as e:
+            logger.error(f"Error in size estimation: {e}")
+            return None
+
+    async def _enhance_fashion_analysis(self, base_analysis: Dict[str, Any], image_paths: List[str]) -> Dict[str, Any]:
+        """
+        Enhance base fashion analysis with additional details.
+        
+        Args:
+            base_analysis: Base analysis result
+            image_paths: List of paths to image files
+            
+        Returns:
+            Enhanced analysis dictionary
+        """
+        try:
+            # Add fashion-specific enhancements
+            enhanced = base_analysis.copy()
+            
+            # Add fashion-specific fields if not present
+            if "fashion_category" not in enhanced:
+                enhanced["fashion_category"] = "unknown"
+            
+            if "style_type" not in enhanced:
+                enhanced["style_type"] = "casual"
+            
+            if "color_analysis" not in enhanced:
+                enhanced["color_analysis"] = []
+            
+            if "size_estimation" not in enhanced:
+                enhanced["size_estimation"] = "M"
+            
+            if "occasion_suitability" not in enhanced:
+                enhanced["occasion_suitability"] = ["casual"]
+            
+            if "styling_suggestions" not in enhanced:
+                enhanced["styling_suggestions"] = []
+            
+            # Add processing metadata
+            enhanced["analysis_type"] = "fashion_enhanced"
+            enhanced["processing_timestamp"] = datetime.now().isoformat()
+            
+            return enhanced
+            
+        except Exception as e:
+            logger.error(f"Error enhancing fashion analysis: {e}")
+            return base_analysis
+
     async def cleanup_image_file(self, image_path: str) -> bool:
         """
         Delete temporary image file.

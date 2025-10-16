@@ -1,5 +1,5 @@
 """
-Standalone knowledge data for Gurtoy Telegram Bot
+Standalone knowledge data for Fashion Mart Telegram Bot
 """
 
 def get_knowledge_chunks():
@@ -7,122 +7,122 @@ def get_knowledge_chunks():
     return [
         {
             "chunk_id": "company_overview",
-            "title": "Gurtoy Company Overview",
-            "content": "Gurtoy is a premium toy store and retailer established as a leading toy retailer in the Ludhiana region. We specialize in children's toys, educational products, ride-on toys, and outdoor play equipment. Our mission is bringing joy and learning to children through quality toys. We serve families with children aged 0-12+ years with geographic coverage in Ludhiana, Punjab, and Pan-India shipping.",
+            "title": "Fashion Mart Company Overview",
+            "content": "Fashion Mart is a premium women's fashion store specializing in contemporary and traditional clothing. We offer a curated collection of cardigans, tops, kurtas, and fashion accessories for modern women. Our mission is to provide stylish, comfortable, and affordable fashion that celebrates women's individuality. We serve customers across India with focus on quality, style, and customer satisfaction.",
             "category": "company_info",
-            "keywords": ["gurtoy", "company", "overview", "toy store", "ludhiana", "premium", "children", "toys"],
+            "keywords": ["fashion mart", "company", "overview", "women fashion", "clothing", "premium", "style"],
             "priority": 1
         },
         {
-            "chunk_id": "owner_management",
-            "title": "Gurtoy Ownership and Management",
-            "content": "Gurtoy is owned by Kawardeep Singh Khurana. Our business philosophy focuses on quality toys for child development and happiness. We provide family-oriented service with personalized attention, backed by years of expertise in toy retail and child development products.",
-            "category": "company_info",
-            "keywords": ["owner", "kawardeep", "singh", "khurana", "management", "philosophy", "quality"],
+            "chunk_id": "contact_information",
+            "title": "Fashion Mart Contact Information",
+            "content": "For inquiries: Call 9876151585. For purchases: Call 6283837649. Store Location: PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003. Google Maps: https://maps.app.goo.gl/koBoUFYEtE3mvdCC7. We welcome walk-in customers for personalized styling and expert fashion advice.",
+            "category": "contact_info",
+            "keywords": ["contact", "phone", "address", "location", "ludhiana", "punjab", "maps", "visit"],
             "priority": 1
         },
         {
             "chunk_id": "product_categories",
-            "title": "Gurtoy Product Categories",
-            "content": "Our product range includes: Educational Toys (puzzles, STEM kits, learning games), Ride-on Toys (cars, bikes, scooters, electric vehicles), Outdoor Play Equipment (swings, slides, trampolines), Indoor Games (board games, card games, building blocks), Electronic Toys (remote control toys, interactive games), Soft Toys (stuffed animals, plush toys), Art & Craft Supplies (drawing kits, craft materials), Sports Equipment (balls, bats, outdoor sports gear).",
+            "title": "Fashion Mart Product Categories",
+            "content": "Our fashion collection includes: Cardigans (Regular, Long, SL, Self, Crop styles), Crop Tops (High neck, V neck, casual styles), Traditional Wear (Kot, Court sets, Tunics), Layering Pieces (Shrugs, Long cardigans), Contemporary Tops (High neck, V neck styles). We focus on mix of Western and Indian fashion, offering versatile pieces for different occasions and seasons.",
             "category": "products",
-            "keywords": ["products", "toys", "educational", "ride-on", "outdoor", "indoor", "electronic", "soft toys", "art", "craft", "sports"],
+            "keywords": ["products", "cardigans", "crop tops", "traditional", "contemporary", "layering", "occasions", "seasons"],
             "priority": 1
         },
         {
-            "chunk_id": "age_groups",
-            "title": "Age-Appropriate Toy Categories",
-            "content": "Age 0-2 years: Soft toys, rattles, teething toys, sensory toys, musical toys. Age 2-5 years: Building blocks, simple puzzles, ride-on toys, pretend play sets, educational games. Age 5-8 years: Advanced puzzles, STEM kits, board games, outdoor sports equipment, art supplies. Age 8-12+ years: Complex building sets, electronic toys, advanced board games, sports equipment, hobby kits.",
-            "category": "products",
-            "keywords": ["age groups", "0-2 years", "2-5 years", "5-8 years", "8-12 years", "development", "appropriate"],
+            "chunk_id": "sizing_information",
+            "title": "Size Guide and Fitting Information",
+            "content": "We offer sizes S, M, L, XL for most products. Size S fits bust 32-34 inches, Size M fits bust 34-36 inches, Size L fits bust 36-38 inches, Size XL fits bust 38-40 inches. For accurate sizing, please provide your measurements or visit our store for personal fitting. We recommend checking individual product descriptions for specific sizing details.",
+            "category": "sizing",
+            "keywords": ["sizing", "size guide", "measurements", "fitting", "bust", "S", "M", "L", "XL"],
             "priority": 2
         },
         {
-            "chunk_id": "store_location",
-            "title": "Gurtoy Store Location and Contact",
-            "content": "Physical Store: Located in Ludhiana, Punjab. We welcome walk-in customers for hands-on toy selection and expert advice. Contact Information: Phone: Available for inquiries and orders. Operating Hours: Standard retail hours, customer service available during business hours. We provide personalized service and expert toy recommendations.",
-            "category": "contact_info",
-            "keywords": ["location", "ludhiana", "punjab", "store", "contact", "phone", "hours", "visit"],
+            "chunk_id": "pricing_policy",
+            "title": "Pricing and Value Proposition",
+            "content": "We offer competitive pricing with focus on value for money. Price range: ₹330 - ₹1,900. Regular promotions and seasonal discounts available. Transparent pricing with no hidden costs. Quality assurance ensures long-term value and durability. We provide budget-friendly fashion without compromising on style and quality.",
+            "category": "pricing",
+            "keywords": ["pricing", "competitive", "value", "promotions", "discounts", "transparent", "quality", "budget"],
             "priority": 2
         },
         {
-            "chunk_id": "online_services",
-            "title": "Online Services and Shipping",
-            "content": "Online Ordering: Available for customers across India. Shipping: Pan-India shipping available with reliable delivery partners. Local Delivery: Special delivery services in Ludhiana area. Customer Support: Online and phone support for product selection and order assistance. We ensure safe packaging and timely delivery of all toy orders.",
+            "chunk_id": "return_policy",
+            "title": "Return and Exchange Policy",
+            "content": "No return policy - we do not accept returns. However, we offer 48-hour replacement for damaged or defective items only. Replacement is available for manufacturing defects, not for size issues or change of mind. Items must be in original condition with tags attached. Contact us within 48 hours of delivery for replacement requests.",
+            "category": "policies",
+            "keywords": ["return", "exchange", "replacement", "damaged", "defective", "48 hours", "policy"],
+            "priority": 1
+        },
+        {
+            "chunk_id": "shipping_delivery",
+            "title": "Shipping and Delivery Information",
+            "content": "We offer Pan-India shipping with reliable delivery partners. Local delivery available in Ludhiana area. Delivery time: 3-7 business days for outstation, 1-2 days for local. We ensure safe packaging and timely delivery. Tracking information provided for all orders. Free shipping on orders above ₹1000.",
             "category": "services",
-            "keywords": ["online", "shipping", "pan-india", "delivery", "ludhiana", "support", "packaging"],
+            "keywords": ["shipping", "delivery", "pan-india", "tracking", "packaging", "free shipping"],
             "priority": 2
         },
         {
-            "chunk_id": "safety_quality",
-            "title": "Toy Safety and Quality Standards",
-            "content": "All toys meet international safety standards including BIS (Bureau of Indian Standards) certification where applicable. We prioritize non-toxic materials, age-appropriate design, and durability testing. Quality assurance includes regular supplier audits and customer feedback integration. Safety features include rounded edges, secure small parts, and clear age recommendations.",
+            "chunk_id": "styling_advice",
+            "title": "Fashion Styling and Advice",
+            "content": "Our team provides expert styling guidance: Occasion-based recommendations (casual, formal, traditional), Color coordination and matching, Layering techniques for different seasons, Size and fit recommendations, Budget-friendly styling options, Mix and match suggestions for versatile wardrobe. We help you create stylish looks that reflect your personality.",
+            "category": "advice",
+            "keywords": ["styling", "advice", "occasion", "color", "layering", "season", "wardrobe", "personality"],
+            "priority": 2
+        },
+        {
+            "chunk_id": "quality_standards",
+            "title": "Quality and Material Standards",
+            "content": "All our products meet high quality standards with focus on comfort and durability. We use quality fabrics including cotton, wool, synthetic blends, and traditional materials. Quality assurance includes fabric testing, stitching quality checks, and finish inspection. We prioritize comfort, fit, and longevity in all our fashion pieces.",
             "category": "quality",
-            "keywords": ["safety", "quality", "standards", "BIS", "certification", "non-toxic", "durability", "testing"],
+            "keywords": ["quality", "standards", "fabric", "cotton", "wool", "comfort", "durability", "testing"],
             "priority": 2
-        },
-        {
-            "chunk_id": "educational_benefits",
-            "title": "Educational Benefits of Our Toys",
-            "content": "Our educational toys promote: Cognitive Development (problem-solving, memory, logical thinking), Motor Skills (fine and gross motor development), Creativity (imagination, artistic expression), Social Skills (sharing, cooperation, communication), STEM Learning (science, technology, engineering, mathematics), Language Development (vocabulary, reading, communication skills).",
-            "category": "education",
-            "keywords": ["educational", "cognitive", "motor skills", "creativity", "social", "STEM", "language", "development"],
-            "priority": 3
-        },
-        {
-            "chunk_id": "popular_brands",
-            "title": "Popular Toy Brands at Gurtoy",
-            "content": "We stock toys from leading brands known for quality and safety. Our selection includes both international and domestic brands that meet our quality standards. Brand selection is based on safety certifications, educational value, durability, and customer satisfaction. We regularly update our brand portfolio based on market trends and customer feedback.",
-            "category": "products",
-            "keywords": ["brands", "quality", "safety", "international", "domestic", "selection", "trends"],
-            "priority": 3
-        },
-        {
-            "chunk_id": "seasonal_special",
-            "title": "Seasonal and Special Occasion Toys",
-            "content": "Special collections for: Birthday Gifts (age-appropriate selections, gift wrapping available), Festival Seasons (Diwali, Christmas, Holi special toys), Back-to-School (educational supplies, learning aids), Summer Holidays (outdoor toys, water play equipment), Winter Indoor Activities (board games, craft kits, puzzles). Custom gift recommendations available.",
-            "category": "seasonal",
-            "keywords": ["seasonal", "birthday", "festival", "diwali", "christmas", "school", "summer", "winter", "gifts"],
-            "priority": 3
         },
         {
             "chunk_id": "customer_service",
             "title": "Customer Service and Support",
-            "content": "Our customer service includes: Pre-purchase consultation for toy selection, Age-appropriate recommendations, Product demonstrations (in-store), After-sales support and warranty assistance, Return and exchange policies, Bulk order services for schools and institutions, Gift wrapping and special packaging services.",
+            "content": "Our customer service includes: Pre-purchase styling consultation, Size and fit recommendations, Product demonstrations (in-store), After-sales support and assistance, Order tracking and updates, Fashion advice and styling tips, Personalized shopping experience. We ensure every customer feels valued and receives expert fashion guidance.",
             "category": "services",
-            "keywords": ["customer service", "consultation", "recommendations", "demonstrations", "warranty", "returns", "bulk orders", "gift wrapping"],
+            "keywords": ["customer service", "consultation", "recommendations", "support", "tracking", "advice", "personalized"],
             "priority": 2
         },
         {
-            "chunk_id": "pricing_value",
-            "title": "Pricing and Value Proposition",
-            "content": "Competitive pricing with focus on value for money. Regular promotions and seasonal discounts available. Bulk purchase discounts for schools and institutions. Price matching policy for identical products. Transparent pricing with no hidden costs. Quality assurance ensures long-term value and durability of purchases.",
-            "category": "pricing",
-            "keywords": ["pricing", "competitive", "value", "promotions", "discounts", "bulk", "transparent", "quality"],
+            "chunk_id": "seasonal_collections",
+            "title": "Seasonal Fashion Collections",
+            "content": "We offer seasonal collections: Summer Collection (light fabrics, crop tops, breathable materials), Winter Collection (cardigans, layering pieces, warm fabrics), Festival Collection (traditional wear, festive colors), Casual Collection (everyday wear, comfortable styles). We update our inventory based on seasons and fashion trends.",
+            "category": "seasonal",
+            "keywords": ["seasonal", "summer", "winter", "festival", "casual", "collections", "trends"],
             "priority": 3
         },
         {
-            "chunk_id": "expert_advice",
-            "title": "Expert Toy Selection Advice",
-            "content": "Our team provides expert guidance on: Developmental appropriateness for different ages, Educational value and learning outcomes, Safety considerations and certifications, Durability and long-term value, Gender-neutral and inclusive toy options, Special needs considerations, Budget-friendly alternatives without compromising quality.",
-            "category": "advice",
-            "keywords": ["expert", "advice", "developmental", "educational", "safety", "durability", "inclusive", "special needs", "budget"],
+            "chunk_id": "online_services",
+            "title": "Online Shopping Experience",
+            "content": "Online Ordering: Available for customers across India. Easy browsing by category, size, and price. Detailed product descriptions with size charts. High-quality product images from multiple angles. Secure payment processing. Order tracking and updates. Customer support via phone and WhatsApp. We make online fashion shopping convenient and reliable.",
+            "category": "services",
+            "keywords": ["online", "shopping", "browsing", "payment", "tracking", "support", "convenient"],
             "priority": 2
         },
         {
-            "chunk_id": "community_engagement",
-            "title": "Community Engagement and Social Responsibility",
-            "content": "Gurtoy actively engages with the local community through: Educational workshops on child development and play, Partnerships with local schools and daycare centers, Toy donation drives for underprivileged children, Environmental responsibility through eco-friendly packaging, Supporting local artisans and toy makers, Promoting traditional Indian games and toys.",
-            "category": "community",
-            "keywords": ["community", "workshops", "schools", "donations", "environmental", "eco-friendly", "artisans", "traditional", "indian games"],
-            "priority": 4
+            "chunk_id": "care_instructions",
+            "title": "Fabric Care and Maintenance",
+            "content": "Care Instructions: Cotton items - Machine wash cold, gentle cycle. Wool items - Hand wash or dry clean only. Synthetic blends - Machine wash warm, tumble dry low. Cardigans - Lay flat to dry, avoid hanging. Crop tops - Gentle cycle, air dry. Always check individual product labels for specific care instructions. Proper care ensures longevity of your fashion pieces.",
+            "category": "care",
+            "keywords": ["care", "instructions", "washing", "cotton", "wool", "synthetic", "maintenance"],
+            "priority": 3
         },
         {
-            "chunk_id": "future_expansion",
-            "title": "Future Plans and Expansion",
-            "content": "Our growth plans include: Expanding product range with latest educational toys, Enhanced online presence and e-commerce capabilities, Additional service locations in Punjab region, Partnerships with international toy brands, Development of exclusive Gurtoy-branded products, Integration of technology in toy retail experience.",
-            "category": "future",
-            "keywords": ["expansion", "growth", "online", "e-commerce", "punjab", "international", "exclusive", "technology"],
-            "priority": 5
+            "chunk_id": "target_customers",
+            "title": "Target Customer Profile",
+            "content": "Our target customers are: Women aged 18-45 years, Style-conscious individuals, Budget-conscious shoppers, Working professionals, Students, Fashion enthusiasts, Those seeking mix of traditional and contemporary styles. We cater to diverse fashion needs from casual everyday wear to special occasion outfits.",
+            "category": "customers",
+            "keywords": ["target", "customers", "women", "age", "style", "budget", "professionals", "students"],
+            "priority": 3
+        },
+        {
+            "chunk_id": "business_hours",
+            "title": "Store Hours and Availability",
+            "content": "Store Hours: Monday to Saturday: 10:00 AM - 8:00 PM, Sunday: 11:00 AM - 6:00 PM. Online orders: Available 24/7. Customer support: Available during business hours via phone. WhatsApp support: Available during business hours. We are closed on major festivals and holidays. Check our social media for holiday schedules.",
+            "category": "contact_info",
+            "keywords": ["hours", "timings", "availability", "support", "whatsapp", "holidays"],
+            "priority": 2
         }
     ]

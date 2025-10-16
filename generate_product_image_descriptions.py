@@ -1,9 +1,9 @@
 """
-Generate AI Image Descriptions and Embeddings for All Products
+Generate AI Image Descriptions and Embeddings for Fashion Mart Products
 This script processes all products in the database:
 1. Fetches products with images
 2. Downloads first image for each product
-3. Generates AI description using Gemini 2.5 Flash
+3. Generates AI description using Gemini 2.5 Flash for fashion items
 4. Creates embedding from description
 5. Updates database with ai_image_description, ai_image_metadata, and image_embedding
 """
@@ -167,18 +167,28 @@ class ProductImageDescriptionGenerator:
             logger.error(f"❌ Error fetching products: {e}", exc_info=True)
             return []
     
-    async def download_image(self, image_url: str, product_id: str) -> Optional[Path]:
+    async def download_image(self, image_data: Dict[str, Any], product_id: str) -> Optional[Path]:
         """
         Download product image from URL.
         
         Args:
-            image_url: URL of the image
+            image_data: Image data dictionary with 'url' key
             product_id: Product ID for filename
             
         Returns:
             Path to downloaded image or None if failed
         """
         try:
+            # Extract URL from image data
+            if isinstance(image_data, dict):
+                image_url = image_data.get('url')
+            else:
+                image_url = str(image_data)
+            
+            if not image_url:
+                logger.error(f"   ❌ No URL found in image data")
+                return None
+            
             # Clean filename
             safe_product_id = "".join(c for c in product_id if c.isalnum() or c in ('-', '_'))
             image_path = self.temp_dir / f"{safe_product_id}.jpg"
@@ -209,14 +219,30 @@ class ProductImageDescriptionGenerator:
             Dictionary with product description and metadata
         """
         try:
-            logger.debug(f"   🤖 Analyzing product image with Gemini...")
+            logger.debug(f"   [AI] Analyzing product image with Gemini...")
             
-            # Upload image to Gemini
-            uploaded_file = await asyncio.to_thread(
-                genai.upload_file,
-                path=str(image_path),
-                display_name=f"product_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            )
+            # Read image file
+            with open(image_path, 'rb') as f:
+                image_data = f.read()
+            
+            # Convert to PIL Image for Gemini
+            from PIL import Image
+            import io
+            
+            pil_image = Image.open(io.BytesIO(image_data))
+            
+            # Upload image to Gemini using the new method
+            try:
+                uploaded_file = await asyncio.to_thread(
+                    genai.upload_file,
+                    path=str(image_path),
+                    display_name=f"product_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+                    mime_type="image/jpeg"
+                )
+            except Exception as upload_error:
+                logger.error(f"   [ERROR] File upload failed: {upload_error}")
+                # Try alternative method - direct image analysis
+                return await self._analyze_image_directly(pil_image)
             
             # Wait for processing
             max_wait = 30  # seconds
@@ -227,49 +253,51 @@ class ProductImageDescriptionGenerator:
                 uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
             
             if uploaded_file.state.name == "FAILED":
-                logger.error("   ❌ Image upload failed")
-                return None
+                logger.error("   [ERROR] Image upload failed")
+                return await self._analyze_image_directly(pil_image)
             
-            # Create prompt for product description
-            prompt = """You are a product catalog expert. Analyze this product image and generate a comprehensive product description.
+            # Create prompt for fashion product description
+            prompt = """You are a fashion catalog expert for Fashion Mart women's fashion store. Analyze this fashion item image and generate a comprehensive product description.
 
 **Your Task:**
-Extract all visible product details that would help customers find this product.
+Extract all visible fashion details that would help customers find this clothing item.
 
 **Focus on:**
-1. **Product Type**: What kind of product is this? (e.g., ride-on car, electric bike, toy jeep, doll, puzzle, educational toy)
-2. **Design & Style**: Describe the overall design, style, and appearance
+1. **Garment Type**: What type of clothing is this? (e.g., cardigan, crop top, kurta, tunic, shrug, court set)
+2. **Design & Style**: Describe the overall design, style, cut, and silhouette
 3. **Colors**: List ALL visible colors (primary and secondary colors)
-4. **Key Features**: Identify visible features (lights, wheels, seats, steering, buttons, accessories, etc.)
-5. **Size Category**: Estimate size (small, medium, large, extra-large)
-6. **Age Suitability**: Estimate appropriate age range based on size and complexity
-7. **Material & Build**: Describe visible materials (plastic, metal, rubber wheels, fabric, wood, etc.)
-8. **Unique Characteristics**: Any distinctive features that make this product stand out
+4. **Key Features**: Identify visible features (neckline, sleeves, length, buttons, embroidery, patterns, etc.)
+5. **Size Category**: Estimate size (S, M, L, XL) based on appearance
+6. **Occasion Suitability**: What occasions is this suitable for? (casual, office, party, traditional, wedding)
+7. **Material & Fabric**: Describe visible materials (cotton, wool, synthetic, knit, woven, etc.)
+8. **Unique Characteristics**: Any distinctive features that make this item stand out (embroidery, patterns, texture)
 
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
 {
-    "product_type": "specific product category",
+    "product_type": "specific garment category",
     "product_name": "suggested descriptive product name",
     "detailed_description": "comprehensive description for embedding (3-5 sentences, include all key details)",
     "colors": ["color1", "color2", "color3"],
     "primary_color": "main color",
     "key_features": ["feature1", "feature2", "feature3", "feature4", "feature5"],
-    "age_range": "X-Y years",
-    "size_category": "small|medium|large|extra-large",
+    "size_range": "S|M|L|XL",
+    "occasion": ["casual", "office", "party", "traditional", "wedding"],
     "style_keywords": ["keyword1", "keyword2", "keyword3", "keyword4"],
+    "material": "estimated material type",
     "confidence": "high|medium|low"
 }
 
 **Important:**
 - Be specific and detailed in the description
 - Include all visible colors
-- Focus on searchable features
-- Use keywords that customers would use when searching
+- Focus on fashion-specific features
+- Use keywords that fashion customers would use when searching
 - The detailed_description should be rich and comprehensive for semantic search
+- Consider Indian women's fashion preferences
 - Output ONLY the JSON, nothing else
 
-Now analyze the product image:"""
+Now analyze the fashion item image:"""
 
             # Wait for rate limit before making API call
             await self.wait_for_rate_limit()
@@ -293,13 +321,102 @@ Now analyze the product image:"""
             result = json.loads(response_text)
             
             # Clean up uploaded file
-            await asyncio.to_thread(genai.delete_file, uploaded_file.name)
+            try:
+                await asyncio.to_thread(genai.delete_file, uploaded_file.name)
+            except:
+                pass  # Ignore cleanup errors
             
-            logger.debug(f"   ✅ Generated description: {result.get('product_type')}")
+            logger.debug(f"   [SUCCESS] Generated description: {result.get('product_type')}")
             return result
             
         except Exception as e:
-            logger.error(f"   ❌ Error generating product description: {e}", exc_info=True)
+            logger.error(f"   [ERROR] Error generating product description: {e}", exc_info=True)
+            return None
+    
+    async def _analyze_image_directly(self, pil_image) -> Optional[Dict[str, Any]]:
+        """
+        Fallback method: Analyze image directly without file upload.
+        
+        Args:
+            pil_image: PIL Image object
+            
+        Returns:
+            Dictionary with basic product description
+        """
+        try:
+            logger.debug(f"   [FALLBACK] Using direct image analysis...")
+            
+            # Wait for rate limit
+            await self.wait_for_rate_limit()
+            
+            # Create model
+            model = genai.GenerativeModel(self.chat_model)
+            
+            # Create prompt for fashion product description
+            prompt = """You are a fashion catalog expert for Fashion Mart women's fashion store. Analyze this fashion item image and generate a comprehensive product description.
+
+**Your Task:**
+Extract all visible fashion details that would help customers find this clothing item.
+
+**Focus on:**
+1. **Garment Type**: What type of clothing is this? (e.g., cardigan, crop top, kurta, tunic, shrug, court set)
+2. **Design & Style**: Describe the overall design, style, cut, and silhouette
+3. **Colors**: List ALL visible colors (primary and secondary colors)
+4. **Key Features**: Identify visible features (neckline, sleeves, length, buttons, embroidery, patterns, etc.)
+5. **Size Category**: Estimate size (S, M, L, XL) based on appearance
+6. **Occasion Suitability**: What occasions is this suitable for? (casual, office, party, traditional, wedding)
+7. **Material & Fabric**: Describe visible materials (cotton, wool, synthetic, knit, woven, etc.)
+8. **Unique Characteristics**: Any distinctive features that make this item stand out (embroidery, patterns, texture)
+
+**Response Format:**
+Return ONLY valid JSON (no markdown, no extra text):
+{
+    "product_type": "specific garment category",
+    "product_name": "suggested descriptive product name",
+    "detailed_description": "comprehensive description for embedding (3-5 sentences, include all key details)",
+    "colors": ["color1", "color2", "color3"],
+    "primary_color": "main color",
+    "key_features": ["feature1", "feature2", "feature3", "feature4", "feature5"],
+    "size_range": "S|M|L|XL",
+    "occasion": ["casual", "office", "party", "traditional", "wedding"],
+    "style_keywords": ["keyword1", "keyword2", "keyword3", "keyword4"],
+    "material": "estimated material type",
+    "confidence": "high|medium|low"
+}
+
+**Important:**
+- Be specific and detailed in the description
+- Include all visible colors
+- Focus on fashion-specific features
+- Use keywords that fashion customers would use when searching
+- The detailed_description should be rich and comprehensive for semantic search
+- Consider Indian women's fashion preferences
+- Output ONLY the JSON, nothing else
+
+Now analyze the fashion item image:"""
+            
+            # Generate description using direct image
+            response = await asyncio.to_thread(
+                model.generate_content,
+                [prompt, pil_image]
+            )
+            
+            # Parse response
+            response_text = response.text.strip()
+            
+            # Remove markdown code blocks if present
+            if response_text.startswith("```json"):
+                response_text = response_text.split("```json")[1].split("```")[0].strip()
+            elif response_text.startswith("```"):
+                response_text = response_text.split("```")[1].split("```")[0].strip()
+            
+            result = json.loads(response_text)
+            
+            logger.debug(f"   [FALLBACK SUCCESS] Generated description: {result.get('product_type')}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"   [FALLBACK ERROR] Error in direct image analysis: {e}", exc_info=True)
             return None
     
     async def generate_embedding(self, text: str) -> Optional[List[float]]:
@@ -313,20 +430,18 @@ Now analyze the product image:"""
             List of floats representing the embedding vector
         """
         try:
-            embed_params = {
-                "model": self.embedding_model,
-                "content": text,
-                "task_type": "retrieval_document",
-                "output_dimensionality": self.embedding_dimensionality
-            }
+            result = await asyncio.to_thread(
+                genai.embed_content,
+                content=text,
+                task_type="retrieval_document",
+                model=self.embedding_model
+            )
             
-            result = await asyncio.to_thread(genai.embed_content, **embed_params)
-            
-            logger.debug(f"   ✅ Generated {len(result['embedding'])}D embedding")
+            logger.debug(f"   [SUCCESS] Generated {len(result['embedding'])}D embedding")
             return result['embedding']
             
         except Exception as e:
-            logger.error(f"   ❌ Error generating embedding: {e}", exc_info=True)
+            logger.error(f"   [ERROR] Error generating embedding: {e}", exc_info=True)
             return None
     
     async def update_product_in_database(
@@ -349,26 +464,22 @@ Now analyze the product image:"""
             True if successful, False otherwise
         """
         try:
-            # Use the database function
-            response = self.supabase.rpc(
-                "update_product_image_data",
-                {
-                    "p_product_id": product_id,
-                    "p_ai_image_description": ai_description,
-                    "p_ai_image_metadata": ai_metadata,
-                    "p_image_embedding": embedding
-                }
-            ).execute()
+            # Update product directly using table update
+            response = self.supabase.table("products").update({
+                "ai_image_description": ai_description,
+                "ai_image_metadata": ai_metadata,
+                "image_embedding": embedding
+            }).eq("product_id", product_id).execute()
             
             if response.data:
-                logger.debug(f"   ✅ Updated database for product {product_id}")
+                logger.debug(f"   [SUCCESS] Updated database for product {product_id}")
                 return True
             else:
-                logger.error(f"   ❌ Failed to update database for product {product_id}")
+                logger.error(f"   [ERROR] Failed to update database for product {product_id}")
                 return False
             
         except Exception as e:
-            logger.error(f"   ❌ Error updating database: {e}", exc_info=True)
+            logger.error(f"   [ERROR] Error updating database: {e}", exc_info=True)
             return False
     
     async def process_product(self, product: Dict[str, Any]) -> bool:
@@ -405,19 +516,19 @@ Now analyze the product image:"""
                 return False
             
             first_image_url = images[0]
-            logger.info(f"   🖼️  Using first image: {first_image_url[:80]}...")
+            logger.info(f"   [IMAGE] Using first image: {first_image_url.get('url', str(first_image_url))[:80]}...")
             
             # Step 1: Download image
             image_path = await self.download_image(first_image_url, product_id)
             if not image_path:
-                logger.error(f"   ❌ Failed to download image")
+                logger.error(f"   [ERROR] Failed to download image")
                 self.stats['failed'] += 1
                 return False
             
             # Step 2: Generate AI description
             product_info = await self.generate_product_description(image_path)
             if not product_info:
-                logger.error(f"   ❌ Failed to generate description")
+                logger.error(f"   [ERROR] Failed to generate description")
                 self.stats['failed'] += 1
                 return False
             
@@ -431,20 +542,21 @@ Now analyze the product image:"""
                 "colors": product_info.get('colors', []),
                 "primary_color": product_info.get('primary_color'),
                 "key_features": product_info.get('key_features', []),
-                "age_range": product_info.get('age_range'),
-                "size_category": product_info.get('size_category'),
+                "size_range": product_info.get('size_range'),
+                "occasion": product_info.get('occasion', []),
                 "style_keywords": product_info.get('style_keywords', []),
+                "material": product_info.get('material'),
                 "confidence": product_info.get('confidence', 'medium')
             }
             
-            logger.info(f"   📝 Description: {detailed_description[:100]}...")
-            logger.info(f"   🎨 Colors: {', '.join(metadata['colors'])}")
-            logger.info(f"   ⭐ Features: {len(metadata['key_features'])} identified")
+            logger.info(f"   [DESC] Description: {detailed_description[:100]}...")
+            logger.info(f"   [COLORS] Colors: {', '.join(metadata['colors'])}")
+            logger.info(f"   [FEATURES] Features: {len(metadata['key_features'])} identified")
             
             # Step 3: Generate embedding
             embedding = await self.generate_embedding(detailed_description)
             if not embedding:
-                logger.error(f"   ❌ Failed to generate embedding")
+                logger.error(f"   [ERROR] Failed to generate embedding")
                 self.stats['failed'] += 1
                 return False
             
@@ -457,16 +569,16 @@ Now analyze the product image:"""
             )
             
             if success:
-                logger.info(f"   ✅ Successfully processed product {product_id}")
+                logger.info(f"   [SUCCESS] Successfully processed product {product_id}")
                 self.stats['successful'] += 1
                 return True
             else:
-                logger.error(f"   ❌ Failed to update database")
+                logger.error(f"   [ERROR] Failed to update database")
                 self.stats['failed'] += 1
                 return False
             
         except Exception as e:
-            logger.error(f"   ❌ Error processing product {product_id}: {e}", exc_info=True)
+            logger.error(f"   [ERROR] Error processing product {product_id}: {e}", exc_info=True)
             self.stats['failed'] += 1
             return False
         

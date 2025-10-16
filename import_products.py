@@ -1,5 +1,5 @@
 """
-Product Import Script for Gurtoy Telegram Bot
+Product Import Script for Fashion Mart Telegram Bot
 This script imports product data with embeddings into Supabase.
 """
 from __future__ import annotations
@@ -74,7 +74,7 @@ def generate_product_embedding(product: Dict[str, Any]) -> List[float]:
         f"Title: {product['title']}",
         f"Category: {product['category']}",
         f"Description: {product['description']}",
-        f"Age Range: {product['age_range']}"
+        f"Size Range: {product['age_range']}"  # Note: age_range is actually size_range in our schema
     ]
     
     # Add colors if available
@@ -85,8 +85,10 @@ def generate_product_embedding(product: Dict[str, Any]) -> List[float]:
     # Add specifications if available
     if product['specifications']:
         specs = product['specifications']
-        if 'battery' in specs:
-            embedding_text_parts.append(f"Battery: {specs['battery']}")
+        if 'material' in specs:
+            embedding_text_parts.append(f"Material: {specs['material']}")
+        if 'care_instructions' in specs:
+            embedding_text_parts.append(f"Care Instructions: {specs['care_instructions']}")
         if 'features' in specs:
             features_str = ', '.join(specs['features'])
             embedding_text_parts.append(f"Features: {features_str}")

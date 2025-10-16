@@ -44,6 +44,7 @@ class OrderCollectionSession:
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     preserved_customer_info: Optional[Dict[str, Any]] = None  # For product switching
+    fashion_preferences: Optional[Dict[str, Any]] = None  # PHASE 4: Fashion preferences (size, color, style, occasion)
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for storage."""
@@ -54,6 +55,7 @@ class OrderCollectionSession:
             "product_details": self.product_details,
             "customer_info": self.customer_info,
             "shipping_address": self.shipping_address,
+            "fashion_preferences": self.fashion_preferences or {},
             "quantity": self.quantity,
             "errors": self.errors,
             "step_history": self.step_history,
@@ -118,12 +120,21 @@ class AIOrderCollector:
                                             "state": {"type": "string", "description": "State name"},
                                             "pincode": {"type": "string", "description": "6-digit postal code"}
                                         }
+                                    },
+                                    "fashion_preferences": {
+                                        "type": "object",
+                                        "properties": {
+                                            "size": {"type": "string", "enum": ["S", "M", "L", "XL"], "description": "Preferred size for the fashion item"},
+                                            "color": {"type": "string", "description": "Preferred color from available options"},
+                                            "style": {"type": "string", "enum": ["casual", "formal", "traditional"], "description": "Preferred style for the occasion"},
+                                            "occasion": {"type": "string", "enum": ["casual", "office", "party", "traditional"], "description": "Intended occasion for wearing"}
+                                        }
                                     }
                                 },
-                                "description": "Extracted customer and shipping information (only if user_intent is providing_details or correcting_info)"
+                                "description": "Extracted customer, shipping, and fashion preference information (only if user_intent is providing_details or correcting_info)"
                             },
-                            "is_complete": {"type": "boolean", "description": "Whether all required information (name, phone, address, city, state, pincode) is now present"},
-                            "missing_fields": {"type": "array", "items": {"type": "string"}, "description": "List of specific missing fields (e.g., 'phone number', 'complete address', 'city', 'pincode')"},
+                            "is_complete": {"type": "boolean", "description": "Whether all required information (name, phone, address, city, state, pincode, size, color) is now present"},
+                            "missing_fields": {"type": "array", "items": {"type": "string"}, "description": "List of specific missing fields (e.g., 'phone number', 'complete address', 'city', 'pincode', 'size preference', 'color preference')"},
                             "correction_details": {"type": "string", "description": "Description of what was corrected (only if user_intent is correcting_info)"},
                             "response_message": {"type": "string", "description": "Intelligent, context-aware response to user in natural Hinglish"}
                         },
@@ -135,7 +146,7 @@ class AIOrderCollector:
     
     def _get_extraction_system_instruction(self) -> str:
         """Get system instruction for intelligent order processing."""
-        return """You are an intelligent order collection assistant for Gurtoy toy store with a smart brain that understands context and user intent.
+        return """You are an intelligent order collection assistant for Fashion Mart with a smart brain that understands context and user intent.
 
 🧠 **YOUR INTELLIGENCE:**
 You understand what users MEAN, not just what they SAY. You're context-aware and conversational.
@@ -143,6 +154,7 @@ You understand what users MEAN, not just what they SAY. You're context-aware and
 📋 **REQUIRED ORDER INFORMATION:**
 - **Customer Info:** name, phone (10 digits), email (optional)
 - **Shipping Address:** street address, city, state, pincode (6 digits)
+- **Fashion Details:** size preference (S, M, L, XL), color preference, style preference
 
 🎯 **UNDERSTAND USER INTENT - Think Like a Human:**
 
@@ -158,16 +170,16 @@ User says: "Yes", "Okay", "Sure", "Thik hai", "Haan", "Bilkul", "Proceed", "Cont
 User says: "What you want?", "What details?", "Kya chahiye?", "What information?", "Tell me what you need", "What's missing?"
 → They're ASKING what information you need!
 → Response: Tell them EXACTLY what's missing or what to provide next
-→ Be specific: "Mujhe aapka phone number aur complete address chahiye..."
+→ Be specific: "Mujhe aapka phone number, complete address, aur size preference chahiye..."
 
 **3. PROVIDING_DETAILS Intent:**
-User gives: "Rahul Sharma 9876543210", "123 Model Town Ludhiana Punjab 141001", "My name is Amit"
+User gives: "Rahul Sharma 9876543210", "123 Model Town Ludhiana Punjab 141001", "My name is Amit", "Size M", "Black color"
 → They're GIVING you information!
 → Extract and acknowledge what you received
 → Ask for what's still missing (if any)
 
 **4. CORRECTING_INFO Intent:**
-User says: "Wrong number", "Correction", "Change address", "Galat hai", "Phone number sahi nahi"
+User says: "Wrong number", "Correction", "Change address", "Galat hai", "Phone number sahi nahi", "Size change karna hai"
 → They're FIXING something!
 → Acknowledge the correction
 → Ask what the correct information is
@@ -180,23 +192,25 @@ User says: "Cancel", "Stop", "Forget it", "Nahi chahiye", "Exit"
 🎯 **CONTEXT-AWARE RESPONSES:**
 
 **Scenario 1: User says "Yes" when details are COMPLETE**
-Current State: All info collected (name, phone, address, city, state, pincode)
+Current State: All info collected (name, phone, address, city, state, pincode, size, color)
 Your Response: "Perfect! Sab details confirm ho gayi hain. Main abhi aapke liye payment link generate kar raha hoon. Ek minute... 😊"
 Action: Set is_complete=true, user_intent="confirming_order"
 
 **Scenario 2: User says "Okay" when details are INCOMPLETE**
-Current State: Only name collected, missing phone and address
-Your Response: "Great! Ab mujhe aapka phone number aur complete delivery address chahiye. Please provide karein. 📱📍"
-Action: Set is_complete=false, user_intent="confirming_order", missing_fields=["phone", "address", "city", "state", "pincode"]
+Current State: Only name collected, missing phone, address, and size
+Your Response: "Great! Ab mujhe aapka phone number, complete delivery address, aur size preference chahiye. Please provide karein. 📱📍👕"
+Action: Set is_complete=false, user_intent="confirming_order", missing_fields=["phone", "address", "city", "state", "pincode", "size"]
 
 **Scenario 3: User says "What you want?" or "What details you want?"**
-Current State: Missing phone and address
+Current State: Missing phone, address, and size
 Your Response: "Main aapki ye details chahta hoon:
 📱 Phone Number (10 digits)
 📍 Complete Address (street, city, state, pincode)
+👕 Size Preference (S, M, L, XL)
+🎨 Color Preference
 
 Please provide karein. 😊"
-Action: Set user_intent="asking_question", missing_fields=["phone", "address", "city", "state", "pincode"]
+Action: Set user_intent="asking_question", missing_fields=["phone", "address", "city", "state", "pincode", "size", "color"]
 
 **Scenario 4: User says "All details are okay"**
 Current State: All details collected
@@ -204,7 +218,7 @@ Your Response: "Bahut accha! Sab details confirm hain. Main payment link generat
 Action: Set is_complete=true, user_intent="confirming_order"
 
 **Scenario 5: User provides details**
-User: "Rahul Sharma 9876543210 rahul@gmail.com"
+User: "Rahul Sharma 9876543210 rahul@gmail.com Size M Black"
 Your Response: "Thanks Rahul! Main aapki details save kar raha hoon. Ab mujhe aapka complete delivery address chahiye (street, city, state, pincode). 📍"
 Action: Extract info, set user_intent="providing_details", missing_fields=["address", "city", "state", "pincode"]
 
@@ -213,6 +227,23 @@ User: "Phone number wrong hai, correct is 9988776655"
 Your Response: "✅ Got it! Phone number update kar diya: 9988776655. Kya aur koi correction hai? 😊"
 Action: Update phone, set user_intent="correcting_info", correction_details="Updated phone number"
 
+🎯 **FASHION-SPECIFIC GUIDANCE:**
+
+**Size Selection:**
+- Ask: "Aapka size kya hai? (S, M, L, XL)"
+- Help: "Size guide: S (Small), M (Medium), L (Large), XL (Extra Large)"
+- Confirm: "Size M confirm hai?"
+
+**Color Preferences:**
+- Ask: "Konsa color pasand hai?"
+- Options: "Available colors: Black, White, Navy, Gray, Pink, Red"
+- Confirm: "Black color confirm hai?"
+
+**Style Preferences:**
+- Ask: "Konsa style pasand hai? (Casual, Formal, Traditional)"
+- Occasion: "Kiske liye chahiye? (Office, Party, Casual wear)"
+- Confirm: "Casual style confirm hai?"
+
 🎯 **RESPONSE GUIDELINES:**
 
 **When ALL details complete:**
@@ -220,6 +251,8 @@ Action: Update phone, set user_intent="correcting_info", correction_details="Upd
 📱 Phone: [Phone]
 📧 Email: [Email]
 📍 Address: [Street], [City], [State] - [Pincode]
+👕 Size: [Size]
+🎨 Color: [Color]
 
 Agar sab sahi hai toh main payment link generate kar raha hoon! 😊"
 
@@ -245,12 +278,13 @@ Please provide karein, phir hum payment pe jayenge. 😊"
 1. **ALWAYS call process_order_conversation function** - Never respond with text directly
 2. **Understand INTENT first** - What is user trying to do?
 3. **Be CONTEXT-AWARE** - Check what's already collected vs what's missing
-4. **Be SPECIFIC** - Don't say "provide details", say "phone number aur address chahiye"
+4. **Be SPECIFIC** - Don't say "provide details", say "phone number, address, aur size chahiye"
 5. **Be NATURAL** - Talk like a helpful human, not a robot
 6. **Handle Hinglish** - Understand Hindi, English, and mixed language
-7. **Validate data** - Phone (10 digits), Pincode (6 digits), Email (valid format)
+7. **Validate data** - Phone (10 digits), Pincode (6 digits), Email (valid format), Size (S/M/L/XL)
+8. **Be FASHION-AWARE** - Understand fashion terminology, sizes, colors, and styles
 
-Remember: You're smart! Understand what users mean, not just what they say. 🧠"""
+Remember: You're smart! Understand what users mean, not just what they say. You're helping customers buy fashion items, so be enthusiastic about style! 🧠👗"""
 
     def start_order_collection(
         self, 
@@ -286,6 +320,7 @@ Remember: You're smart! Understand what users mean, not just what they say. 🧠
             product_details=product_details,
             customer_info={},
             shipping_address={},
+            fashion_preferences={},
             quantity=quantity,
             errors=[],
             step_history=["Order collection started"],
@@ -437,6 +472,11 @@ Ya phir sirf naam se start kariye: "Mera naam Rahul hai"
                             session.customer_info.update(extracted_info["customer_info"])
                         if extracted_info.get("shipping_address"):
                             session.shipping_address.update(extracted_info["shipping_address"])
+                        if extracted_info.get("fashion_preferences"):
+                            # Store fashion preferences in session
+                            if not hasattr(session, 'fashion_preferences'):
+                                session.fashion_preferences = {}
+                            session.fashion_preferences.update(extracted_info["fashion_preferences"])
                         
                         if user_intent == "correcting_info":
                             logger.info(f"🔧 Correction: {correction_details}")
@@ -800,25 +840,25 @@ Remember: Be smart! Understand what the user MEANS, not just what they SAY. 🧠
         """Use LLM to generate intelligent product information response."""
         product = session.product_details
         
-        prompt = f"""You are a helpful toy store assistant. A user is asking about a product during order collection.
+        prompt = f"""You are a helpful fashion store assistant. A user is asking about a product during order collection.
 
 **Product Details:**
 - Title: {product.get('title', 'Product')}
-- Age Range: {product.get('age_range', 'Not specified')}
+- Size Range: {product.get('size_range', 'Not specified')}
 - Original Price: ₹{product.get('price', 0):,.0f}
 - Special Offer Price: ₹{product.get('discount_price', product.get('price', 0)):,.0f}
 - Colors: {', '.join(product.get('colors', [])) if product.get('colors') else 'Multiple colors'}
-- Features: {', '.join(product.get('features', [])) if product.get('features') else 'Standard features'}
-- Battery: {product.get('battery', '12V rechargeable battery')}
-- Warranty: {product.get('warranty', '1 year warranty')}
+- Material: {product.get('specifications', {}).get('material', 'Mixed materials')}
+- Care Instructions: {product.get('specifications', {}).get('wash_care', 'Hand wash cold, lay flat to dry')}
+- Warranty: {product.get('warranty', 'Quality guarantee')}
 
 **User's Question:** "{user_input}"
 
 **Instructions:**
-1. Provide comprehensive information about the product
-2. Highlight key features and benefits
+1. Provide comprehensive information about the fashion item
+2. Highlight key features, materials, and care instructions
 3. Mention the special offer price prominently
-4. Be enthusiastic and engaging
+4. Be enthusiastic and engaging about fashion
 5. End with a call-to-action for ordering
 6. Use emojis appropriately
 7. Keep response under 300 characters
@@ -834,29 +874,26 @@ Remember: Be smart! Understand what the user MEANS, not just what they SAY. 🧠
         
         # Build comprehensive product information
         title = product.get('title', 'Product')
-        age_range = product.get('age_range', 'Not specified')
+        size_range = product.get('size_range', 'Not specified')
         original_price = product.get('price', 0)
         discount_price = product.get('discount_price', original_price)
         colors = product.get('colors', [])
-        features = product.get('features', [])
-        battery = product.get('battery', '12V rechargeable battery')
-        warranty = product.get('warranty', '1 year warranty')
+        material = product.get('specifications', {}).get('material', 'Mixed materials')
+        care_instructions = product.get('specifications', {}).get('wash_care', 'Hand wash cold, lay flat to dry')
+        warranty = product.get('warranty', 'Quality guarantee')
         
         # Format colors
         colors_text = ", ".join(colors) if colors else "Multiple colors available"
         
-        # Format features
-        features_text = ", ".join(features) if features else "Standard features"
-        
         # Build response
-        response = f"""🎯 **{title}**
+        response = f"""👗 **{title}**
 
 📊 **Product Details:**
-• **Age Range:** {age_range}
-• **Battery:** {battery}
-• **Warranty:** {warranty}
+• **Size Range:** {size_range}
+• **Material:** {material}
+• **Care Instructions:** {care_instructions}
 • **Colors:** {colors_text}
-• **Features:** {features_text}
+• **Warranty:** {warranty}
 
 💰 **Pricing:**
 • **Original Price:** ₹{original_price:,.0f}
@@ -868,6 +905,84 @@ Aap iska order kar sakte hain! Main aapki details collect karunga. 😊"""
         session.step_history.append("User requested general product information")
         return True, response, None
     
+    def _get_occasion_recommendations(self, occasion: str) -> Dict[str, Any]:
+        """Get product recommendations based on occasion for fashion items."""
+        occasion_mappings = {
+            'casual': {
+                'categories': ['Cardigan', 'Crop top', 'Tunic'],
+                'styles': ['comfortable', 'relaxed', 'everyday'],
+                'description': 'Casual everyday wear for comfort and style',
+                'size_guide': 'Choose your regular size for comfortable fit'
+            },
+            'office': {
+                'categories': ['Cardigan', 'High neck top', 'Court set'],
+                'styles': ['professional', 'elegant', 'sophisticated'],
+                'description': 'Professional and formal wear for office and business',
+                'size_guide': 'Choose fitted size for professional look'
+            },
+            'party': {
+                'categories': ['Crop top', 'Cardigan crop', 'V neck crop top'],
+                'styles': ['stylish', 'trendy', 'party-ready'],
+                'description': 'Stylish and trendy pieces for parties and events',
+                'size_guide': 'Choose your preferred fit - fitted for bold look or loose for comfort'
+            },
+            'traditional': {
+                'categories': ['Kot', 'Court set', 'Tunic'],
+                'styles': ['ethnic', 'traditional', 'cultural'],
+                'description': 'Traditional and ethnic wear for festivals and ceremonies',
+                'size_guide': 'Choose comfortable size for traditional occasions'
+            }
+        }
+        
+        return occasion_mappings.get(occasion, {
+            'categories': ['Cardigan', 'Crop top', 'Tunic'],
+            'styles': ['versatile', 'stylish'],
+            'description': 'Versatile pieces for any occasion',
+            'size_guide': 'Choose your regular size'
+        })
+    
+    def _handle_occasion_based_recommendation(self, session: OrderCollectionSession, user_input: str) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
+        """Handle occasion-based recommendations for fashion items."""
+        user_input_lower = user_input.lower()
+        
+        # Detect occasion keywords
+        occasion_keywords = {
+            'casual': ['casual', 'everyday', 'daily', 'comfortable', 'relaxed'],
+            'office': ['office', 'work', 'professional', 'business', 'formal'],
+            'party': ['party', 'night', 'evening', 'celebration', 'event'],
+            'traditional': ['traditional', 'ethnic', 'festival', 'wedding', 'ceremony']
+        }
+        
+        detected_occasion = None
+        for occasion, keywords in occasion_keywords.items():
+            if any(keyword in user_input_lower for keyword in keywords):
+                detected_occasion = occasion
+                break
+        
+        if detected_occasion:
+            recommendations = self._get_occasion_recommendations(detected_occasion)
+            product = session.product_details
+            
+            response = f"""🎯 **Perfect for {detected_occasion.title()} Occasion!**
+
+👗 **{product.get('title', 'Product')}** is ideal for {detected_occasion} wear!
+
+✨ **Why it's perfect:**
+• {recommendations['description']}
+• {recommendations['size_guide']}
+
+🎨 **Style:** {', '.join(recommendations['styles'])}
+📏 **Available Sizes:** {product.get('size_range', 'S, M, L, XL')}
+
+💰 **Price:** ₹{product.get('discount_price', product.get('price', 0)):,.0f}
+
+Ready to order for your {detected_occasion} occasion? 😊"""
+            
+            session.step_history.append(f"User requested {detected_occasion} occasion recommendation")
+            return True, response, None
+        
+        return False, "", None
+
     def _handle_product_question(self, session: OrderCollectionSession, user_input: str) -> Tuple[bool, str, Optional[Dict[str, Any]]]:
         """Handle when user asks questions about current product."""
         logger.info(f"❓ Product question detected for user {session.telegram_id}")
@@ -875,34 +990,32 @@ Aap iska order kar sakte hain! Main aapki details collect karunga. 😊"""
         product = session.product_details
         user_input_lower = user_input.lower()
         
+        # Handle occasion-based recommendations first
+        occasion_result = self._handle_occasion_based_recommendation(session, user_input)
+        if occasion_result[0]:  # If occasion was detected and handled
+            return occasion_result
+        
         # Handle general product information requests
         if any(keyword in user_input_lower for keyword in ["batao", "bataiye", "tell me", "about this", "iske baare", "iskye baare", "details", "info"]):
             return self._handle_general_product_info(session, user_input)
         
-        # Answer common product questions
-        if "battery" in user_input_lower or "kitne time" in user_input_lower:
-            battery_info = product.get("battery", "12V rechargeable battery")
-            return True, f"Yeh {product.get('title', 'product')} mein {battery_info} hai. Full charge pe 1-2 hours continuous use kar sakte hain! 🔋\n\nKya aap iska order karna chahenge?", None
+        # Answer common fashion product questions
+        if "size" in user_input_lower or "fit" in user_input_lower:
+            size_range = product.get("size_range", "S, M, L, XL")
+            return True, f"Yeh {product.get('title', 'product')} {size_range} sizes mein available hai! Aap apna regular size choose kar sakte hain. 👗\n\nKya aap iska order karna chahenge?", None
         
-        elif "led lights" in user_input_lower or "lights" in user_input_lower:
-            features = product.get("features", [])
-            has_lights = any("led" in str(feature).lower() or "light" in str(feature).lower() for feature in features)
-            if has_lights:
-                return True, f"Haan ji! Yeh {product.get('title', 'product')} mein LED lights hain. Raat mein bhi safe driving kar sakte hain! ✨\n\nKya aap iska order karna chahenge?", None
-            else:
-                return True, f"Yeh {product.get('title', 'product')} mein LED lights nahi hain, lekin bahut smooth aur safe hai! 🚗\n\nKya aap iska order karna chahenge?", None
+        elif "material" in user_input_lower or "fabric" in user_input_lower:
+            material = product.get("specifications", {}).get("material", "Mixed materials")
+            return True, f"Yeh {product.get('title', 'product')} {material} se bana hai. Bahut comfortable aur durable hai! 🧵\n\nKya aap iska order karna chahenge?", None
         
-        elif "music" in user_input_lower or "sound" in user_input_lower:
-            features = product.get("features", [])
-            has_music = any("music" in str(feature).lower() or "sound" in str(feature).lower() for feature in features)
-            if has_music:
-                return True, f"Haan ji! Yeh {product.get('title', 'product')} mein music system hai. Bachche ko bahut maza aayega! 🎵\n\nKya aap iska order karna chahenge?", None
-            else:
-                return True, f"Yeh {product.get('title', 'product')} mein music system nahi hai, lekin bahut smooth aur comfortable hai! 🚗\n\nKya aap iska order karna chahenge?", None
+        elif "wash" in user_input_lower or "care" in user_input_lower:
+            care_instructions = product.get("specifications", {}).get("wash_care", "Hand wash cold, lay flat to dry")
+            return True, f"Yeh {product.get('title', 'product')} ke liye care instructions: {care_instructions} 💧\n\nKya aap iska order karna chahenge?", None
         
         elif "age" in user_input_lower or "suitable" in user_input_lower:
-            age_range = product.get("age_range", "3-8 years")
-            return True, f"Yeh {product.get('title', 'product')} {age_range} ke bachcho ke liye perfect hai! 👶\n\nKya aap iska order karna chahenge?", None
+            # Check if product is suitable for the user's size preference
+            size_range = product.get("size_range", "S, M, L, XL")
+            return True, f"Yeh {product.get('title', 'product')} {size_range} sizes mein available hai! 👗\n\nKya aap iska order karna chahenge?", None
         
         elif "price" in user_input_lower or "kitna" in user_input_lower:
             price = product.get("discount_price", product.get("price", 0))
@@ -1130,6 +1243,7 @@ Aap iska order kar sakte hain! Main aapki details collect karunga. 😊"""
                     product_details=data["product_details"],
                     customer_info=data["customer_info"],
                     shipping_address=data["shipping_address"],
+                    fashion_preferences=data.get("fashion_preferences", {}),
                     quantity=data["quantity"],
                     errors=data.get("errors", []),
                     step_history=data.get("step_history", []),

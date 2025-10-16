@@ -1,0 +1,1223 @@
+{
+  "total_products": 28,
+  "categories": {
+    "Long cardigan": 2,
+    "Crop top": 2,
+    "Shrug": 1,
+    "Cardigan ": 2,
+    "Cardigan": 6,
+    "Tunic": 1,
+    "High neck crop": 1,
+    "Court set": 1,
+    "SL cardigan": 1,
+    "SL Cardigan ": 1,
+    "Kot": 3,
+    "High neck top": 1,
+    "V neck crop top": 1,
+    "Extra long kot": 1,
+    "Cardigan crop": 1,
+    "Self cardigan ": 2,
+    "SL Cardigan": 1
+  },
+  "products": [
+    {
+      "id": 5,
+      "product_id": "1102",
+      "title": "Teachar",
+      "category": "Long cardigan",
+      "description": "Feather and long item",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760549941912-npifalpk9wn.jpg",
+          "name": "29.jpg",
+          "path": "products/1760549941912-npifalpk9wn.jpg",
+          "uploaded_at": "2025-10-15T17:39:02.919Z"
+        }
+      ],
+      "price": 1900.0,
+      "discount_price": 2000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:40:14.342+00:00",
+      "updated_at": "2025-10-16T07:57:56.600412+00:00"
+    },
+    {
+      "id": 11,
+      "product_id": "2000",
+      "title": "G F  O",
+      "category": "Crop top",
+      "description": "Unique crop top",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Pink",
+        "Red"
+      ],
+      "specifications": {
+        "care": "Machine wash warm, tumble dry low",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Polyester blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550957132-8p99hg2p8tm.jpg",
+          "name": "34.jpg",
+          "path": "products/1760550957132-8p99hg2p8tm.jpg",
+          "uploaded_at": "2025-10-15T17:56:28.849Z"
+        }
+      ],
+      "price": 450.0,
+      "discount_price": 500.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:57:16.704+00:00",
+      "updated_at": "2025-10-16T07:57:56.706361+00:00"
+    },
+    {
+      "id": 6,
+      "product_id": "1103",
+      "title": "Teacher ",
+      "category": "Shrug",
+      "description": "Long shrug heavy stuff",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Check individual product label",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Mixed materials"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550070684-rzf52fix4l.jpg",
+          "name": "28.jpg",
+          "path": "products/1760550070684-rzf52fix4l.jpg",
+          "uploaded_at": "2025-10-15T17:41:12.071Z"
+        }
+      ],
+      "price": 1800.0,
+      "discount_price": 1900.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:42:10.419+00:00",
+      "updated_at": "2025-10-16T07:57:56.892814+00:00"
+    },
+    {
+      "id": 7,
+      "product_id": "1104",
+      "title": "Teacher ",
+      "category": "Cardigan ",
+      "description": "Free size all over wooly thread",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550166797-0q7sd1qu6en.jpg",
+          "name": "26.jpg",
+          "path": "products/1760550166797-0q7sd1qu6en.jpg",
+          "uploaded_at": "2025-10-15T17:42:48.152Z"
+        }
+      ],
+      "price": 1200.0,
+      "discount_price": 1500.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:43:41.428+00:00",
+      "updated_at": "2025-10-16T07:57:57.006306+00:00"
+    },
+    {
+      "id": 9,
+      "product_id": "1202",
+      "title": "Oster",
+      "category": "Cardigan",
+      "description": "Swed thread heavy stuff ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550460406-v8u07dco1qe.jpg",
+          "name": "33.jpg",
+          "path": "products/1760550460406-v8u07dco1qe.jpg",
+          "uploaded_at": "2025-10-15T17:47:41.822Z"
+        }
+      ],
+      "price": 1100.0,
+      "discount_price": 1200.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:48:51.355+00:00",
+      "updated_at": "2025-10-16T07:57:57.211452+00:00"
+    },
+    {
+      "id": 12,
+      "product_id": "2001",
+      "title": "G F O",
+      "category": "Crop top",
+      "description": "Imported top",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Pink",
+        "Red"
+      ],
+      "specifications": {
+        "care": "Machine wash warm, tumble dry low",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Polyester blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551149681-yu2bftqe0mb.jpg",
+          "name": "37.jpg",
+          "path": "products/1760551149681-yu2bftqe0mb.jpg",
+          "uploaded_at": "2025-10-15T17:59:11.290Z"
+        }
+      ],
+      "price": 800.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:00:17.993+00:00",
+      "updated_at": "2025-10-16T07:57:57.321701+00:00"
+    },
+    {
+      "id": 14,
+      "product_id": "2005",
+      "title": "Compinent",
+      "category": "Tunic",
+      "description": "Imported tunic frok style",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Check individual product label",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Mixed materials"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551426250-q58zhjdjgpb.jpg",
+          "name": "46.jpg",
+          "path": "products/1760551426250-q58zhjdjgpb.jpg",
+          "uploaded_at": "2025-10-15T18:03:47.546Z"
+        }
+      ],
+      "price": 1200.0,
+      "discount_price": 1500.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:04:20.646+00:00",
+      "updated_at": "2025-10-16T07:57:57.486842+00:00"
+    },
+    {
+      "id": 15,
+      "product_id": "2007",
+      "title": "Imported ",
+      "category": "High neck crop",
+      "description": "Imported High neck crop style",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Pink",
+        "Red"
+      ],
+      "specifications": {
+        "care": "Machine wash warm, tumble dry low",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Polyester blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551495131-dz8znrfaqzj.jpg",
+          "name": "40.jpg",
+          "path": "products/1760551495131-dz8znrfaqzj.jpg",
+          "uploaded_at": "2025-10-15T18:04:56.147Z"
+        }
+      ],
+      "price": 900.0,
+      "discount_price": 700.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:05:39.956+00:00",
+      "updated_at": "2025-10-16T07:57:57.631032+00:00"
+    },
+    {
+      "id": 16,
+      "product_id": "3001",
+      "title": "Richeez",
+      "category": "Court set",
+      "description": "Court set ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Check individual product label",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Mixed materials"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551572735-80bx9tqd8cp.jpg",
+          "name": "47.jpg",
+          "path": "products/1760551572735-80bx9tqd8cp.jpg",
+          "uploaded_at": "2025-10-15T18:06:14.252Z"
+        }
+      ],
+      "price": 1500.0,
+      "discount_price": 1700.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:07:01.873+00:00",
+      "updated_at": "2025-10-16T07:57:57.722418+00:00"
+    },
+    {
+      "id": 18,
+      "product_id": "2009",
+      "title": "Imported ",
+      "category": "SL cardigan",
+      "description": "Imported SL cardigan imported ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551826771-lw183ztvxaf.webp",
+          "name": "50.webp",
+          "path": "products/1760551826771-lw183ztvxaf.webp",
+          "uploaded_at": "2025-10-15T18:10:28.457Z"
+        }
+      ],
+      "price": 330.0,
+      "discount_price": 500.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:11:16.993+00:00",
+      "updated_at": "2025-10-16T07:57:57.927672+00:00"
+    },
+    {
+      "id": 20,
+      "product_id": "4002",
+      "title": "Nice girl",
+      "category": "SL Cardigan ",
+      "description": "Hear wool ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551989196-teu62hfipm.webp",
+          "name": "53.webp",
+          "path": "products/1760551989196-teu62hfipm.webp",
+          "uploaded_at": "2025-10-15T18:13:11.179Z"
+        }
+      ],
+      "price": 350.0,
+      "discount_price": 315.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:13:57.99+00:00",
+      "updated_at": "2025-10-16T07:57:58.130223+00:00"
+    },
+    {
+      "id": 21,
+      "product_id": "5001",
+      "title": "Unique ",
+      "category": "Kot",
+      "description": "Unique kot with feather nech",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, gentle cycle",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Synthetic blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760552193131-1s76fg4d1r4i.jpg",
+          "name": "55.jpg",
+          "path": "products/1760552193131-1s76fg4d1r4i.jpg",
+          "uploaded_at": "2025-10-15T18:16:35.432Z"
+        }
+      ],
+      "price": 1500.0,
+      "discount_price": 1800.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:17:23.343+00:00",
+      "updated_at": "2025-10-16T07:57:58.229475+00:00"
+    },
+    {
+      "id": 28,
+      "product_id": "7004",
+      "title": "KLJ oswal",
+      "category": "Cardigan",
+      "description": "V neck KLJ cardigan",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "V neck": "200",
+        "material": "Wool/Cotton blend",
+        "Round neck": "500"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760589084012-svydwrykxl.jpg",
+          "name": "25.jpg",
+          "path": "products/1760589084012-svydwrykxl.jpg",
+          "uploaded_at": "2025-10-16T04:31:26.355Z"
+        }
+      ],
+      "price": 600.0,
+      "discount_price": 500.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:32:23.115+00:00",
+      "updated_at": "2025-10-16T07:57:59.19887+00:00"
+    },
+    {
+      "id": 10,
+      "product_id": "1203",
+      "title": "Oster",
+      "category": "Cardigan",
+      "description": "V neck swead",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550553360-h8lkyokt7z.jpg",
+          "name": "30.jpg",
+          "path": "products/1760550553360-h8lkyokt7z.jpg",
+          "uploaded_at": "2025-10-15T17:49:14.717Z"
+        }
+      ],
+      "price": 1500.0,
+      "discount_price": 1700.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:50:07.302+00:00",
+      "updated_at": "2025-10-16T07:57:56.805421+00:00"
+    },
+    {
+      "id": 8,
+      "product_id": "1201",
+      "title": "Oster",
+      "category": "Cardigan",
+      "description": "Oster vislon thread cardigan",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760550359683-zmji30wfi0o.jpg",
+          "name": "31.jpg",
+          "path": "products/1760550359683-zmji30wfi0o.jpg",
+          "uploaded_at": "2025-10-15T17:46:01.042Z"
+        }
+      ],
+      "price": 1300.0,
+      "discount_price": 1400.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T17:47:13.649+00:00",
+      "updated_at": "2025-10-16T07:57:57.106924+00:00"
+    },
+    {
+      "id": 13,
+      "product_id": "2004",
+      "title": "G F O",
+      "category": "High neck top",
+      "description": "High neck imported to",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Pink",
+        "Red"
+      ],
+      "specifications": {
+        "care": "Machine wash warm, tumble dry low",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Polyester blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551264111-o4gqrmhvzkl.jpg",
+          "name": "39.jpg",
+          "path": "products/1760551264111-o4gqrmhvzkl.jpg",
+          "uploaded_at": "2025-10-15T18:01:05.660Z"
+        }
+      ],
+      "price": 800.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:01:52.785+00:00",
+      "updated_at": "2025-10-16T07:57:57.411704+00:00"
+    },
+    {
+      "id": 17,
+      "product_id": "2008",
+      "title": "Imported ",
+      "category": "V neck crop top",
+      "description": "Imported crop top with v neck",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Pink",
+        "Red"
+      ],
+      "specifications": {
+        "care": "Machine wash warm, tumble dry low",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Polyester blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551647916-nt4yzkgqgv.jpg",
+          "name": "43.jpg",
+          "path": "products/1760551647916-nt4yzkgqgv.jpg",
+          "uploaded_at": "2025-10-15T18:07:28.876Z"
+        }
+      ],
+      "price": 700.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:08:09.28+00:00",
+      "updated_at": "2025-10-16T07:57:57.801316+00:00"
+    },
+    {
+      "id": 22,
+      "product_id": "5002",
+      "title": "Soft warm",
+      "category": "Kot",
+      "description": "Soft warm semi long kot",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, gentle cycle",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Synthetic blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760552255469-qv7p0uy8f3q.jpg",
+          "name": "56.jpg",
+          "path": "products/1760552255469-qv7p0uy8f3q.jpg",
+          "uploaded_at": "2025-10-15T18:17:37.258Z"
+        }
+      ],
+      "price": 900.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:18:37.439+00:00",
+      "updated_at": "2025-10-16T07:57:58.336447+00:00"
+    },
+    {
+      "id": 23,
+      "product_id": "6001",
+      "title": "Richeez ",
+      "category": "Kot",
+      "description": "Semi long kot with colar",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, gentle cycle",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Synthetic blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760552552410-q7xabg5lx3s.jpg",
+          "name": "57.jpg",
+          "path": "products/1760552552410-q7xabg5lx3s.jpg",
+          "uploaded_at": "2025-10-15T18:22:34.362Z"
+        }
+      ],
+      "price": 800.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:23:36.391+00:00",
+      "updated_at": "2025-10-16T07:57:58.437379+00:00"
+    },
+    {
+      "id": 24,
+      "product_id": "6009",
+      "title": "Richeez",
+      "category": "Extra long kot",
+      "description": "Extra long kot in swead thread ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, gentle cycle",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Cotton/Synthetic blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760552626898-r8gp23jphrl.jpg",
+          "name": "58.jpg",
+          "path": "products/1760552626898-r8gp23jphrl.jpg",
+          "uploaded_at": "2025-10-15T18:23:48.762Z"
+        }
+      ],
+      "price": 1200.0,
+      "discount_price": 1500.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:24:43.353+00:00",
+      "updated_at": "2025-10-16T07:57:58.910073+00:00"
+    },
+    {
+      "id": 26,
+      "product_id": "7002",
+      "title": "Pinaque",
+      "category": "Cardigan",
+      "description": "Pinaque embroidery cardigan ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760588882775-lxljlq0kz2r.jpg",
+          "name": "24.jpg",
+          "path": "products/1760588882775-lxljlq0kz2r.jpg",
+          "uploaded_at": "2025-10-16T04:28:04.232Z"
+        }
+      ],
+      "price": 700.0,
+      "discount_price": 900.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:28:42.398+00:00",
+      "updated_at": "2025-10-16T07:57:59.061342+00:00"
+    },
+    {
+      "id": 27,
+      "product_id": "7003",
+      "title": "Wintley",
+      "category": "Cardigan crop",
+      "description": "Crop cardigan for girls Sizes S, M , L",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "Red": "200",
+        "Blue": "100",
+        "care": "Machine wash cold, lay flat to dry",
+        "Green": "100",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760588940864-7jqevdxp1zp.jpg",
+          "name": "23.jpg",
+          "path": "products/1760588940864-7jqevdxp1zp.jpg",
+          "uploaded_at": "2025-10-16T04:29:02.796Z"
+        }
+      ],
+      "price": 510.0,
+      "discount_price": 600.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:29:38.017+00:00",
+      "updated_at": "2025-10-16T07:57:59.138422+00:00"
+    },
+    {
+      "id": 30,
+      "product_id": "8002",
+      "title": "Spink",
+      "category": "Self cardigan ",
+      "description": "Embroidery cardigan ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760589324837-jjnm60kaph.jpg",
+          "name": "30.jpg",
+          "path": "products/1760589324837-jjnm60kaph.jpg",
+          "uploaded_at": "2025-10-16T04:35:26.187Z"
+        }
+      ],
+      "price": 500.0,
+      "discount_price": 700.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:35:56.866+00:00",
+      "updated_at": "2025-10-16T07:57:59.350332+00:00"
+    },
+    {
+      "id": 31,
+      "product_id": "8003",
+      "title": "I like you",
+      "category": "Cardigan ",
+      "description": "Hear wool cardigan",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760589369171-zfary8kkays.jpg",
+          "name": "29.jpg",
+          "path": "products/1760589369171-zfary8kkays.jpg",
+          "uploaded_at": "2025-10-16T04:36:11.133Z"
+        }
+      ],
+      "price": 500.0,
+      "discount_price": 600.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:36:40.289+00:00",
+      "updated_at": "2025-10-16T07:57:59.434474+00:00"
+    },
+    {
+      "id": 4,
+      "product_id": "1101",
+      "title": "Teacher",
+      "category": "Cardigan",
+      "description": "Teacher best 4 pochet cardigan",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760525601698-jtr2xw51t4.jpg",
+          "name": "27.jpg",
+          "path": "products/1760525601698-jtr2xw51t4.jpg",
+          "uploaded_at": "2025-10-15T10:53:26.006Z"
+        }
+      ],
+      "price": 1450.0,
+      "discount_price": 1500.0,
+      "stock_status": "in_stock",
+      "warranty": "",
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T10:53:34.109+00:00",
+      "updated_at": "2025-10-16T07:57:59.495894+00:00"
+    },
+    {
+      "id": 19,
+      "product_id": "4001",
+      "title": "Suprimo",
+      "category": "SL Cardigan",
+      "description": "Suprimo SL cardigan",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551903171-xclpy3w0dcs.webp",
+          "name": "54.webp",
+          "path": "products/1760551903171-xclpy3w0dcs.webp",
+          "uploaded_at": "2025-10-15T18:11:43.924Z"
+        },
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551903173-o6wi8q6zzv.jpg",
+          "name": "52.jpg",
+          "path": "products/1760551903173-o6wi8q6zzv.jpg",
+          "uploaded_at": "2025-10-15T18:11:43.939Z"
+        },
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760551903174-wcsbxkyl4c.jpg",
+          "name": "51.jpg",
+          "path": "products/1760551903174-wcsbxkyl4c.jpg",
+          "uploaded_at": "2025-10-15T18:11:43.762Z"
+        }
+      ],
+      "price": 505.0,
+      "discount_price": 450.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-15T18:12:28.573+00:00",
+      "updated_at": "2025-10-16T07:57:58.024801+00:00"
+    },
+    {
+      "id": 25,
+      "product_id": "7001",
+      "title": "Softwarm",
+      "category": "Long cardigan",
+      "description": "Long cardigan with self work",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760588823069-d0y3ly99byu.jpg",
+          "name": "22.jpg",
+          "path": "products/1760588823069-d0y3ly99byu.jpg",
+          "uploaded_at": "2025-10-16T04:27:04.777Z"
+        }
+      ],
+      "price": 900.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:27:48.879+00:00",
+      "updated_at": "2025-10-16T07:57:58.980149+00:00"
+    },
+    {
+      "id": 29,
+      "product_id": "8001",
+      "title": "Pinaque ",
+      "category": "Self cardigan ",
+      "description": "Embroidery cardigan ",
+      "size_range": "S, M, L, XL",
+      "colors": [
+        "Black",
+        "White",
+        "Navy",
+        "Gray"
+      ],
+      "specifications": {
+        "care": "Machine wash cold, lay flat to dry",
+        "sizes": [
+          "S",
+          "M",
+          "L",
+          "XL"
+        ],
+        "material": "Wool/Cotton blend"
+      },
+      "images": [
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760589262327-2m6y1qzp0w5.jpg",
+          "name": "31.jpg",
+          "path": "products/1760589262327-2m6y1qzp0w5.jpg",
+          "uploaded_at": "2025-10-16T04:34:25.518Z"
+        },
+        {
+          "url": "https://uejyfpzabmlrgkdayfrn.supabase.co/storage/v1/object/public/product-images/products/1760589262328-pmp6pk1go4.webp",
+          "name": "26.webp",
+          "path": "products/1760589262328-pmp6pk1go4.webp",
+          "uploaded_at": "2025-10-16T04:34:25.885Z"
+        }
+      ],
+      "price": 800.0,
+      "discount_price": 1000.0,
+      "stock_status": "in_stock",
+      "warranty": null,
+      "embedding": null,
+      "ai_image_description": null,
+      "ai_image_metadata": {},
+      "image_embedding": null,
+      "created_at": "2025-10-16T04:35:10.683+00:00",
+      "updated_at": "2025-10-16T07:57:59.281899+00:00"
+    }
+  ]
+}

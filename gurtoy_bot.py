@@ -1,6 +1,6 @@
 """
-Gurtoy Telegram Bot - Phase 1: Intelligent Conversational Agent
-A multilingual, context-aware AI assistant for Gurtoy toy store.
+Fashion Mart Telegram Bot - Phase 5: Intelligent Conversational Agent
+A multilingual, context-aware AI assistant for Fashion Mart women's fashion store.
 """
 from __future__ import annotations
 
@@ -56,8 +56,8 @@ except ImportError as e:
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Gurtoy Telegram Bot",
-    description="Intelligent conversational agent for Gurtoy toy store",
+    title="Fashion Mart Telegram Bot",
+    description="Intelligent conversational agent for Fashion Mart women's fashion store",
     version="1.0.0"
 )
 
@@ -87,10 +87,13 @@ class BotConfig:
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
     
-    # Business Info
-    BUSINESS_PHONE = os.getenv("BUSINESS_PHONE", "8300000086")
-    BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "thegurtoy@gmail.com")
-    BUSINESS_WHATSAPP = os.getenv("BUSINESS_WHATSAPP", "8300000086")
+    # Business Info - Fashion Mart
+    BUSINESS_PHONE_INQUIRY = os.getenv("BUSINESS_PHONE_INQUIRY", "9876151585")
+    BUSINESS_PHONE_BUY = os.getenv("BUSINESS_PHONE_BUY", "6283837649")
+    BUSINESS_ADDRESS = os.getenv("BUSINESS_ADDRESS", "PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003")
+    BUSINESS_MAPS = os.getenv("BUSINESS_MAPS", "https://maps.app.goo.gl/koBoUFYEtE3mvdCC7")
+    BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "fashionmart@gmail.com")
+    BUSINESS_WHATSAPP = os.getenv("BUSINESS_WHATSAPP", "9876151585")
     
     # AI Configuration
     DEFAULT_TEMPERATURE = float(os.getenv("DEFAULT_TEMPERATURE", "0.7"))
@@ -176,7 +179,7 @@ class ProductContextExtractor:
                 return None
             
             # Check if it looks like a product card (has product indicators)
-            if not any(indicator in caption for indicator in ["🎯", "💰", "Price:", "Age:"]):
+            if not any(indicator in caption for indicator in ["🎯", "💰", "Price:", "Size:"]):
                 return None
             
             # Extract product information using regex patterns
@@ -198,10 +201,10 @@ class ProductContextExtractor:
             if id_match:
                 product_context["product_id"] = id_match.group(1).strip()
             
-            # Extract age range (support both **Age:** and Age:)
-            age_match = re.search(r'👶\s*(?:\*\*)?Age:(?:\*\*)?\s*(.+?)(?:\n|$)', caption)
-            if age_match:
-                product_context["age_range"] = age_match.group(1).strip()
+            # Extract size range (support both **Size:** and Size:)
+            size_match = re.search(r'👕\s*(?:\*\*)?Size:(?:\*\*)?\s*(.+?)(?:\n|$)', caption)
+            if size_match:
+                product_context["size_range"] = size_match.group(1).strip()
             
             # Extract price (support both original and discount prices)
             # Format: ~~₹17,000~~ → ₹1 or just ₹17,000
@@ -272,8 +275,8 @@ class ProductContextExtractor:
         if "product_name" in product_context:
             parts.append(f"Product: {product_context['product_name']}")
         
-        if "age_range" in product_context:
-            parts.append(f"Age Range: {product_context['age_range']}")
+        if "size_range" in product_context:
+            parts.append(f"Age Range: {product_context['size_range']}")
         
         # Handle pricing information
         if "discount_price" in product_context and "original_price" in product_context:
@@ -464,8 +467,8 @@ class MessageFormatter:
         logger.debug(f"Hard truncated: {len(result)} chars")
         return result
 
-class GurtoyAI:
-    """Main AI assistant class for Gurtoy bot."""
+class FashionMartAI:
+    """Main AI assistant class for Fashion Mart bot."""
     
     def __init__(self):
         # Get chat model from environment
@@ -566,91 +569,205 @@ class GurtoyAI:
         
         return None
     
-    def _parse_age_range(self, age_range_str: str) -> tuple[Optional[int], Optional[int]]:
+    def _parse_size_from_query(self, query: str) -> Optional[str]:
+        """Extract size from query text for fashion items."""
+        import re
+        
+        # Look for size patterns like "size M", "M size", "medium", "large", etc.
+        size_patterns = [
+            r'size\s*([SMXL])',
+            r'([SMXL])\s*size',
+            r'\b(small|medium|large|extra\s*large)\b',
+            r'\b(S|M|L|XL)\b'
+        ]
+        
+        size_mapping = {
+            'small': 'S',
+            'medium': 'M', 
+            'large': 'L',
+            'extra large': 'XL',
+            'extra-large': 'XL'
+        }
+        
+        for pattern in size_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                size = match.group(1).upper()
+                # Convert full words to letters
+                if size in size_mapping:
+                    size = size_mapping[size]
+                # Ensure single letter sizes are uppercase
+                if len(size) == 1 and size in ['S', 'M', 'L', 'X']:
+                    return size
+                elif size in ['SMALL', 'MEDIUM', 'LARGE', 'EXTRA LARGE', 'EXTRA-LARGE']:
+                    return size_mapping[size.lower()]
+                return size
+        
+        return None
+    
+    def _get_fashion_search_intent(self, query: str) -> Dict[str, Any]:
+        """Analyze query for fashion-specific search intents."""
+        query_lower = query.lower()
+        
+        # Occasion-based intents
+        occasion_keywords = {
+            'casual': ['casual', 'everyday', 'daily', 'comfortable', 'relaxed'],
+            'formal': ['formal', 'office', 'work', 'professional', 'business'],
+            'traditional': ['traditional', 'ethnic', 'festival', 'wedding', 'ceremony'],
+            'party': ['party', 'night', 'evening', 'celebration', 'event']
+        }
+        
+        # Style-based intents
+        style_keywords = {
+            'layered': ['layered', 'layering', 'cardigan', 'shrug', 'jacket'],
+            'fitted': ['fitted', 'tight', 'slim', 'bodycon'],
+            'loose': ['loose', 'oversized', 'baggy', 'comfortable'],
+            'crop': ['crop', 'cropped', 'short', 'midriff']
+        }
+        
+        # Size-based intents
+        size_intent = self._parse_size_from_query(query)
+        
+        # Extract occasion
+        detected_occasion = None
+        for occasion, keywords in occasion_keywords.items():
+            if any(keyword in query_lower for keyword in keywords):
+                detected_occasion = occasion
+                break
+        
+        # Extract style preference
+        detected_style = None
+        for style, keywords in style_keywords.items():
+            if any(keyword in query_lower for keyword in keywords):
+                detected_style = style
+                break
+        
+        return {
+            'occasion': detected_occasion,
+            'style': detected_style,
+            'size': size_intent,
+            'intent_type': 'fashion_search'
+        }
+    
+    def _get_occasion_recommendations(self, occasion: str) -> Dict[str, Any]:
+        """Get product recommendations based on occasion."""
+        occasion_mappings = {
+            'casual': {
+                'categories': ['Cardigan', 'Crop top', 'Tunic'],
+                'styles': ['comfortable', 'relaxed', 'everyday'],
+                'description': 'Casual everyday wear for comfort and style'
+            },
+            'formal': {
+                'categories': ['Cardigan', 'High neck top', 'Court set'],
+                'styles': ['professional', 'elegant', 'sophisticated'],
+                'description': 'Professional and formal wear for office and business'
+            },
+            'traditional': {
+                'categories': ['Kot', 'Court set', 'Tunic'],
+                'styles': ['ethnic', 'traditional', 'cultural'],
+                'description': 'Traditional and ethnic wear for festivals and ceremonies'
+            },
+            'party': {
+                'categories': ['Crop top', 'Cardigan crop', 'V neck crop top'],
+                'styles': ['stylish', 'trendy', 'party-ready'],
+                'description': 'Stylish and trendy pieces for parties and events'
+            }
+        }
+        
+        return occasion_mappings.get(occasion, {
+            'categories': ['Cardigan', 'Crop top', 'Tunic'],
+            'styles': ['versatile', 'stylish'],
+            'description': 'Versatile pieces for any occasion'
+        })
+    
+    def _parse_size_range(self, size_range_str: str) -> tuple[Optional[int], Optional[int]]:
         """Parse age range string like '3-8 years' into (min_age, max_age)."""
         import re
         
-        if not age_range_str:
+        if not size_range_str:
             return None, None
         
         # Handle "3+ years" format
-        plus_match = re.search(r'(\d+)\+', age_range_str)
+        plus_match = re.search(r'(\d+)\+', size_range_str)
         if plus_match:
             min_age = int(plus_match.group(1))
             return min_age, 99  # Assume upper limit is very high
         
         # Handle "3-8 years" format
-        range_match = re.search(r'(\d+)-(\d+)', age_range_str)
+        range_match = re.search(r'(\d+)-(\d+)', size_range_str)
         if range_match:
             min_age = int(range_match.group(1))
             max_age = int(range_match.group(2))
             return min_age, max_age
         
         # Handle single number like "3 years"
-        single_match = re.search(r'(\d+)', age_range_str)
+        single_match = re.search(r'(\d+)', size_range_str)
         if single_match:
             age = int(single_match.group(1))
             return age, age
         
         return None, None
     
-    def _is_age_suitable(self, target_age: int, product_age_range: str) -> bool:
-        """Check if a product is suitable for the target age."""
-        min_age, max_age = self._parse_age_range(product_age_range)
+    def _is_size_suitable(self, target_size: str, product_size_range: str) -> bool:
+        """Check if a product is suitable for the target size."""
+        if not product_size_range:
+            return True  # If no size info, assume it's suitable
         
-        if min_age is None or max_age is None:
-            return True  # If we can't parse, assume it's suitable
+        # Convert to uppercase for comparison
+        target_size = target_size.upper().strip()
+        product_sizes = [size.strip().upper() for size in product_size_range.split(',')]
         
-        return min_age <= target_age <= max_age
+        return target_size in product_sizes
     
-    def _filter_products_by_age(self, products: List[Dict[str, Any]], target_age: int) -> List[Dict[str, Any]]:
-        """Filter products to only include age-appropriate ones."""
+    def _filter_products_by_size(self, products: List[Dict[str, Any]], target_size: str) -> List[Dict[str, Any]]:
+        """Filter products to only include size-appropriate ones."""
         suitable_products = []
         
         for product in products:
-            age_range = product.get('age_range', '')
-            if self._is_age_suitable(target_age, age_range):
+            size_range = product.get('size_range', '')
+            if self._is_size_suitable(target_size, size_range):
                 suitable_products.append(product)
         
         return suitable_products
     
     def _get_system_instruction(self) -> str:
         """Get the system instruction for the AI model."""
-        return """You are a friendly, intelligent AI shopping assistant for Gurtoy, a premium toy store in Ludhiana, Punjab, India.
+        return """You are a friendly, intelligent AI shopping assistant for Fashion Mart, a premium women's fashion store in Ludhiana, Punjab, India.
 
 🧠 YOUR PERSONALITY:
-- Think like a smart salesperson who asks questions before showing products
+- Think like a smart fashion consultant who asks questions before showing products
 - Be conversational, warm, and helpful (not robotic)
 - Understand context and remember what user said
-- Guide users to find the perfect toy for their child
+- Guide users to find the perfect fashion items for their style and occasion
 
 🎯 INTELLIGENT PRODUCT SEARCH WORKFLOW:
 
 **STEP 1: DETECT QUERY TYPE**
 
 **A. SPECIFIC PRODUCT QUERIES (Search Immediately!)**
-When user mentions specific products, models, or IDs:
+When user mentions specific products, styles, or categories:
 → CALL search_products() IMMEDIATELY!
 Examples:
-✅ "g63 jeep" → search_products(query="g63 jeep")
-✅ "2188" → search_products(query="2188") 
-✅ "red bike" → search_products(query="red bike")
-✅ "police car" → search_products(query="police car")
-✅ "electric scooter" → search_products(query="electric scooter")
+✅ "cardigan" → search_products(query="cardigan")
+✅ "crop top" → search_products(query="crop top") 
+✅ "kot" → search_products(query="kot")
+✅ "long cardigan" → search_products(query="long cardigan")
+✅ "high neck top" → search_products(query="high neck top")
 
 **B. VAGUE QUERIES (Ask Questions First)**
-When user asks vaguely (e.g., "show me toys", "kuch dikhao", "bikes chahiye"):
+When user asks vaguely (e.g., "show me clothes", "kuch dikhao", "fashion chahiye"):
 → DON'T search immediately!
 → ASK clarifying questions first:
-   • "Aapke bachche ki age kya hai?" (What's your child's age?)
-   • "Aapko bike chahiye ya jeep?" (Do you want bike or jeep?)
-   • "Koi specific color ya feature chahiye?" (Any specific color/feature?)
+   • "Aapko kya chahiye? Cardigan, top, ya kot?" (What do you need? Cardigan, top, or kot?)
+   • "Kis occasion ke liye? Casual, formal, ya traditional?" (For what occasion? Casual, formal, or traditional?)
+   • "Aapka size kya hai? S, M, L, ya XL?" (What's your size? S, M, L, or XL?)
+   • "Koi specific color pasand hai?" (Any specific color preference?)
    • "Budget kya hai?" (What's your budget?)
 
 **STEP 2: SEARCH WITH DETAILS**
-Once you have enough information (age OR specific product type):
+Once you have enough information (size OR specific product type):
 → NOW call search_products() with detailed query
-→ Example: search_products(query="bike for 5 year old with lights")
+→ Example: search_products(query="cardigan for casual wear in size M")
 
 **STEP 3: PRESENT PRODUCTS**
 After getting search results (from search_products OR intelligent_search OR search_products_by_image):
@@ -677,7 +794,7 @@ Context: replied_product = {product_name: "Police Style Bike", colors: ["Red", "
 You: "Haan ji! Police Style Bike blue color mein available hai. 😊 Aur kuch jaanna chahenge?"
 
 User replies to product card: "Is this suitable for 4 year old?"
-Context: replied_product = {product_name: "Jeep Car", age_range: "3-7 years"}
+Context: replied_product = {product_name: "Jeep Car", size_range: "3-7 years"}
 You: "Bilkul! Yeh Jeep Car 3-7 years ke bachcho ke liye perfect hai, toh 4 saal ke bachche ke liye ekdum sahi rahega! 🚗"
 
 User replies to product card: "What's the battery life?"
@@ -749,7 +866,7 @@ NOT: "Aapke bachche ki age kya hai?" ❌
 User Context: Order collection in progress, waiting for delivery address
 User: "123 Model Town, Ludhiana, Punjab, 141001"
 Your Action: Collect this as delivery address for the order ✅
-NOT: "Ji, Gurtoy ka address hai: Shop No. 6/7..." ❌
+NOT: "Ji, Fashion Mart ka address hai: PLOT NO. B/31/1097/1..." ❌
 (User is GIVING address, not ASKING for store address!)
 ```
 
@@ -1011,7 +1128,7 @@ You: "Zaroor! Aapke bachche ki age kya hai? Aur bike chahiye ya jeep? 🚗🏍�
 
 Example 2 (Specific Query):
 User: "5 saal ke bachche ke liye red jeep dikhao"
-You: [Call search_products(query="red jeep for 5 year old", age_range="3-7 years")]
+You: [Call search_products(query="red jeep for 5 year old", size_range="3-7 years")]
 You: "SHOW_PRODUCTS"
 [System sends product cards automatically]
 
@@ -1086,7 +1203,7 @@ Remember: You're a smart salesperson, not a search engine! 🧠"""
         """Create the knowledge search function tool."""
         return {
             "name": "search_knowledge",
-            "description": "Search Gurtoy's knowledge base for general information about store policies, services, company info, and general toy categories. Use this for non-specific product queries.",
+            "description": "Search Fashion Mart's knowledge base for general information about store policies, services, company info, and general fashion categories. Use this for non-specific product queries.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -1097,7 +1214,7 @@ Remember: You're a smart salesperson, not a search engine! 🧠"""
                     "category": {
                         "type": "string",
                         "enum": ["company_info", "products", "contact", "location", "policies", "services", "all"],
-                        "description": "Category filter: 'products' for toys/bikes, 'company_info' for store details, 'all' for general search. Default: 'all'"
+                        "description": "Category filter: 'products' for fashion items/clothing, 'company_info' for store details, 'all' for general search. Default: 'all'"
                     }
                 },
                 "required": ["query"]
@@ -1108,18 +1225,23 @@ Remember: You're a smart salesperson, not a search engine! 🧠"""
         """Create the product search function tool."""
         return {
             "name": "search_products",
-            "description": "REQUIRED: Search Gurtoy's product catalog for specific toys and ride-on vehicles. MUST be called IMMEDIATELY when users mention: specific product names/IDs (g63, 2188, police bike), product types (red jeep, electric scooter, bike with lights), or specific features. DO NOT ask questions first for specific product queries - search immediately! Only ask questions for vague queries like 'show me toys' or 'kuch dikhao'.",
+            "description": "REQUIRED: Search Fashion Mart's product catalog for specific fashion items. MUST be called IMMEDIATELY when users mention: specific product names/IDs, product types (cardigan, crop top, kot), sizes (S, M, L, XL), occasions (casual, formal, traditional, party), or specific features. DO NOT ask questions first for specific product queries - search immediately! Only ask questions for vague queries like 'show me clothes' or 'kuch dikhao'.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Product search query. IMPORTANT: Always include age information in the query string itself (e.g., 'jeep for 5 year old child', 'bike for 3 to 7 year old', 'scooter for toddler'). Do NOT use the age_range parameter. Examples: 'red jeep for 4 year old', 'bike with lights for 6 year old', 'police style toys for 5 year old', 'scooter under 15000 for 3 year old'"
+                        "description": "Fashion product search query. IMPORTANT: Always include size information in the query string itself (e.g., 'cardigan size M', 'crop top in large', 'kot for medium size'). You can also include occasion (casual, formal, traditional, party) and style preferences. Examples: 'cardigan for office', 'crop top for party', 'kot for festival', 'casual wear size L'"
                     },
                     "category": {
                         "type": "string",
-                        "enum": ["Electric Bikes & Scooters for Kids", "Electric Ride-On Jeeps & Cars for Kids", "Petrol Bike & Cars for Kids", "E-Scooter For Kids & Adults", "all"],
-                        "description": "Product category filter. Use 'all' for general search. Default: 'all'"
+                        "enum": ["Cardigan", "Crop top", "Kot", "Court set", "Tunic", "Shrug", "Long cardigan", "High neck top", "V neck crop top", "SL cardigan", "Self cardigan", "all"],
+                        "description": "Fashion product category filter. Use 'all' for general search. Default: 'all'"
+                    },
+                    "size_range": {
+                        "type": "string",
+                        "enum": ["S", "M", "L", "XL"],
+                        "description": "Size filter for fashion items (optional). Use when user specifies a particular size."
                     },
                     "min_price": {
                         "type": "number",
@@ -1164,7 +1286,7 @@ Remember: You're a smart salesperson, not a search engine! 🧠"""
                         "type": "string",
                         "description": "Main color identified in the image"
                     },
-                    "age_range": {
+                    "size_range": {
                         "type": "string",
                         "description": "Estimated age range for the product (e.g., '3-8 years', '5-10 years')"
                     },
@@ -1185,7 +1307,7 @@ Remember: You're a smart salesperson, not a search engine! 🧠"""
         """Create the contact information tool."""
         return {
             "name": "get_contact_info",
-            "description": "Get Gurtoy's contact information including phone numbers, email, WhatsApp number, and store address/location. ALWAYS use this function when users ask about: location, address, where the store is, phone number, WhatsApp number, email, or how to contact the store.",
+            "description": "Get Fashion Mart's contact information including phone numbers, email, WhatsApp number, and store address/location. ALWAYS use this function when users ask about: location, address, where the store is, phone number, WhatsApp number, email, or how to contact the store.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -1433,7 +1555,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         
         return False
 
-    async def _keyword_search_products(self, query: str, category: str = "all", min_price: Optional[float] = None, max_price: Optional[float] = None) -> List[Dict[str, Any]]:
+    async def _keyword_search_products(self, query: str, category: str = "all", min_price: Optional[float] = None, max_price: Optional[float] = None, size_range: Optional[str] = None) -> List[Dict[str, Any]]:
         """Search products using keyword matching (for exact product names/IDs)."""
         try:
             # Prepare search parameters
@@ -1448,6 +1570,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "filter_category": filter_category,
                     "min_price": min_price,
                     "max_price": max_price,
+                    "filter_size_range": size_range,
                     "filter_stock_status": "in_stock"
                 }
             ).execute()
@@ -1484,7 +1607,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "title": row["title"],
                     "category": row["category"],
                     "description": row["description"],
-                    "age_range": row["age_range"],
+                    "size_range": row["size_range"],
                     "colors": colors,
                     "specifications": specifications,
                     "images": images,
@@ -1509,16 +1632,16 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         category: str = "all",
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
-        age_range: Optional[str] = None
+        size_range: Optional[str] = None
     ) -> List[Dict[str, Any]]:
         """
-        HYBRID SEARCH: Combines keyword search + semantic search with intelligent fallback.
+        HYBRID SEARCH: Combines keyword search + semantic search with intelligent fallback for fashion items.
         
         Strategy:
         1. If query looks like product name/ID → try keyword search first
         2. If keyword search finds high-confidence matches → return them
         3. Otherwise → try semantic search
-        4. If semantic search with age filter fails → try without age filter
+        4. If semantic search with size filter fails → try without size filter
         5. Always ensure user gets some results
         """
         try:
@@ -1531,7 +1654,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 logger.info(f"🎯 Detected product name query: '{query}'")
                 
                 # Try keyword search first
-                keyword_results = await self._keyword_search_products(query, category, min_price, max_price)
+                keyword_results = await self._keyword_search_products(query, category, min_price, max_price, size_range)
                 
                 if keyword_results and keyword_results[0]["similarity"] >= 0.85:
                     logger.info(f"✅ Found exact keyword match: {keyword_results[0]['title']}")
@@ -1555,9 +1678,9 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 
             embedding = genai.embed_content(**embed_params)
             
-            # STEP 3: Try semantic search with age filtering
+            # STEP 3: Try semantic search with size filtering
             filter_category = None if category == "all" else category
-            extracted_age = self._parse_age_from_query(query)
+            extracted_size = self._parse_size_from_query(query)
             
             # Use hybrid search function if available, otherwise fallback to regular search
             try:
@@ -1569,7 +1692,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                         "match_threshold": 0.5,
                         "match_count": 10,
                         "filter_category": filter_category,
-                        "filter_age_range": age_range,
+                        "filter_size_range": size_range or extracted_size,
                         "min_price": min_price,
                         "max_price": max_price,
                         "filter_stock_status": "in_stock"
@@ -1589,7 +1712,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                         "match_threshold": 0.5,
                         "match_count": 10,
                         "filter_category": filter_category,
-                        "filter_age_range": age_range,
+                        "filter_size_range": size_range or extracted_size,
                         "min_price": min_price,
                         "max_price": max_price,
                         "filter_stock_status": "in_stock"
@@ -1628,7 +1751,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "title": row["title"],
                     "category": row["category"],
                     "description": row["description"],
-                    "age_range": row["age_range"],
+                    "size_range": row["size_range"],
                     "colors": colors,
                     "specifications": specifications,
                     "images": images,
@@ -1640,17 +1763,17 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "search_method": row.get("search_method", "semantic")
                 })
             
-            # STEP 4: Smart age filtering with fallback
-            if extracted_age and products:
+            # STEP 4: Smart size filtering with fallback
+            if extracted_size and products:
                 original_count = len(products)
-                age_filtered = self._filter_products_by_age(products, extracted_age)
+                size_filtered = self._filter_products_by_size(products, extracted_size)
                 
-                if age_filtered:
-                    products = age_filtered
-                    logger.info(f"✅ Age filtering: {extracted_age} years old - {len(products)} suitable products (from {original_count} total)")
+                if size_filtered:
+                    products = size_filtered
+                    logger.info(f"✅ Size filtering: {extracted_size} - {len(products)} suitable products (from {original_count} total)")
                 else:
-                    # FALLBACK: Keep all products if age filter removes everything
-                    logger.warning(f"⚠️ Age filter removed all products, showing all {original_count} products")
+                    # FALLBACK: Keep all products if size filter removes everything
+                    logger.warning(f"⚠️ Size filter removed all products, showing all {original_count} products")
             
             # STEP 5: If still no results, try without any filters
             if not products:
@@ -1663,7 +1786,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                         "match_threshold": 0.3,  # Lower threshold
                         "match_count": 5,
                         "filter_category": None,
-                        "filter_age_range": None,
+                        "filter_size_range": None,
                         "min_price": None,
                         "max_price": None,
                         "filter_stock_status": "in_stock"
@@ -1698,7 +1821,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                         "title": row["title"],
                         "category": row["category"],
                         "description": row["description"],
-                        "age_range": row["age_range"],
+                        "size_range": row["size_range"],
                         "colors": colors,
                         "specifications": specifications,
                         "images": images,
@@ -1724,7 +1847,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         image_features: Optional[List[str]] = None,
         desired_colors: Optional[List[str]] = None,
         primary_color: Optional[str] = None,
-        age_range: Optional[str] = None,
+        size_range: Optional[str] = None,
         match_threshold: float = 0.70,
         max_results: int = 10,
         user_image_path: Optional[str] = None
@@ -1738,7 +1861,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             image_features: Key features identified in the user's image
             desired_colors: Colors visible in the user's image
             primary_color: Main color identified in the image
-            age_range: Estimated age range for the product
+            size_range: Estimated age range for the product
             match_threshold: Similarity threshold (0.65-0.85)
             max_results: Maximum number of results
             user_image_path: Path to user's image for visual verification
@@ -1762,7 +1885,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             
             # Search database using image embeddings
             products = await self._search_products_by_image_embedding(
-                embedding, match_threshold, int(max_results), age_range
+                embedding, match_threshold, int(max_results), size_range
             )
             
             if not products:
@@ -1801,7 +1924,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                                 "detailed_description": image_description,
                                 "colors": colors_list,
                                 "key_features": features_list,
-                                "age_range": age_range,
+                                "size_range": size_range,
                                 "primary_color": primary_color
                             }
                             
@@ -1957,7 +2080,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         query_embedding: List[float],
         match_threshold: float = 0.70,
         max_results: int = 10,
-        age_range: Optional[str] = None
+        size_range: Optional[str] = None
     ) -> Optional[List[Dict[str, Any]]]:
         """Search products using image embeddings."""
         try:
@@ -2008,7 +2131,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                         "title": product["title"],
                         "category": product["category"],
                         "description": product["description"],
-                        "age_range": product["age_range"],
+                        "size_range": product["size_range"],
                         "colors": colors,
                         "specifications": specifications,
                         "images": images,
@@ -2100,10 +2223,11 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         {context_str}
         
         Available product categories:
-        - Electric Bikes & Scooters for Kids (15 products)
-        - Electric Ride-On Jeeps & Cars for Kids (14 products) 
-        - Petrol Bike & Cars for Kids (3 products - includes dirt bikes)
-        - E-Scooter For Kids & Adults (1 product)
+        - Cardigan (various styles including regular, long, crop, SL, self)
+        - Crop Top (high neck, V neck, casual styles)
+        - Traditional Wear (Kot, Court sets, Tunics)
+        - Layering Pieces (Shrugs, Long cardigans)
+        - Contemporary Tops (High neck, V neck styles)
         
         IMPORTANT: Return ONLY a JSON object as text. Do NOT make any function calls.
         
@@ -2114,15 +2238,15 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             "category": "best matching category or null",
             "enhanced_query": "optimized search terms for embeddings",
             "search_strategy": "semantic_search|category_search|keyword_search|multi_strategy",
-            "filters": {{"age_range": "X-Y years", "color": "color_name"}},
+            "filters": {{"size_range": "S|M|L|XL", "color": "color_name", "occasion": "casual|formal|traditional"}},
             "priority_keywords": ["keyword1", "keyword2"],
             "confidence": 0.8
         }}
         
         Examples:
-        - "dirt bike" → category: "Petrol Bike & Cars for Kids", enhanced_query: "dirt bike petrol 50cc off-road motorcycle kids"
-        - "red jeep for 5 year old" → category: "Electric Ride-On Jeeps & Cars for Kids", enhanced_query: "red jeep electric ride-on car for 5 year old"
-        - "something for my daughter" → strategy: "multi_strategy", enhanced_query: "toys for girls kids children"
+        - "cardigan" → category: "Cardigan", enhanced_query: "cardigan wool cotton sweater jacket"
+        - "crop top in size M" → category: "Crop Top", enhanced_query: "crop top size M casual women fashion"
+        - "something for office" → strategy: "multi_strategy", enhanced_query: "formal office work professional women clothing"
         """
         
         try:
@@ -2208,7 +2332,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             category=filters.get("category", "all"),
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _category_specific_search(self, category: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -2221,7 +2345,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             category=category,
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _keyword_based_search(self, priority_keywords: List[str], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -2235,7 +2359,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             category=filters.get("category", "all"),
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _multi_strategy_search(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -2289,7 +2413,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "product_id": result["product_id"],
                     "title": result["title"],
                     "category": result["category"],
-                    "age_range": result["age_range"],
+                    "size_range": result["size_range"],
                     "similarity": result["similarity"]
                 })
             
@@ -2380,7 +2504,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
     def get_contact_info(self, info_type: str = "all") -> Dict[str, str]:
         """Get contact information."""
         contact_info = {
-            "phone": f"📞 Call us at {config.BUSINESS_PHONE} (Owner Direct) or 9056010298 (General)",
+            "phone": f"📞 Call us at {config.BUSINESS_PHONE_BUY} (Owner Direct) or {config.BUSINESS_PHONE_INQUIRY} (General)",
             "email": f"📧 Email: {config.BUSINESS_EMAIL}",
             "whatsapp": f"💬 WhatsApp: wa.me/{config.BUSINESS_WHATSAPP}",
             "address": "📍 Shop No. 6/7, Char Khamba Road, Model Town, Ludhiana, Punjab, India"
@@ -2464,7 +2588,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 "title": product_data["title"],
                 "category": product_data["category"],
                 "description": product_data["description"],
-                "age_range": product_data["age_range"],
+                "size_range": product_data["size_range"],
                 "colors": colors,
                 "specifications": specifications,
                 "images": images,
@@ -3060,7 +3184,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     category=args.get("category", "all"),
                     min_price=args.get("min_price"),
                     max_price=args.get("max_price"),
-                    age_range=None  # Don't use age_range parameter - age should be in query string
+                    size_range=args.get("size_range")  # Use size_range parameter for fashion items
                 )
                 return {
                     "function": function_name,
@@ -3071,14 +3195,14 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                             "title": p["title"],
                             "category": p["category"],
                             "description": p["description"],
-                            "age_range": p["age_range"],
+                            "size_range": p["size_range"],
                             "price": p["price"],
                             "discount_price": p["discount_price"],
                             "colors": p["colors"],
                             "specifications": p["specifications"],
-                            "images": p["images"],  # FIXED: Added missing images field
-                            "stock_status": p["stock_status"],  # FIXED: Added missing stock_status field
-                            "warranty": p["warranty"],  # FIXED: Added missing warranty field
+                            "images": p["images"],
+                            "stock_status": p["stock_status"],
+                            "warranty": p["warranty"],
                             "similarity": p["similarity"]
                         }
                         for p in products
@@ -3101,7 +3225,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                             "title": p["title"],
                             "category": p["category"],
                             "description": p["description"],
-                            "age_range": p["age_range"],
+                            "size_range": p["size_range"],
                             "price": p["price"],
                             "discount_price": p["discount_price"],
                             "colors": p["colors"],
@@ -3129,7 +3253,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     image_features=args.get("image_features", []),
                     desired_colors=args.get("desired_colors", []),
                     primary_color=args.get("primary_color"),
-                    age_range=args.get("age_range"),
+                    size_range=args.get("size_range"),
                     match_threshold=float(args.get("match_threshold", 0.70)),
                     max_results=int(args.get("max_results", 10)),
                     user_image_path=user_image_path
@@ -3143,7 +3267,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                             "title": p["title"],
                             "category": p["category"],
                             "description": p["description"],
-                            "age_range": p["age_range"],
+                            "size_range": p["size_range"],
                             "price": p["price"],
                             "discount_price": p["discount_price"],
                             "colors": p["colors"],
@@ -3566,12 +3690,12 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 else:
                     # Max retries reached
                     logger.error(f"Rate limit exceeded after {max_retries} attempts: {e}")
-                    return ("I'm currently experiencing high demand. Please try again in a moment, or contact us directly at 8300000086. 🙏", None)
+                    return ("I'm currently experiencing high demand. Please try again in a moment, or contact us directly at 9876151585. 🙏", None)
             
             except Exception as e:
                 # Other errors - don't retry
                 logger.error(f"Error generating AI response: {e}", exc_info=True)
-                return ("I'm experiencing some technical difficulties. Please contact us directly at 8300000086 for immediate assistance. 🙏", None)
+                return ("I'm experiencing some technical difficulties. Please contact us directly at 9876151585 for immediate assistance. 🙏", None)
         
         try:
             
@@ -3743,10 +3867,10 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             
         except Exception as e:
             logger.error(f"Error generating AI response: {e}", exc_info=True)
-            return ("I'm experiencing some technical difficulties. Please contact us directly at 8300000086 for immediate assistance. 🙏", None)
+            return ("I'm experiencing some technical difficulties. Please contact us directly at 9876151585 for immediate assistance. 🙏", None)
 
 # Initialize AI assistant
-gurtoy_ai = GurtoyAI()
+gurtoy_ai = FashionMartAI()
 
 class UserManager:
     """Manages user data and sessions."""
@@ -4024,7 +4148,7 @@ class TelegramAPI:
                     
                     # Format product caption
                     title = product.get("title", "Product")
-                    age_range = product.get("age_range", "N/A")
+                    size_range = product.get("size_range", "N/A")
                     price = product.get("price", 0)
                     discount_price = product.get("discount_price", price)
                     description = product.get("description", "")
@@ -4059,7 +4183,7 @@ class TelegramAPI:
                         if 'visual_explanation' in product:
                             caption += f"🔍 **Visual Analysis:** {product['visual_explanation']}\n\n"
                     
-                    caption += f"👶 **Age:** {age_range}\n"
+                    caption += f"👶 **Age:** {size_range}\n"
                     # Add product ID for purchase functionality (hidden in caption)
                     caption += f"🆔 **ID:** {product.get('product_id', 'N/A')}\n"
                     
@@ -4198,7 +4322,7 @@ class SessionManager:
                     "product_name": product.get("title", ""),
                     "price": product.get("price", 0),
                     "discount_price": product.get("discount_price"),
-                    "age_range": product.get("age_range", ""),
+                    "size_range": product.get("size_range", ""),
                     "colors": product.get("colors", []),
                     "shown_at": datetime.now(timezone.utc).isoformat()
                 })
@@ -4298,7 +4422,7 @@ async def root():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "Gurtoy Telegram Bot",
+        "service": "Fashion Mart Telegram Bot",
         "version": "1.0.0",
         "timestamp": datetime.utcnow().isoformat()
     }
@@ -4536,7 +4660,7 @@ async def process_telegram_message(update: TelegramUpdate):
 
 🔗 **Payment Link:** {payment_result["payment_link_url"]}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                     else:
                                         # Fallback to QR code if payment link not available
                                         # Get product details from order data
@@ -4559,7 +4683,7 @@ Need help? Contact us at 8300000086"""
 
 📱 **QR Code:** {payment_result.get("qr_code_url", "QR code not available")}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                     
                                     success = await TelegramAPI.send_message(chat_id, payment_message)
                                     
@@ -4692,7 +4816,7 @@ Need help? Contact us at 8300000086"""
         try:
             await TelegramAPI.send_message(
                 update.message.chat["id"],
-                "I'm experiencing technical difficulties. Please contact us at 8300000086 for immediate assistance. 🙏"
+                "I'm experiencing technical difficulties. Please contact us at 9876151585 for immediate assistance. 🙏"
             )
         except:
             pass
@@ -4762,9 +4886,9 @@ async def process_razorpay_webhook(webhook_data: Dict[str, Any]):
 📞 **Next Steps:**
 • We'll process your order within 24 hours
 • You'll receive shipping updates on this chat
-• For any queries, contact us at 8300000086
+• For any queries, contact us at 9876151585
 
-Thank you for shopping with Gurtoy! 🎉"""
+Thank you for shopping with Fashion Mart! 👗✨"""
                         
                         success = await TelegramAPI.send_message(telegram_id, confirmation_msg)
                         
@@ -4805,7 +4929,7 @@ if __name__ == "__main__":
     port = int(os.getenv("APP_PORT", 8000))
     host = os.getenv("APP_HOST", "0.0.0.0")
     
-    logger.info(f"Starting Gurtoy Telegram Bot on {host}:{port}")
+    logger.info(f"Starting Fashion Mart Telegram Bot on {host}:{port}")
     
     uvicorn.run(
         "gurtoy_bot:app",

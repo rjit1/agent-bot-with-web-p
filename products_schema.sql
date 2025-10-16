@@ -1,4 +1,4 @@
--- Products Schema for Gurtoy Telegram Bot
+-- Products Schema for Fashion Mart Telegram Bot
 -- Phase 2: Product System with Semantic Search
 -- This schema adds product catalog with vector embeddings
 

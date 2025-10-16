@@ -1,23 +1,30 @@
-# Gurtoy Telegram Bot - Phase 1: Intelligent Conversational Agent
+# Fashion Mart Telegram Bot - Phase 8: Complete Migration
 
-A multilingual, context-aware AI assistant for Gurtoy toy store built with Gemini 2.5 Flash, Supabase, and Telegram Bot API.
+A multilingual, context-aware AI assistant for Fashion Mart women's fashion store built with Gemini 2.5 Flash, Supabase, and Telegram Bot API.
 
 ## 🌟 Features
 
-### Phase 1 Capabilities
+### Phase 8 Capabilities
 - **Multilingual Support**: English, Hindi, and Hinglish responses
 - **Context-Aware Conversations**: Remembers user preferences and conversation history
-- **Knowledge Base Integration**: Vector search through company information
+- **Fashion Knowledge Base**: Vector search through fashion store information
 - **Function Calling**: Dynamic routing to tools and APIs
 - **Sentiment Analysis**: Tracks conversation sentiment for analytics
 - **Human Escalation**: Seamless handoff to human agents when needed
 - **Safety & Compliance**: Content filtering and PII protection
+- **Fashion Image Analysis**: AI-powered fashion item recognition and styling advice
+- **Size Recommendations**: AI-powered size estimation and recommendations
+- **Style Coordination**: Color and style coordination suggestions
+- **Occasion-Based Recommendations**: Event-appropriate fashion suggestions
 
 ### Key Functions
-- Product information and recommendations
+- Fashion item information and recommendations
 - Store location and contact details
 - Return policy and customer service
 - Order assistance and support
+- Size recommendations and fit guidance
+- Style advice and color coordination
+- Occasion-based fashion suggestions
 - Cultural sensitivity for Indian customers
 
 ## 🏗️ Architecture
@@ -307,7 +314,7 @@ gurtoy-telegram-bot/
 ### Adding New Features
 
 1. **Extend Knowledge Base**: Add new chunks in `knowledge_preparation.py`
-2. **Add Functions**: Create new tools in `GurtoyAI` class
+2. **Add Functions**: Create new tools in `FashionMartAI` class
 3. **Modify Responses**: Update system instructions and prompts
 4. **Add Analytics**: Extend conversation logging
 
@@ -372,7 +379,7 @@ For technical support or questions:
 
 ## 📄 License
 
-This project is proprietary software for Gurtoy toy store.
+This project is proprietary software for Fashion Mart women's fashion store.
 
 ## 🙏 Acknowledgments
 

@@ -1,6 +1,6 @@
-# 🛍️ Product Management Web Application
+# 🛍️ Fashion Mart Product Management Web Application
 
-A modern, mobile-friendly web application for managing products with password authentication and Supabase integration.
+A modern, mobile-friendly web application for managing Fashion Mart products with password authentication and Supabase integration.
 
 ## 🌟 Features
 
@@ -30,7 +30,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 ADMIN_PASSWORD=121233
 JWT_SECRET=your_jwt_secret_here
-NEXT_PUBLIC_APP_NAME=Gurtoy Product Management
+NEXT_PUBLIC_APP_NAME=Fashion Mart Product Management
 NEXT_PUBLIC_CONTACT_TELEGRAM=@Sarvesh_101
 ```
 
@@ -198,7 +198,7 @@ product-management-web/
 
 ## 📄 License
 
-This project is proprietary software for Gurtoy Product Management.
+This project is proprietary software for Fashion Mart Product Management.
 
 ---
 

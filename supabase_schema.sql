@@ -1,4 +1,4 @@
--- Supabase Schema for Gurtoy Telegram Bot Knowledge Base
+-- Supabase Schema for Fashion Mart Telegram Bot Knowledge Base
 -- This file contains all the necessary tables and functions for Phase 1
 
 -- Enable required extensions

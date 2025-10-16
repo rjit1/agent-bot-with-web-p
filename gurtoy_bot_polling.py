@@ -1,5 +1,5 @@
 """
-Gurtoy Telegram Bot - Polling Mode
+Fashion Mart Telegram Bot - Polling Mode
 A polling-based version that doesn't require webhook setup.
 This is ideal for local development and testing without ngrok.
 """
@@ -16,8 +16,8 @@ from dotenv import load_dotenv
 from gurtoy_bot import (
     config, 
     UserManager, 
-    GurtoyAI,
-    gurtoy_ai,  # Import the initialized instance
+    FashionMartAI,
+    fashion_mart_ai,  # Import the initialized instance
     TelegramAPI,
     TelegramUser,
     logger,
@@ -122,9 +122,9 @@ async def send_payment_success_message(chat_id: int, order_id: str, amount: floa
 **What's Next:**
 📦 Your order is being processed
 🚚 You'll receive shipping updates via SMS
-📞 Contact us at 8300000086 for any queries
+📞 Contact us at 9876151585 for any queries
 
-Thank you for choosing Gurtoy! 😊"""
+Thank you for choosing Fashion Mart! 😊"""
     
     await TelegramAPI.send_message(chat_id, success_message)
     logger.info(f"Payment success message sent for order {order_id}")
@@ -133,7 +133,7 @@ async def check_pending_payments():
     """Check for pending payments and send success notifications."""
     try:
         global invoice_generator
-        from gurtoy_bot import gurtoy_ai
+        from gurtoy_bot import fashion_mart_ai
         
         # Initialize invoice generator if not already done
         if invoice_generator is None:
@@ -176,7 +176,7 @@ async def check_pending_payments():
                 logger.info(f"Checking payment for order {order_id} (User: {telegram_id}, Razorpay Order ID: {razorpay_order_id})")
                 
                 # Check payment status with Razorpay
-                status_result = await gurtoy_ai.payment_manager.check_payment_status(order_id)
+                status_result = await fashion_mart_ai.payment_manager.check_payment_status(order_id)
                 
                 if status_result["success"] and status_result["status"] == "paid":
                     # Payment successful - send confirmation ONLY to the user who made the payment
@@ -201,8 +201,8 @@ async def check_pending_payments():
                             logger.info(f"Invoice generated successfully: {invoice_path}")
                             
                             # Send invoice PDF to user
-                            caption = f"📄 Invoice for Order {order_id}\n\nThank you for your purchase! 🎉"
-                            filename = f"Gurtoy_Invoice_{order_id}.pdf"
+                            caption = f"📄 Invoice for Order {order_id}\n\nThank you for your fashion purchase! 👗✨"
+                            filename = f"Fashion_Mart_Invoice_{order_id}.pdf"
                             
                             invoice_sent = await TelegramAPI.send_document(
                                 chat_id=telegram_id,
@@ -236,7 +236,7 @@ Your payment could not be processed. This could be due to:
 **What to do:**
 1. Check your payment method
 2. Try again with a different payment method
-3. Contact us at 8300000086 for assistance
+3. Contact us at 9876151585 for assistance
 
 We'll keep your order ready for 24 hours."""
                     
@@ -372,7 +372,7 @@ class TelegramPollingBot:
             from gurtoy_bot import PAYMENT_SYSTEM_AVAILABLE
             if PAYMENT_SYSTEM_AVAILABLE:
                 logger.info(f"[DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session")
-                order_session = gurtoy_ai.order_collector.get_session(telegram_user.id)
+                order_session = fashion_mart_ai.order_collector.get_session(telegram_user.id)
                 if order_session:
                     logger.info(f"[DEBUG] Order session found, adding to context")
                     user_context["active_order_session"] = {
@@ -702,12 +702,12 @@ class TelegramPollingBot:
             if PAYMENT_SYSTEM_AVAILABLE:
                 try:
                     logger.info(f"[ORDER_COLLECTION] Checking for active order session for user {telegram_user.id}")
-                    order_session = gurtoy_ai.order_collector.get_session(telegram_user.id)
+                    order_session = fashion_mart_ai.order_collector.get_session(telegram_user.id)
                     logger.info(f"[ORDER_COLLECTION] Session check result for user {telegram_user.id}: {'Found' if order_session else 'Not found'}")
                     if order_session:
                         logger.info(f"[ORDER_COLLECTION] Processing order collection input for user {telegram_user.id}")
                         # Process order collection input
-                        success, response_message, order_data = gurtoy_ai.order_collector.process_user_input(
+                        success, response_message, order_data = fashion_mart_ai.order_collector.process_user_input(
                             telegram_id=telegram_user.id,
                             user_input=user_text
                         )
@@ -729,7 +729,7 @@ class TelegramPollingBot:
                                     # Create order and payment using PaymentManager (this creates both database order and Razorpay order)
                                     try:
                                         logger.info(f"[ORDER_COLLECTION] Creating order and payment using PaymentManager")
-                                        payment_result = await gurtoy_ai.payment_manager.create_order_with_qr(
+                                        payment_result = await fashion_mart_ai.payment_manager.create_order_with_qr(
                                             user_id=user_data["id"],
                                             product_details=order_data["product_details"],
                                             customer_details=order_data["customer_details"],
@@ -762,7 +762,7 @@ class TelegramPollingBot:
 
 🔗 **Payment Link:** {payment_result["payment_link_url"]}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                             else:
                                                 # Fallback to QR code if payment link not available
                                                 # Get product details from order data
@@ -785,7 +785,7 @@ Need help? Contact us at 8300000086"""
 
 📱 **QR Code:** {payment_result.get("qr_code_url", "QR code not available")}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                             
                                             await TelegramAPI.send_message(chat_id, payment_message)
                                             await UserManager.log_conversation(
@@ -863,7 +863,7 @@ Need help? Contact us at 8300000086"""
                 logger.info(f"[GENERAL_CONVERSATION] Bypassing order collection for user {telegram_user.id}, proceeding with normal AI")
 
             # Generate AI response using the initialized instance
-            ai_response, products = await gurtoy_ai.generate_response(user_text, user_context)
+            ai_response, products = await fashion_mart_ai.generate_response(user_text, user_context)
             
             # Check if we need to show products
             if ai_response == "SHOW_PRODUCTS":
@@ -925,7 +925,7 @@ Need help? Contact us at 8300000086"""
     
     async def start_polling(self):
         """Start the polling loop."""
-        logger.info("🤖 Starting Gurtoy Telegram Bot in POLLING mode...")
+        logger.info("🤖 Starting Fashion Mart Telegram Bot in POLLING mode...")
         logger.info("=" * 60)
         
         # Delete webhook first

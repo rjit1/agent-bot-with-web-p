@@ -1,5 +1,5 @@
 """
-Payment Manager for Gurtoy Telegram Bot - Phase 3
+Payment Manager for Fashion Mart Telegram Bot - Phase 5
 Handles Razorpay integration, QR code generation, and order management.
 """
 from __future__ import annotations
