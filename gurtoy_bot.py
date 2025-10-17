@@ -90,6 +90,7 @@ class BotConfig:
     # Business Info - Fashion Mart
     BUSINESS_PHONE_INQUIRY = os.getenv("BUSINESS_PHONE_INQUIRY", "9876151585")
     BUSINESS_PHONE_BUY = os.getenv("BUSINESS_PHONE_BUY", "6283837649")
+    BUSINESS_PHONE = os.getenv("BUSINESS_PHONE") or BUSINESS_PHONE_BUY or BUSINESS_PHONE_INQUIRY
     BUSINESS_ADDRESS = os.getenv("BUSINESS_ADDRESS", "PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003")
     BUSINESS_MAPS = os.getenv("BUSINESS_MAPS", "https://maps.app.goo.gl/koBoUFYEtE3mvdCC7")
     BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "fashionmart@gmail.com")
@@ -1555,13 +1556,119 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         
         return False
 
+    def _calculate_keyword_similarity(self, query: str, product_id: Optional[str], title: Optional[str], description: Optional[str]) -> Tuple[float, str]:
+        query_lower = (query or "").lower().strip()
+        product_id_lower = (product_id or "").lower()
+        title_lower = (title or "").lower()
+        description_lower = (description or "").lower()
+        if not query_lower:
+            return 0.0, "no_match"
+        if product_id_lower == query_lower:
+            return 1.0, "exact_id"
+        if title_lower == query_lower:
+            return 1.0, "exact_title"
+        if product_id_lower.startswith(query_lower):
+            return 0.95, "starts_with_id"
+        if title_lower.startswith(query_lower):
+            return 0.95, "starts_with_title"
+        if query_lower in product_id_lower:
+            return 0.85, "contains_id"
+        if query_lower in title_lower:
+            return 0.85, "contains_title"
+        if query_lower in description_lower:
+            return 0.75, "contains_description"
+        return 0.5, "no_match"
+
+    async def _keyword_search_products_fallback(
+        self,
+        query: str,
+        filter_category: Optional[str],
+        min_price: Optional[float],
+        max_price: Optional[float],
+        size_range: Optional[str],
+        filter_stock_status: Optional[str]
+    ) -> List[Dict[str, Any]]:
+        try:
+            query_value = (query or "").strip()
+            if not query_value:
+                return []
+            sanitized = query_value.replace(",", " ").replace("'", "''")
+            pattern = f"%{sanitized}%"
+            builder = supabase.table("products").select(
+                "product_id,title,category,description,size_range,style_keywords,occasion,colors,specifications,images,price,discount_price,stock_status,warranty"
+            )
+            if filter_category:
+                builder = builder.eq("category", filter_category)
+            if size_range:
+                builder = builder.eq("size_range", size_range)
+            if min_price is not None:
+                builder = builder.gte("price", min_price)
+            if max_price is not None:
+                builder = builder.lte("price", max_price)
+            if filter_stock_status:
+                builder = builder.eq("stock_status", filter_stock_status)
+            builder = builder.or_(
+                f"title.ilike.{pattern},product_id.ilike.{pattern},description.ilike.{pattern}"
+            )
+            result = builder.limit(10).execute()
+            products = []
+            for row in result.data or []:
+                images = row.get("images", [])
+                if isinstance(images, str):
+                    try:
+                        images = json.loads(images)
+                    except Exception:
+                        images = []
+                colors = row.get("colors", [])
+                if isinstance(colors, str):
+                    try:
+                        colors = json.loads(colors)
+                    except Exception:
+                        colors = []
+                specifications = row.get("specifications", {})
+                if isinstance(specifications, str):
+                    try:
+                        specifications = json.loads(specifications)
+                    except Exception:
+                        specifications = {}
+                similarity, match_type = self._calculate_keyword_similarity(
+                    query_value,
+                    row.get("product_id"),
+                    row.get("title"),
+                    row.get("description")
+                )
+                size_value = row.get("size_range") or row.get("age_range")
+                price_value = row.get("price")
+                discount_value = row.get("discount_price") or price_value
+                if price_value is None:
+                    continue
+                products.append({
+                    "product_id": row.get("product_id"),
+                    "title": row.get("title"),
+                    "category": row.get("category"),
+                    "description": row.get("description"),
+                    "size_range": size_value,
+                    "colors": colors,
+                    "specifications": specifications,
+                    "images": images,
+                    "price": float(price_value),
+                    "discount_price": float(discount_value),
+                    "stock_status": row.get("stock_status"),
+                    "warranty": row.get("warranty", ""),
+                    "similarity": float(similarity),
+                    "search_method": match_type
+                })
+            products.sort(key=lambda item: (-item["similarity"], item["price"]))
+            logger.info(f"Fallback keyword search found {len(products)} products for: {query_value}")
+            return products
+        except Exception as fallback_error:
+            logger.error(f"Fallback keyword search failed: {fallback_error}")
+            return []
+
     async def _keyword_search_products(self, query: str, category: str = "all", min_price: Optional[float] = None, max_price: Optional[float] = None, size_range: Optional[str] = None) -> List[Dict[str, Any]]:
         """Search products using keyword matching (for exact product names/IDs)."""
         try:
-            # Prepare search parameters
             filter_category = None if category == "all" else category
-            
-            # Search using keyword function
             result = supabase.rpc(
                 "keyword_search_products",
                 {
@@ -1574,40 +1681,32 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "filter_stock_status": "in_stock"
                 }
             ).execute()
-            
-            # Convert to product dictionaries
             products = []
             for row in result.data:
-                # Ensure images is a list
                 images = row.get("images", [])
                 if isinstance(images, str):
                     try:
                         images = json.loads(images)
-                    except:
+                    except Exception:
                         images = []
-                
-                # Ensure colors is a list
                 colors = row.get("colors", [])
                 if isinstance(colors, str):
                     try:
                         colors = json.loads(colors)
-                    except:
+                    except Exception:
                         colors = []
-                
-                # Ensure specifications is a dict
                 specifications = row.get("specifications", {})
                 if isinstance(specifications, str):
                     try:
                         specifications = json.loads(specifications)
-                    except:
+                    except Exception:
                         specifications = {}
-                
                 products.append({
                     "product_id": row["product_id"],
                     "title": row["title"],
                     "category": row["category"],
                     "description": row["description"],
-                    "size_range": row["size_range"],
+                    "size_range": row.get("size_range"),
                     "colors": colors,
                     "specifications": specifications,
                     "images": images,
@@ -1618,13 +1717,18 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "similarity": float(row["similarity"]),
                     "search_method": row.get("match_type", "keyword")
                 })
-            
             logger.info(f"Keyword search found {len(products)} products for: {query}")
             return products
-            
         except Exception as e:
-            logger.error(f"Error in keyword search: {e}")
-            return []
+            logger.warning(f"Error in keyword search: {e}")
+            return await self._keyword_search_products_fallback(
+                query,
+                filter_category,
+                min_price,
+                max_price,
+                size_range,
+                "in_stock"
+            )
 
     async def search_products(
         self, 
@@ -3871,6 +3975,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
 
 # Initialize AI assistant
 gurtoy_ai = FashionMartAI()
+fashion_mart_ai = gurtoy_ai
 
 class UserManager:
     """Manages user data and sessions."""
@@ -3992,6 +4097,56 @@ class UserManager:
 
 class TelegramAPI:
     """Handles Telegram API interactions."""
+    
+    @staticmethod
+    def _normalize_image_url(image_ref: Any) -> Optional[str]:
+        if not image_ref:
+            return None
+        if isinstance(image_ref, dict):
+            for key in ("url", "public_url", "signed_url"):
+                candidate = image_ref.get(key)
+                if candidate:
+                    normalized = TelegramAPI._normalize_image_url(candidate)
+                    if normalized:
+                        return normalized
+            path = image_ref.get("path")
+            if path:
+                bucket = image_ref.get("bucket_id") or image_ref.get("bucket") or "product-images"
+                if path.startswith("storage/v1/object/public/"):
+                    return TelegramAPI._normalize_image_url(path)
+                return TelegramAPI._normalize_image_url(f"storage/v1/object/public/{bucket.rstrip('/')}/{path.lstrip('/')}")
+            return None
+        if not isinstance(image_ref, str):
+            return None
+        value = image_ref.strip()
+        if not value:
+            return None
+        if value.startswith("http://") or value.startswith("https://"):
+            return value.replace(" ", "%20")
+        path = value.lstrip("/")
+        base = config.SUPABASE_URL.rstrip("/")
+        if path.startswith("storage/v1/object/public/"):
+            return f"{base}/{path.replace(' ', '%20')}"
+        return f"{base}/storage/v1/object/public/{path.replace(' ', '%20')}"
+    
+    @staticmethod
+    def _extract_image_urls(image_data: Any) -> List[str]:
+        value = image_data
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except Exception:
+                normalized = TelegramAPI._normalize_image_url(value)
+                return [normalized] if normalized else []
+        if isinstance(value, dict):
+            value = [value]
+        urls: List[str] = []
+        if isinstance(value, list):
+            for entry in value:
+                normalized = TelegramAPI._normalize_image_url(entry)
+                if normalized:
+                    urls.append(normalized)
+        return urls
     
     @staticmethod
     async def send_message(chat_id: int, text: str, reply_markup: Dict[str, Any] = None) -> bool:
@@ -4139,12 +4294,17 @@ class TelegramAPI:
             for idx, product in enumerate(products, 1):
                 try:
                     # Get first image URL
-                    images = product.get("images", [])
-                    if isinstance(images, str):
-                        import json
-                        images = json.loads(images)
+                    raw_images = product.get("images", [])
+                    images = TelegramAPI._extract_image_urls(raw_images)
+                    if not images:
+                        fallback_image = TelegramAPI._normalize_image_url(product.get("image"))
+                        if fallback_image:
+                            images = [fallback_image]
+                    product["images"] = images
                     
-                    image_url = images[0] if images and len(images) > 0 else None
+                    image_url = images[0] if images else None
+                    if not image_url:
+                        logger.warning(f"No valid image URL for product {product.get('product_id')}, falling back to text message")
                     
                     # Format product caption
                     title = product.get("title", "Product")
@@ -4223,7 +4383,6 @@ class TelegramAPI:
                     if image_url:
                         success = await TelegramAPI.send_photo(chat_id, image_url, caption)
                     else:
-                        # If no image, send as text message
                         success = await TelegramAPI.send_message(chat_id, caption)
                     
                     if not success:

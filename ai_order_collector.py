@@ -65,6 +65,19 @@ class OrderCollectionSession:
             "preserved_customer_info": self.preserved_customer_info
         }
 
+ACTIVE_SESSION_STATES = {
+    OrderCollectionState.INITIAL,
+    OrderCollectionState.COLLECTING_DETAILS,
+    OrderCollectionState.CONFIRMING_DETAILS,
+    OrderCollectionState.PRODUCT_CHANGE_REQUESTED
+}
+
+TERMINAL_SESSION_STATES = {
+    OrderCollectionState.CREATING_PAYMENT,
+    OrderCollectionState.COMPLETED,
+    OrderCollectionState.CANCELLED
+}
+
 class AIOrderCollector:
     """AI-powered order collection system using Gemini 2.5 Flash."""
     
@@ -340,10 +353,12 @@ Remember: You're smart! Understand what users mean, not just what they say. You'
         """Get active session for a user."""
         session = self.active_sessions.get(telegram_id)
         
-        # If not in memory, try to restore from database
         if not session:
             if self.restore_session_from_database(telegram_id):
                 session = self.active_sessions.get(telegram_id)
+        
+        if session and session.state in TERMINAL_SESSION_STATES:
+            return None
         
         return session
     
@@ -473,10 +488,22 @@ Ya phir sirf naam se start kariye: "Mera naam Rahul hai"
                         if extracted_info.get("shipping_address"):
                             session.shipping_address.update(extracted_info["shipping_address"])
                         if extracted_info.get("fashion_preferences"):
-                            # Store fashion preferences in session
                             if not hasattr(session, 'fashion_preferences'):
                                 session.fashion_preferences = {}
                             session.fashion_preferences.update(extracted_info["fashion_preferences"])
+                            color_pref = session.fashion_preferences.get("color")
+                            size_pref = session.fashion_preferences.get("size")
+                            style_pref = session.fashion_preferences.get("style")
+                            occasion_pref = session.fashion_preferences.get("occasion")
+                            if color_pref:
+                                session.product_details["selected_color"] = color_pref
+                            if size_pref:
+                                session.product_details["selected_size"] = size_pref
+                            if style_pref:
+                                session.product_details["selected_style"] = style_pref
+                            if occasion_pref:
+                                session.product_details["selected_occasion"] = occasion_pref
+                            session.product_details["fashion_preferences"] = session.fashion_preferences.copy()
                         
                         if user_intent == "correcting_info":
                             logger.info(f"🔧 Correction: {correction_details}")
@@ -488,26 +515,37 @@ Ya phir sirf naam se start kariye: "Mera naam Rahul hai"
                     # Handle CONFIRMING_ORDER intent
                     if user_intent == "confirming_order":
                         if is_complete and not session.errors:
-                            # All details complete, proceed to payment
+                            product_details = session.product_details.copy()
+                            fashion_preferences = session.fashion_preferences or {}
+                            if fashion_preferences:
+                                product_details["fashion_preferences"] = fashion_preferences.copy()
+                                if fashion_preferences.get("color") and not product_details.get("selected_color"):
+                                    product_details["selected_color"] = fashion_preferences["color"]
+                                if fashion_preferences.get("size") and not product_details.get("selected_size"):
+                                    product_details["selected_size"] = fashion_preferences["size"]
+                                if fashion_preferences.get("style") and not product_details.get("selected_style"):
+                                    product_details["selected_style"] = fashion_preferences["style"]
+                                if fashion_preferences.get("occasion") and not product_details.get("selected_occasion"):
+                                    product_details["selected_occasion"] = fashion_preferences["occasion"]
+                            
                             order_data = {
                                 "user_id": session.user_id,
-                                "product_details": session.product_details,
+                                "product_details": product_details,
                                 "customer_details": {
                                     "name": session.customer_info["name"],
                                     "phone": session.customer_info["phone"],
                                     "email": session.customer_info.get("email")
                                 },
                                 "shipping_address": session.shipping_address,
-                                "quantity": session.quantity
+                                "quantity": session.quantity,
+                                "fashion_preferences": fashion_preferences
                             }
                             
                             session.state = OrderCollectionState.CREATING_PAYMENT
-                            session.step_history.append("Order confirmed, creating payment")
+                            session.step_history.append("Order confirmed, payment initiated")
                             session.updated_at = datetime.now()
                             self._save_session_to_database(session)
-                            
-                            # Remove session as it's complete
-                            del self.active_sessions[telegram_id]
+                            self.active_sessions.pop(telegram_id, None)
                             
                             logger.info(f"✅ Order confirmed for user {telegram_id}, proceeding to payment")
                             return True, response_message, order_data
@@ -598,6 +636,29 @@ Ya phir sirf naam se start kariye: "Mera naam Rahul hai"
             collected_info.append(f"✅ Pincode: {session.shipping_address['pincode']}")
         else:
             missing_info.append("❌ Pincode")
+        
+        fashion_preferences = session.fashion_preferences or {}
+        if not fashion_preferences and isinstance(session.product_details, dict):
+            fashion_preferences = session.product_details.get("fashion_preferences") or {}
+        size_pref = fashion_preferences.get("size")
+        color_pref = fashion_preferences.get("color")
+        style_pref = fashion_preferences.get("style")
+        occasion_pref = fashion_preferences.get("occasion")
+        
+        if size_pref:
+            collected_info.append(f"✅ Size Preference: {size_pref}")
+        else:
+            missing_info.append("❌ Size Preference")
+        
+        if color_pref:
+            collected_info.append(f"✅ Color Preference: {color_pref}")
+        else:
+            missing_info.append("❌ Color Preference")
+        
+        if style_pref:
+            collected_info.append(f"✅ Style Preference: {style_pref}")
+        if occasion_pref:
+            collected_info.append(f"✅ Occasion: {occasion_pref}")
         
         # Add to context
         if collected_info:
@@ -1201,6 +1262,7 @@ Ready to order for your {detected_occasion} occasion? 😊"""
                 "product_details": session.product_details,
                 "customer_info": session.customer_info,
                 "shipping_address": session.shipping_address,
+                "fashion_preferences": session.fashion_preferences or {},
                 "quantity": session.quantity,
                 "errors": session.errors,
                 "step_history": session.step_history,
@@ -1236,14 +1298,26 @@ Ready to order for your {detected_occasion} occasion? 😊"""
                 created_at = datetime.fromisoformat(data["created_at"]) if data.get("created_at") else None
                 updated_at = datetime.fromisoformat(data["updated_at"]) if data.get("updated_at") else None
                 
+                product_details = data["product_details"]
+                if isinstance(product_details, str):
+                    try:
+                        product_details = json.loads(product_details)
+                    except Exception:
+                        product_details = {}
+                fashion_preferences = {}
+                if isinstance(product_details, dict):
+                    fashion_preferences = product_details.get("fashion_preferences") or {}
+                if not fashion_preferences:
+                    fashion_preferences = data.get("fashion_preferences") or {}
+                
                 session = OrderCollectionSession(
                     user_id=data["user_id"],
                     telegram_id=data["telegram_id"],
                     state=OrderCollectionState(data["state"]),
-                    product_details=data["product_details"],
+                    product_details=product_details,
                     customer_info=data["customer_info"],
                     shipping_address=data["shipping_address"],
-                    fashion_preferences=data.get("fashion_preferences", {}),
+                    fashion_preferences=fashion_preferences,
                     quantity=data["quantity"],
                     errors=data.get("errors", []),
                     step_history=data.get("step_history", []),
@@ -1252,6 +1326,17 @@ Ready to order for your {detected_occasion} occasion? 😊"""
                     updated_at=updated_at,
                     preserved_customer_info=data.get("preserved_customer_info")
                 )
+                
+                if session.fashion_preferences:
+                    session.product_details["fashion_preferences"] = session.fashion_preferences.copy()
+                    if session.fashion_preferences.get("color"):
+                        session.product_details["selected_color"] = session.fashion_preferences["color"]
+                    if session.fashion_preferences.get("size"):
+                        session.product_details["selected_size"] = session.fashion_preferences["size"]
+                    if session.fashion_preferences.get("style"):
+                        session.product_details["selected_style"] = session.fashion_preferences["style"]
+                    if session.fashion_preferences.get("occasion"):
+                        session.product_details["selected_occasion"] = session.fashion_preferences["occasion"]
                 
                 logger.info(f"📂 Loaded order collection session from database for user {telegram_id}")
                 return session
@@ -1268,10 +1353,16 @@ Ready to order for your {detected_occasion} occasion? 😊"""
             session = self._load_session_from_database(telegram_id)
             if session:
                 # Only restore if session is not completed or cancelled
-                if session.state not in [OrderCollectionState.COMPLETED, OrderCollectionState.CANCELLED]:
+                if session.state in ACTIVE_SESSION_STATES:
                     self.active_sessions[telegram_id] = session
                     logger.info(f"🔄 Restored order collection session for user {telegram_id}")
                     return True
+                
+                try:
+                    self.supabase.table("order_collection_sessions").delete().eq("telegram_id", telegram_id).execute()
+                    logger.info(f"🧹 Cleared terminal order session for user {telegram_id}")
+                except Exception as cleanup_error:
+                    logger.warning(f"Error clearing terminal session for user {telegram_id}: {cleanup_error}")
             
             return False
             
@@ -1294,6 +1385,10 @@ Ready to order for your {detected_occasion} occasion? 😊"""
     
     def _validate_extracted_info(self, session: OrderCollectionSession):
         """Validate extracted information and add errors if invalid."""
+        session.errors = []
+        if session.fashion_preferences is None:
+            session.fashion_preferences = {}
+        
         # Validate name
         if session.customer_info.get("name"):
             is_valid, error = AddressValidator.validate_name(session.customer_info["name"])
@@ -1330,6 +1425,11 @@ Ready to order for your {detected_occasion} occasion? 😊"""
         for field in required_address_fields:
             if not session.shipping_address.get(field):
                 session.errors.append(f"Missing required field: {field}")
+        
+        required_fashion_fields = [("size", "size preference"), ("color", "color preference")]
+        for field, label in required_fashion_fields:
+            if not session.fashion_preferences.get(field):
+                session.errors.append(f"Missing required fashion preference: {label}")
 
 # Import os for environment variables
 import os

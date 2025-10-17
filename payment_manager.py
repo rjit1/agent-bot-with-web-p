@@ -71,6 +71,12 @@ class PaymentManager:
             if total_amount < Decimal('1'):
                 total_amount = Decimal('1')
             
+            fashion_preferences = product_details.get("fashion_preferences") or {}
+            selected_color = product_details.get("selected_color") or fashion_preferences.get("color")
+            selected_size = product_details.get("selected_size") or fashion_preferences.get("size")
+            selected_style = product_details.get("selected_style") or fashion_preferences.get("style")
+            selected_occasion = product_details.get("selected_occasion") or fashion_preferences.get("occasion")
+            
             # Create order in database
             order_result = self.supabase.rpc(
                 "create_order",
@@ -100,7 +106,10 @@ class PaymentManager:
                     "p_quantity": quantity,
                     "p_unit_price": float(unit_price),
                     "p_product_details": json.dumps({
-                        "color": product_details.get("selected_color"),
+                        "color": selected_color,
+                        "size": selected_size,
+                        "style": selected_style,
+                        "occasion": selected_occasion,
                         "age_range": product_details.get("age_range"),
                         "specifications": product_details.get("specifications", {})
                     })
@@ -109,6 +118,33 @@ class PaymentManager:
             
             if not item_added.data:
                 raise Exception("Failed to add item to order")
+            
+            existing_pending_order = None
+            try:
+                pending_orders = self.supabase.table("orders").select("order_id, status").eq("user_id", user_id).eq("status", "pending_payment").neq("order_id", order_id).order("created_at", desc=True).limit(1).execute()
+                if pending_orders.data:
+                    existing_pending_order = pending_orders.data[0]["order_id"]
+            except Exception as fetch_error:
+                logger.warning(f"Error checking existing pending orders for user {user_id}: {fetch_error}")
+            
+            if existing_pending_order:
+                logger.info(f"Found existing pending order {existing_pending_order} for user {user_id}, cancelling before creating new one")
+                try:
+                    self.supabase.rpc(
+                        "update_order_status",
+                        {
+                            "p_order_id": existing_pending_order,
+                            "p_new_status": "cancelled",
+                            "p_changed_by": "system",
+                            "p_notes": f"Cancelled due to replacement by new order {order_id}"
+                        }
+                    ).execute()
+                    self.supabase.table("payments").update({
+                        "status": "cancelled",
+                        "updated_at": datetime.now().isoformat()
+                    }).eq("order_id", self._get_order_internal_id(existing_pending_order)).execute()
+                except Exception as cancel_error:
+                    logger.warning(f"Error cancelling previous pending order {existing_pending_order} for user {user_id}: {cancel_error}")
             
             # Create Razorpay order
             razorpay_order_data = {
@@ -119,7 +155,11 @@ class PaymentManager:
                     "order_id": order_id,
                     "customer_name": customer_details["name"],
                     "customer_phone": customer_details["phone"],
-                    "product_name": product_details["title"]
+                    "product_name": product_details["title"],
+                    "color": selected_color or "",
+                    "size": selected_size or "",
+                    "style": selected_style or "",
+                    "occasion": selected_occasion or ""
                 }
             }
             
@@ -181,7 +221,13 @@ class PaymentManager:
                         "reminder_enable": True,
                         "notes": {
                             "order_id": order_id,
-                            "customer_name": customer_details["name"]
+                            "customer_name": customer_details["name"],
+                            "customer_phone": customer_details["phone"],
+                            "product_name": product_details["title"],
+                            "color": selected_color or "",
+                            "size": selected_size or "",
+                            "style": selected_style or "",
+                            "occasion": selected_occasion or ""
                         }
                     }
                     
@@ -231,6 +277,12 @@ class PaymentManager:
                     "p_notes": f"{payment_method} generated for payment"
                 }
             ).execute()
+            
+            if existing_pending_order:
+                try:
+                    logger.info(f"Cleared previous pending order {existing_pending_order} for user {user_id}")
+                except Exception:
+                    pass
             
             # Prepare return data
             result = {
