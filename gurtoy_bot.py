@@ -2813,7 +2813,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             "phone": f"📞 Call us at {config.BUSINESS_PHONE_BUY} (Owner Direct) or {config.BUSINESS_PHONE_INQUIRY} (General)",
             "email": f"📧 Email: {config.BUSINESS_EMAIL}",
             "whatsapp": f"💬 WhatsApp: wa.me/{config.BUSINESS_WHATSAPP}",
-            "address": "📍 Shop No. 6/7, Char Khamba Road, Model Town, Ludhiana, Punjab, India"
+            "address": f"📍 {config.BUSINESS_ADDRESS}"
         }
         
         if info_type == "all":

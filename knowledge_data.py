@@ -16,9 +16,9 @@ def get_knowledge_chunks():
         {
             "chunk_id": "contact_information",
             "title": "Fashion Mart Contact Information",
-            "content": "For inquiries: Call 9876151585. For purchases: Call 6283837649. Store Location: PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003. Google Maps: https://maps.app.goo.gl/koBoUFYEtE3mvdCC7. We welcome walk-in customers for personalized styling and expert fashion advice.",
+            "content": "📞 For inquiries: Call 9876151585. For purchases: Call 6283837649 (Owner Direct Line). 🏪 Store Location: PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003. 🗺️ Google Maps: https://maps.app.goo.gl/koBoUFYEtE3mvdCC7. 💬 WhatsApp: 9876151585. 📧 Email: fashionmart@gmail.com. We welcome walk-in customers for personalized styling and expert fashion advice. Visit us for the latest fashion collection!",
             "category": "contact_info",
-            "keywords": ["contact", "phone", "address", "location", "ludhiana", "punjab", "maps", "visit"],
+            "keywords": ["contact", "phone", "address", "location", "ludhiana", "punjab", "maps", "visit", "shop", "store", "fashion mart"],
             "priority": 1
         },
         {
