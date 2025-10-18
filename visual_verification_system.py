@@ -111,35 +111,37 @@ class VisualVerificationSystem:
             mime_type = mime_type_map.get(file_ext, 'image/jpeg')
             
             # Create analysis prompt
-            prompt = """You are a product analysis expert. Analyze this image to understand what product the customer is looking for.
+            prompt = """You are a fashion product analysis expert. Analyze this image to understand what fashion product the customer is looking for.
 
 **Your Task:**
-Generate a detailed analysis that will help find the exact or similar product in a toy store database.
+Generate a detailed analysis that will help find the exact or similar product in a WOMEN'S FASHION STORE database.
 
 **Focus on:**
-1. **Product Type**: What kind of product? (electric jeep, bike, scooter, doll, puzzle, etc.)
-2. **Design & Style**: Describe the overall design and appearance
+1. **Product Type**: What kind of fashion item? (cardigan, shrug, crop top, kurta, dress, coat, blazer, sweater, etc.)
+2. **Design & Style**: Describe the overall design, cut, and silhouette
 3. **Colors**: List ALL visible colors (primary and secondary)
-4. **Key Features**: Identify visible features (lights, wheels, seats, steering, buttons, etc.)
-5. **Size Category**: Estimate size (small, medium, large, extra-large)
-6. **Age Suitability**: Estimate appropriate age range
-7. **Material & Build**: Describe visible materials (plastic, metal, rubber wheels, etc.)
+4. **Key Features**: Identify visible features (buttons, neckline, sleeves, patterns, embroidery, pockets, closures, etc.)
+5. **Size Category**: Estimate size range (XS, S, M, L, XL, XXL)
+6. **Fabric & Texture**: Describe visible fabric type and texture (knitted, cotton, silk, denim, woolen, etc.)
+7. **Style Category**: Classify style (casual, formal, ethnic, western, traditional, party wear, etc.)
 8. **Brand/Model**: If visible, identify brand or model information
 
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
 {
-    "product_type": "specific product category",
+    "product_type": "specific fashion product category",
     "detailed_description": "comprehensive description for embedding (3-5 sentences)",
     "colors": ["color1", "color2", "color3"],
     "primary_color": "main color",
     "key_features": ["feature1", "feature2", "feature3", "feature4"],
-    "age_range": "X-Y years",
-    "size_category": "small|medium|large|extra-large",
+    "size_range": "XS-XXL or specific sizes",
+    "size_category": "XS|S|M|L|XL|XXL",
+    "fabric_texture": "fabric type and texture",
     "style_keywords": ["keyword1", "keyword2", "keyword3"],
+    "style_category": "casual|formal|ethnic|western|traditional|party",
     "brand_model": "brand or model if visible",
     "confidence": "high|medium|low",
-    "image_context": "brief context about the image (indoor/outdoor, angle, etc.)"
+    "image_context": "brief context about the image (studio/outdoor, worn/flat-lay, angle, etc.)"
 }
 
 **Important:**
@@ -324,10 +326,17 @@ Compare the customer's image with each product image and determine:
 4. Which products are RELATED (related category but different product)
 5. Which products are NOT MATCHES
 
+**CRITICAL MATCHING RULES - BE STRICT:**
+- **exact_match**: ONLY if it's the EXACT same product, same color, same design (confidence ≥ 0.9)
+- **color_variant**: ONLY if it's the SAME product but different color (confidence ≥ 0.8)
+- **similar_product**: ONLY if it's VERY similar style, design, and features (confidence ≥ 0.6)
+- **related_product**: Same category but notably different design (confidence ≥ 0.4)
+- **no_match**: If confidence < 0.4 OR completely different products
+
 **For each product, provide:**
 - Match type (exact_match, color_variant, similar_product, related_product, no_match)
 - Confidence level (very_high, high, medium, low, very_low)
-- Confidence score (0.0-1.0)
+- Confidence score (0.0-1.0) - BE HONEST, don't inflate scores
 - Visual similarity level
 - Whether product type, design, color, and features match
 - Color differences (if any)
@@ -536,13 +545,22 @@ Compare both images visually and determine:
 2. Are they SIMILAR products? (same type, different variant)
 3. Are they DIFFERENT products? (not a match)
 
+**CRITICAL MATCHING RULES - BE STRICT:**
+- **exact_match**: ONLY if it's the EXACT same product, same color, same design (confidence ≥ 0.9)
+- **color_variant**: ONLY if it's the SAME product but different color (confidence ≥ 0.8)
+- **similar_product**: ONLY if it's VERY similar style, design, and features (confidence ≥ 0.6)
+- **related_product**: Same category but notably different design (confidence ≥ 0.4)
+- **no_match**: If confidence < 0.4 OR completely different products
+
 **Analyze:**
-- Product type match (ride-on car, bike, jeep, etc.)
+- Product type match (cardigan, shrug, top, dress, etc.)
 - Design and style similarity
 - Color match or difference
-- Feature similarity (wheels, lights, seats, etc.)
+- Feature similarity (buttons, neckline, sleeves, pattern, etc.)
 - Size and proportions
 - Overall visual similarity
+
+**IMPORTANT:** Be honest with confidence scores. Don't inflate them. If products are different, mark as no_match.
 
 **Response Format:**
 Return ONLY valid JSON (no markdown, no extra text):
@@ -713,7 +731,33 @@ Now compare the images:"""
             
             logger.info(f"✅ Batch visual verification completed: {len(matched_products)} results")
             
-            # Find best match
+            # CRITICAL FIX: Filter out products that don't meet minimum confidence threshold
+            # Remove NO_MATCH products and products with very low confidence
+            qualified_products = []
+            for match in matched_products:
+                # Skip NO_MATCH products entirely
+                if match.match_type == MatchType.NO_MATCH:
+                    logger.info(f"❌ Filtering out NO_MATCH product: {match.product_title}")
+                    continue
+                
+                # Skip products with confidence below minimum threshold
+                if match.confidence_score < self.min_confidence_threshold:
+                    logger.info(f"❌ Filtering out low confidence ({match.confidence_score:.2f}) product: {match.product_title}")
+                    continue
+                
+                # Skip products with "not_recommended" recommendation
+                if match.recommendation == "not_recommended":
+                    logger.info(f"❌ Filtering out not_recommended product: {match.product_title}")
+                    continue
+                
+                qualified_products.append(match)
+            
+            logger.info(f"🎯 {len(qualified_products)}/{len(matched_products)} products passed quality filters")
+            
+            # Use qualified products for matching
+            matched_products = qualified_products
+            
+            # Find best match from qualified products
             best_match = None
             if matched_products:
                 # Sort by confidence score and match type priority
