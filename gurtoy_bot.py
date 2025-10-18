@@ -12,6 +12,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
+from difflib import SequenceMatcher
 
 import google.generativeai as genai
 from google.api_core import exceptions as google_exceptions
@@ -475,6 +476,11 @@ class FashionMartAI:
         # Get chat model from environment
         chat_model = os.getenv("CHAT_MODEL", "models/gemini-2.5-flash")
         
+        # Cache for product brands/titles (dynamically extracted)
+        self._brand_cache = None
+        self._brand_cache_timestamp = 0
+        self._BRAND_CACHE_TTL = 3600  # 1 hour cache
+        
         # Build tools list
         tools = [
             {"function_declarations": [self._create_search_knowledge_tool()]},
@@ -546,6 +552,81 @@ class FashionMartAI:
         
         # Initialize last smart response storage
         self._last_smart_response = None
+    
+    async def _get_dynamic_brands(self) -> List[str]:
+        """
+        Dynamically extract all unique brand names from the database.
+        Uses caching to avoid repeated database queries.
+        
+        Returns:
+            List of brand names (product titles) from database
+        """
+        try:
+            current_time = time.time()
+            
+            # Check if cache is still valid
+            if self._brand_cache is not None and (current_time - self._brand_cache_timestamp) < self._BRAND_CACHE_TTL:
+                logger.info(f"🔄 Using cached brands ({len(self._brand_cache)} brands)")
+                return self._brand_cache
+            
+            # Fetch all product titles from database
+            result = supabase.table("products").select("title").execute()
+            
+            if result.data:
+                # Extract unique brand names, normalize them
+                brands = set()
+                for row in result.data:
+                    title = row.get("title", "").strip().lower()
+                    if title:
+                        brands.add(title)
+                
+                self._brand_cache = sorted(list(brands))
+                self._brand_cache_timestamp = current_time
+                logger.info(f"✅ Loaded {len(self._brand_cache)} unique brands from database: {self._brand_cache}")
+                return self._brand_cache
+            else:
+                logger.warning("⚠️ No products found in database")
+                return []
+                
+        except Exception as e:
+            logger.error(f"❌ Error loading dynamic brands: {e}")
+            # Return fallback list if database fails (all current brands in lowercase)
+            return [
+                'teacher', 'teachar', 'oster', 'imported', 'nice girl', 'richeez', 
+                'g f o', 'gfo', 'compinent', 'klj oswal', 'softwarm', 'soft warm',
+                'i like you', 'pinaque', 'spink', 'suprimo', 'unique', 'wintley'
+            ]
+    
+    def _fuzzy_match_brand(self, query_word: str, brands: List[str], threshold: float = 0.65) -> Optional[Tuple[str, float]]:
+        """
+        Use fuzzy matching to find similar brand names.
+        
+        Args:
+            query_word: The word to match (e.g., "oswal")
+            brands: List of known brand names
+            threshold: Minimum similarity ratio (0-1) to consider a match
+        
+        Returns:
+            Tuple of (matched_brand, confidence_score) or None if no match found
+        """
+        best_match = None
+        best_ratio = 0.0
+        
+        for brand in brands:
+            # Calculate similarity ratio
+            ratio = SequenceMatcher(None, query_word.lower(), brand.lower()).ratio()
+            
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = brand
+        
+        # Return match only if it exceeds threshold
+        if best_ratio >= threshold:
+            logger.info(f"🎯 Fuzzy match: '{query_word}' → '{best_match}' (confidence: {best_ratio:.2f})")
+            return (best_match, best_ratio)
+        
+        logger.info(f"❌ No fuzzy match found for '{query_word}' (best was '{best_match}' with {best_ratio:.2f})")
+        return None
     
     def _parse_age_from_query(self, query: str) -> Optional[int]:
         """Extract age from user query using multiple patterns."""
@@ -750,26 +831,41 @@ When user mentions specific products, styles, categories, OR BRAND NAMES:
 → CALL search_products() IMMEDIATELY!
 
 **🏷️ BRAND NAME RECOGNITION (CRITICAL!):**
-Fashion Mart carries these PREMIUM BRANDS - recognize them INSTANTLY and search immediately:
+Fashion Mart carries PREMIUM BRANDS - recognize them INSTANTLY and search immediately:
 • **"Teacher"** or **"Teachar"** → Premium brand cardigans/shrughs/kots
 • **"Oster"** → Premium brand cardigans  
+• **"KLJ Oswal"** → Premium Oswal brand (handles "oswal", "KLJ oswal" variations)
 • **"Imported"** → Imported fashion items (tops, tunics, cardigans)
 • **"Nice girl"**, **"Richeez"**, **"G F O"**, **"Compinent"** → Other premium brands
+• **"Softwarm"**, **"Soft warm"**, **"I like you"**, **"Pinaque"**, **"Spink"**, **"Suprimo"**, **"Unique"**, **"Wintley"** → Additional premium brands
 
-**⚠️ CRITICAL INSTRUCTION: When user mentions ANY of these BRAND NAMES:**
-→ IMMEDIATELY call search_products() with the brand name
+🤖 **INTELLIGENT BRAND MATCHING:** The system now automatically recognizes ALL brand names from our database and even handles misspellings and variations! If a user mentions a brand name (even if slightly misspelled), the backend will intelligently fuzzy-match it to the correct brand. 
+
+**⚠️ CRITICAL INSTRUCTION: When user mentions ANY BRAND NAME (or what sounds like a brand):**
+→ IMMEDIATELY call search_products() with EXACTLY what the user said - DO NOT SUBSTITUTE OR CORRECT!
+→ The system's intelligent backend will fuzzy-match and find the correct brand automatically
 → DON'T ask clarifying questions like "what do you want?"
 → DON'T ask "kya matlab hai?" (what do you mean?)
 → DON'T interpret brand names as professions (e.g., "teacher" ≠ school teacher!)
+→ DON'T try to correct misspellings yourself - let the system's fuzzy matching handle it
+→ DON'T substitute one brand for another - pass the query as the user said it!
 
-**When user mentions BRAND NAME → Search IMMEDIATELY:**
-✅ "teacher product" → search_products(query="teacher")
-✅ "show me some teacher product" → search_products(query="teacher")
+**When user mentions BRAND NAME → Search IMMEDIATELY (pass query exactly as given):**
+✅ "teacher product" → search_products(query="teacher product")
+✅ "show me some teacher product" → search_products(query="show me some teacher product")
 ✅ "teacher cardigan" → search_products(query="teacher cardigan")
-✅ "oster dikhao" → search_products(query="oster")
+✅ "oster dikhao" → search_products(query="oster dikhao")
+✅ "oswal products" → search_products(query="oswal products") [system will fuzzy-match to "KLJ oswal"]
 ✅ "imported top" → search_products(query="imported top")
-✅ "show me teacher items" → search_products(query="teacher")
-✅ "richeez brand" → search_products(query="richeez")
+✅ "show me teacher items" → search_products(query="show me teacher items")
+✅ "richeez brand" → search_products(query="richeez brand")
+
+**FUZZY MATCHING EXAMPLES (System handles misspellings automatically):**
+✅ "oswal products" → Backend fuzzy-matches to KLJ oswal → correct Oswal products shown
+✅ "teachar" OR "techer" → Backend recognizes variations → shows Teacher products
+✅ "richees" OR "richeez" → Backend recognizes both → shows Richeez products
+✅ "g f o" OR "gfo" OR "G.F.O" → Backend recognizes variations → shows G F O products
+✅ "softwram" OR "softwarm" → Backend fuzzy-matches → shows Softwarm products
 
 **When user mentions CATEGORY/STYLE:**
 ✅ "cardigan" → search_products(query="cardigan")
@@ -1587,7 +1683,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             logger.error(f"Error searching knowledge base: {e}")
             return []
     
-    def _is_product_name_query(self, query: str) -> bool:
+    def _is_product_name_query(self, query: str, dynamic_brands: Optional[List[str]] = None) -> bool:
         """
         Check if query is likely a product name/ID search rather than descriptive search.
         
@@ -1595,7 +1691,11 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         - Very short queries (≤5 chars)
         - Queries with only alphanumeric characters
         - Queries that look like product IDs or model names
-        - Fashion brand names mentioned in the system instruction
+        - Fashion brand names mentioned in the system instruction or dynamically loaded
+        
+        Args:
+            query: The search query
+            dynamic_brands: Optional list of dynamic brand names from database
         """
         query_clean = query.strip().lower()
         
@@ -1607,19 +1707,24 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         if query_clean.replace(' ', '').isalnum() and len(query_clean.split()) <= 2:
             return True
         
-        # Known product name patterns - UPDATED with Fashion Mart brand names
+        # Build product patterns list
         product_patterns = [
             # Toys/Vehicles (Old patterns)
             'g63', 'g63s', 'jeep', 'bike', 'car', 'scooter',
             '2188', '2189', '2190', '2191', '2192',  # Product IDs
             'red', 'blue', 'black', 'white', 'yellow', 'green',  # Color + product
-            # Fashion Mart BRAND NAMES (CRITICAL!)
+            # Fashion Mart BRAND NAMES (CRITICAL!) - All current brands
             'teacher', 'teachar', 'oster', 'imported', 'nice girl', 'richeez', 
-            'g f o', 'compinent',  # Brand names from system instruction
+            'g f o', 'gfo', 'compinent', 'klj oswal', 'oswal', 'softwarm', 'soft warm',
+            'i like you', 'pinaque', 'spink', 'suprimo', 'unique', 'wintley',  # All brand names
             # Fashion categories (CRITICAL!)
             'cardigan', 'crop top', 'kot', 'tunic', 'shrug', 'court set',
             'high neck', 'v neck', 'long cardigan', 'sl cardigan'  # Product categories
         ]
+        
+        # Add dynamic brands to the pattern list
+        if dynamic_brands:
+            product_patterns.extend(dynamic_brands)
         
         if any(pattern in query_clean for pattern in product_patterns):
             return True
@@ -1812,17 +1917,44 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         HYBRID SEARCH: Combines keyword search + semantic search with intelligent fallback for fashion items.
         
         Strategy:
-        1. If query looks like product name/ID → try keyword search first
-        2. If keyword search finds high-confidence matches → return them
-        3. Otherwise → try semantic search
-        4. If semantic search with size filter fails → try without size filter
-        5. Always ensure user gets some results
+        1. Check for fuzzy brand matching with intelligent suggestions
+        2. If query looks like product name/ID → try keyword search first
+        3. If keyword search finds high-confidence matches → return them
+        4. Otherwise → try semantic search
+        5. If semantic search with size filter fails → try without size filter
+        6. Always ensure user gets some results
         """
         try:
             logger.info(f"🔍 Starting hybrid search for: '{query}'")
             
+            # STEP 0: Intelligent brand matching with fuzzy detection
+            # Get dynamic brands from database
+            dynamic_brands = await self._get_dynamic_brands()
+            
+            # Check if query contains potential brand names
+            query_words = query.lower().split()
+            corrected_query = query
+            
+            for word in query_words:
+                # Try fuzzy matching for short words that might be brand names
+                if len(word) >= 3:
+                    fuzzy_result = self._fuzzy_match_brand(word, dynamic_brands, threshold=0.60)
+                    if fuzzy_result:
+                        matched_brand, confidence = fuzzy_result
+                        if confidence >= 0.70:  # High confidence - auto-correct
+                            logger.info(f"🔄 Auto-correcting '{word}' → '{matched_brand}' (confidence: {confidence:.2f})")
+                            corrected_query = query.replace(word, matched_brand)
+                        elif confidence >= 0.60:  # Medium confidence - log and suggest
+                            logger.warning(f"⚠️ Possible brand name mismatch: '{word}' might be '{matched_brand}' (confidence: {confidence:.2f})")
+                            # Try searching with corrected version
+                            corrected_query = query.replace(word, matched_brand)
+            
+            if corrected_query != query:
+                logger.info(f"🔄 Query corrected: '{query}' → '{corrected_query}'")
+                query = corrected_query
+            
             # STEP 1: Check if this looks like a product name query
-            is_product_query = self._is_product_name_query(query)
+            is_product_query = self._is_product_name_query(query, dynamic_brands)
             
             if is_product_query:
                 logger.info(f"🎯 Detected product name query: '{query}'")
