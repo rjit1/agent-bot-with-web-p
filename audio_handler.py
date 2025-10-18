@@ -5,6 +5,7 @@ Handles voice message download, transcription, and cleanup.
 import os
 import asyncio
 import logging
+import base64
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -17,7 +18,7 @@ import google.generativeai as genai
 logger = logging.getLogger(__name__)
 
 class AudioHandler:
-    """Handles voice message processing with Gemini 2.5 Flash."""
+    """Handles voice message processing using Gemini Flash models."""
     
     # Directory for temporary audio storage
     TEMP_AUDIO_DIR = Path(__file__).parent / "temp_audio"
@@ -28,13 +29,19 @@ class AudioHandler:
     # Maximum audio duration to process (in seconds)
     MAX_AUDIO_DURATION = 300  # 5 minutes
     
-    def __init__(self, telegram_bot_token: str, gemini_api_key: str):
+    def __init__(
+        self,
+        telegram_bot_token: str,
+        gemini_api_key: str,
+        voice_model_name: Optional[str] = None,
+    ):
         """
         Initialize AudioHandler.
         
         Args:
             telegram_bot_token: Telegram bot token for file downloads
             gemini_api_key: Gemini API key for transcription
+            voice_model_name: Optional override for the Gemini model used for voice transcription
         """
         self.telegram_bot_token = telegram_bot_token
         self.telegram_api_url = f"https://api.telegram.org/bot{telegram_bot_token}"
@@ -42,10 +49,34 @@ class AudioHandler:
         # Configure Gemini
         genai.configure(api_key=gemini_api_key)
         
+        # Voice transcription model configuration
+        self.voice_model_name = (
+            voice_model_name
+            or os.getenv("VOICE_MODEL_NAME")
+            or os.getenv("VOICE_MODEL")
+            or "gemini-2.5-flash"
+        )
+        self.voice_model_temperature = float(
+            os.getenv("VOICE_MODEL_TEMPERATURE", "0.2")
+        )
+        self.voice_model_top_p = float(os.getenv("VOICE_MODEL_TOP_P", "0.8"))
+        self.voice_model_top_k = int(os.getenv("VOICE_MODEL_TOP_K", "40"))
+        self.voice_post_process_strategy = (
+            os.getenv("VOICE_TRANSCRIPTION_POST_PROCESS", "strip")
+            .strip()
+            .lower()
+        )
+        
         # Ensure temp directory exists
         self.TEMP_AUDIO_DIR.mkdir(exist_ok=True)
         
-        logger.info("🎤 AudioHandler initialized")
+        logger.info(
+            "🎤 AudioHandler initialized | Model: %s | Temp: %.2f | top_p: %.2f | top_k: %d",
+            self.voice_model_name,
+            self.voice_model_temperature,
+            self.voice_model_top_p,
+            self.voice_model_top_k,
+        )
     
     async def download_voice_message(
         self, 
@@ -120,7 +151,7 @@ class AudioHandler:
     
     async def transcribe_audio(self, audio_path: str) -> Optional[Dict[str, Any]]:
         """
-        Transcribe audio using Gemini 2.5 Flash.
+        Transcribe audio using Gemini 2.5 Flash with base64 encoding.
         
         Args:
             audio_path: Path to audio file
@@ -136,37 +167,47 @@ class AudioHandler:
             }
         """
         start_time = datetime.now()
-        uploaded_file = None
         
         try:
             # Get file size
             file_size_kb = os.path.getsize(audio_path) / 1024
             logger.info(f"🎧 Processing audio: {file_size_kb:.2f} KB")
             
-            # Upload audio file to Gemini File API
-            logger.info("📤 Uploading audio file to Gemini...")
-            uploaded_file = await asyncio.to_thread(
-                genai.upload_file,
-                path=audio_path,
-                display_name=f"voice_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            # Read and encode audio file as base64
+            logger.info("📤 Encoding audio file...")
+            async with aiofiles.open(audio_path, 'rb') as f:
+                audio_data = await f.read()
+            
+            audio_base64 = base64.standard_b64encode(audio_data).decode('utf-8')
+            logger.info(f"✅ Audio encoded: {len(audio_base64) // 1024} KB (base64)")
+            
+            # Determine MIME type based on file extension
+            file_ext = Path(audio_path).suffix.lower()
+            mime_types = {
+                '.ogg': 'audio/ogg',
+                '.mp3': 'audio/mpeg',
+                '.wav': 'audio/wav',
+                '.m4a': 'audio/mp4',
+                '.webm': 'audio/webm'
+            }
+            mime_type = mime_types.get(file_ext, 'audio/ogg')
+            logger.info(f"📝 Detected MIME type: {mime_type}")
+            
+            # Create Gemini model (configurable)
+            model = genai.GenerativeModel(
+                model_name=self.voice_model_name,
+                generation_config={
+                    "temperature": self.voice_model_temperature,
+                    "top_p": self.voice_model_top_p,
+                    "top_k": self.voice_model_top_k,
+                    "max_output_tokens": int(
+                        os.getenv("VOICE_MODEL_MAX_OUTPUT_TOKENS", "2048")
+                    ),
+                },
             )
-            logger.info(f"✅ File uploaded: {uploaded_file.uri}")
-            
-            # Wait for file to be processed (if needed)
-            while uploaded_file.state.name == "PROCESSING":
-                logger.info("⏳ Waiting for file processing...")
-                await asyncio.sleep(2)
-                uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
-            
-            if uploaded_file.state.name == "FAILED":
-                logger.error("❌ File processing failed")
-                return None
-            
-            # Create Gemini model
-            model = genai.GenerativeModel('gemini-2.0-flash-exp')
             
             # Create intelligent prompt for transcription
-            prompt = """You are an expert audio transcription assistant for a toy store chatbot.
+            prompt = """You are an expert audio transcription assistant for a fashion store chatbot.
 
 **Your Task:**
 1. Transcribe this voice message EXACTLY as spoken
@@ -186,14 +227,26 @@ Just provide the transcribed text, nothing else.
 
 Now transcribe this voice message:"""
             
-            # Generate transcription
-            logger.info("🤖 Sending to Gemini for transcription...")
+            # Generate transcription using base64-encoded audio
+            logger.info(
+                "🤖 Sending to Gemini for transcription... | Model: %s",
+                self.voice_model_name,
+            )
             response = await asyncio.to_thread(
                 model.generate_content,
-                [prompt, uploaded_file]
+                [
+                    prompt,
+                    {
+                        "mime_type": mime_type,
+                        "data": audio_base64
+                    }
+                ]
             )
             
             transcription = response.text.strip()
+            
+            # Apply optional post-processing if configured
+            transcription = self._post_process_transcription(transcription)
             
             # Calculate processing time
             processing_time = (datetime.now() - start_time).total_seconds()
@@ -219,40 +272,73 @@ Now transcribe this voice message:"""
         except Exception as e:
             logger.error(f"Error transcribing audio: {e}", exc_info=True)
             return None
-        
-        finally:
-            # Clean up uploaded file from Gemini File API
-            if uploaded_file:
-                try:
-                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-                    logger.info(f"🗑️ Deleted uploaded file from Gemini: {uploaded_file.name}")
-                except Exception as e:
-                    logger.warning(f"Failed to delete uploaded file: {e}")
     
+    def _post_process_transcription(self, transcription: str) -> str:
+        """Apply optional post-processing strategies to the transcription."""
+        strategy = self.voice_post_process_strategy
+        logger.debug("🧹 Post-processing transcription | strategy=%s", strategy)
+
+        try:
+            if strategy == "none":
+                return transcription
+            if strategy == "strip":
+                return transcription.strip()
+            if strategy == "smart-strip":
+                return self._smart_strip_transcription(transcription)
+            if strategy == "normalize":
+                return self._normalize_transcription(transcription)
+        except Exception as error:
+            logger.warning(
+                "⚠️ Post-processing failed (strategy=%s): %s",
+                strategy,
+                error,
+            )
+            return transcription
+
+        return transcription
+
+    def _smart_strip_transcription(self, transcription: str) -> str:
+        """Trim repeated leading/trailing tokens added by the model."""
+        cleaned = transcription.strip()
+        cleaned = cleaned.lstrip('"\'“”').rstrip('"\'“”')  # Remove leading/trailing quotes
+        cleaned = "\n".join(line.strip() for line in cleaned.splitlines())
+        lines = [line for line in cleaned.splitlines() if line.strip()]
+        return "\n".join(lines)
+
+    def _normalize_transcription(self, transcription: str) -> str:
+        """Normalize transcription text for consistent spacing (casing preserved)."""
+        cleaned = self._smart_strip_transcription(transcription)
+        return " ".join(cleaned.split())
+
     def _estimate_confidence(self, transcription: str, file_size_kb: float) -> str:
-        """
-        Estimate transcription confidence based on heuristics.
-        
-        Args:
-            transcription: Transcribed text
-            file_size_kb: Audio file size in KB
-            
-        Returns:
-            "high", "medium", or "low"
-        """
-        # Very short transcriptions from larger files might be low confidence
+        """Estimate transcription confidence based on heuristics with additional metrics."""
         words = transcription.split()
         word_count = len(words)
-        
-        # Heuristics
-        if word_count < 2 and file_size_kb > 10:
+        character_count = len(transcription)
+        avg_word_length = (character_count / word_count) if word_count else 0
+        unique_words = len(set(words)) if words else 0
+        lexical_diversity = (unique_words / word_count) if word_count else 0
+    
+        logger.debug(
+            "🔎 Confidence heuristics | words=%d | chars=%d | avg_len=%.2f | diversity=%.2f | size=%.2fKB",
+            word_count,
+            character_count,
+            avg_word_length,
+            lexical_diversity,
+            file_size_kb,
+        )
+    
+        if word_count == 0:
             return "low"
-        elif word_count < 5 and file_size_kb > 20:
+        if word_count < 3 and file_size_kb > 10:
+            return "low"
+        if word_count < 5 and file_size_kb > 20:
             return "medium"
-        elif word_count >= 5:
-            return "high"
-        else:
+        if avg_word_length < 2.3 and word_count > 3:
             return "medium"
+        if lexical_diversity < 0.4 and word_count > 8:
+            return "medium"
+        return "high"
     
     def _detect_language(self, text: str) -> str:
         """
@@ -389,19 +475,18 @@ Now transcribe this voice message:"""
 audio_handler: Optional[AudioHandler] = None
 
 
-def initialize_audio_handler(telegram_bot_token: str, gemini_api_key: str) -> AudioHandler:
-    """
-    Initialize the global audio handler instance.
-    
-    Args:
-        telegram_bot_token: Telegram bot token
-        gemini_api_key: Gemini API key
-        
-    Returns:
-        Initialized AudioHandler instance
-    """
+def initialize_audio_handler(
+    telegram_bot_token: str,
+    gemini_api_key: str,
+    voice_model_name: Optional[str] = None,
+) -> AudioHandler:
+    """Initialize the global audio handler instance."""
     global audio_handler
-    audio_handler = AudioHandler(telegram_bot_token, gemini_api_key)
+    audio_handler = AudioHandler(
+        telegram_bot_token=telegram_bot_token,
+        gemini_api_key=gemini_api_key,
+        voice_model_name=voice_model_name,
+    )
     return audio_handler
 
 

@@ -6,6 +6,7 @@ import os
 import asyncio
 import logging
 import json
+import base64
 from typing import Optional, Dict, Any, List
 from datetime import datetime
 from pathlib import Path
@@ -130,7 +131,7 @@ class ImageHandler:
         caption: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
-        Analyze one or more fashion images using Gemini 2.5 Flash.
+        Analyze one or more fashion images using Gemini 2.5 Flash with base64 encoding.
         
         Args:
             image_paths: List of paths to image files
@@ -153,39 +154,41 @@ class ImageHandler:
             }
         """
         start_time = datetime.now()
-        uploaded_files = []
         
         try:
             num_images = len(image_paths)
             logger.info(f"🔍 Analyzing {num_images} image(s)...")
             
-            # Upload all images to Gemini File API
+            # Prepare image content in base64 format
+            image_content = []
+            mime_type_map = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.webp': 'image/webp',
+                '.heic': 'image/heic',
+                '.heif': 'image/heif'
+            }
+            
             for i, image_path in enumerate(image_paths):
                 file_size_kb = os.path.getsize(image_path) / 1024
-                logger.info(f"📤 Uploading image {i+1}/{num_images}: {file_size_kb:.2f} KB")
+                logger.info(f"📤 Processing image {i+1}/{num_images}: {file_size_kb:.2f} KB")
                 
-                uploaded_file = await asyncio.to_thread(
-                    genai.upload_file,
-                    path=image_path,
-                    display_name=f"image_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{i}"
-                )
+                # Read and encode image as base64
+                async with aiofiles.open(image_path, 'rb') as f:
+                    image_data = await f.read()
                 
-                # Wait for file to be processed
-                while uploaded_file.state.name == "PROCESSING":
-                    logger.info(f"⏳ Waiting for image {i+1} processing...")
-                    await asyncio.sleep(1)
-                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+                image_base64 = base64.standard_b64encode(image_data).decode('utf-8')
                 
-                if uploaded_file.state.name == "FAILED":
-                    logger.error(f"❌ Image {i+1} processing failed")
-                    continue
+                # Determine MIME type
+                file_ext = Path(image_path).suffix.lower()
+                mime_type = mime_type_map.get(file_ext, 'image/jpeg')
                 
-                uploaded_files.append(uploaded_file)
-                logger.info(f"✅ Image {i+1} uploaded: {uploaded_file.uri}")
-            
-            if not uploaded_files:
-                logger.error("No images were successfully uploaded")
-                return None
+                image_content.append({
+                    "mime_type": mime_type,
+                    "data": image_base64
+                })
+                logger.info(f"✅ Image {i+1} encoded: {file_ext} -> {mime_type}")
             
             # Create intelligent prompt
             prompt = self._create_analysis_prompt(num_images, caption)
@@ -193,8 +196,8 @@ class ImageHandler:
             # Create Gemini model
             model = genai.GenerativeModel('gemini-2.5-flash')
             
-            # Prepare content (prompt + all uploaded images)
-            content_parts = [prompt] + uploaded_files
+            # Prepare content (prompt + all base64-encoded images)
+            content_parts = [prompt] + image_content
             
             # Generate analysis
             logger.info("🤖 Sending to Gemini for analysis...")
@@ -227,20 +230,12 @@ class ImageHandler:
             
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON response: {e}")
-            logger.error(f"Response text: {response_text[:500]}")
+            if 'response_text' in locals():
+                logger.error(f"Response text: {response_text[:500]}")
             return None
         except Exception as e:
             logger.error(f"Error analyzing images: {e}", exc_info=True)
             return None
-        
-        finally:
-            # Clean up uploaded files from Gemini File API
-            for uploaded_file in uploaded_files:
-                try:
-                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-                    logger.info(f"🗑️ Deleted uploaded file from Gemini: {uploaded_file.name}")
-                except Exception as e:
-                    logger.warning(f"Failed to delete uploaded file: {e}")
     
     async def generate_product_search_description(
         self, 
@@ -248,7 +243,7 @@ class ImageHandler:
         caption: Optional[str] = None
     ) -> Optional[Dict[str, Any]]:
         """
-        Generate detailed product description for image-based search.
+        Generate detailed product description for image-based search with base64 encoding.
         This is different from the general analysis - focused on product matching.
         
         Args:
@@ -261,41 +256,42 @@ class ImageHandler:
         try:
             logger.info(f"🖼️ Generating product search description for {len(image_paths)} image(s)")
             
-            # Upload images to Gemini
-            uploaded_files = []
-            for image_path in image_paths:
-                uploaded_file = await asyncio.to_thread(
-                    genai.upload_file,
-                    path=image_path,
-                    display_name=f"product_search_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                uploaded_files.append(uploaded_file)
+            # Prepare images in base64 format
+            mime_type_map = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.webp': 'image/webp',
+                '.heic': 'image/heic',
+                '.heif': 'image/heif'
+            }
             
-            # Wait for processing
-            max_wait = 30  # seconds
-            wait_time = 0
-            for uploaded_file in uploaded_files:
-                while uploaded_file.state.name == "PROCESSING" and wait_time < max_wait:
-                    await asyncio.sleep(1)
-                    wait_time += 1
-                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+            image_content = []
+            for image_path in image_paths:
+                async with aiofiles.open(image_path, 'rb') as f:
+                    image_data = await f.read()
                 
-                if uploaded_file.state.name == "FAILED":
-                    logger.error("Image upload failed")
-                    return None
+                image_base64 = base64.standard_b64encode(image_data).decode('utf-8')
+                file_ext = Path(image_path).suffix.lower()
+                mime_type = mime_type_map.get(file_ext, 'image/jpeg')
+                
+                image_content.append({
+                    "mime_type": mime_type,
+                    "data": image_base64
+                })
             
             # Create product-focused prompt
             prompt = """You are a product search expert. Analyze this image to understand what EXACT product the customer is looking for.
 
 **Your Task:**
-Generate a DETAILED description that would help find the EXACT same product in a toy store database.
+Generate a DETAILED description that would help find the EXACT same product in a fashion store database.
 
 **Focus on SPECIFIC details:**
-1. **Exact Product Type**: Be very specific (e.g., "Gurtoy electric tricycle motorcycle", not just "tricycle")
+1. **Exact Product Type**: Be very specific (e.g., "women's casual cotton kurta", not just "dress")
 2. **Specific Brand/Model**: If visible, include brand and model information
 3. **Exact Colors**: List specific color names and shades
 4. **Unique Features**: Identify distinctive features that make this product unique
-5. **Exact Specifications**: Size, wheel type, seat style, etc.
+5. **Exact Specifications**: Size, fabric, sleeve type, style, etc.
 6. **Visual Characteristics**: Any unique visual elements
 
 **Response Format:**
@@ -308,12 +304,12 @@ Return ONLY valid JSON (no markdown, no extra text):
     "key_features": ["specific_feature1", "specific_feature2", "specific_feature3"],
     "brand_model": "brand and model if visible",
     "unique_characteristics": ["unique_element1", "unique_element2"],
-    "age_range": "X-Y years",
-    "size_category": "small|medium|large|extra-large",
+    "style": "casual|formal|ethnic|western|traditional",
+    "size_estimate": "XS|S|M|L|XL|XXL",
     "confidence": "high|medium|low"
 }
 
-**CRITICAL:** Be as specific as possible. Include brand names, model numbers, exact colors, and unique features that would distinguish this exact product from similar ones.
+**CRITICAL:** Be as specific as possible. Include brand names, exact colors, and unique features that would distinguish this exact product from similar ones.
 
 Now analyze the product image:"""
 
@@ -324,7 +320,7 @@ Now analyze the product image:"""
             model = genai.GenerativeModel('gemini-2.5-flash')
             response = await asyncio.to_thread(
                 model.generate_content,
-                [prompt] + uploaded_files
+                [prompt] + image_content
             )
             
             # Parse response
@@ -336,25 +332,12 @@ Now analyze the product image:"""
             
             result = json.loads(response_text)
             
-            # Clean up uploaded files
-            for uploaded_file in uploaded_files:
-                await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-            
             logger.info(f"✅ Generated product search description: {result.get('product_type')}")
             return result
             
         except Exception as e:
             logger.error(f"Error generating product search description: {e}", exc_info=True)
             return None
-        
-        finally:
-            # Clean up uploaded files from Gemini File API
-            for uploaded_file in uploaded_files:
-                try:
-                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-                    logger.info(f"🗑️ Deleted uploaded file from Gemini: {uploaded_file.name}")
-                except Exception as e:
-                    logger.warning(f"Failed to delete uploaded file: {e}")
     
     def _create_analysis_prompt(self, num_images: int, caption: Optional[str]) -> str:
         """
@@ -512,7 +495,7 @@ Return ONLY valid JSON (no markdown, no extra text):
 
     async def analyze_style_and_color(self, image_paths: List[str], caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
-        Analyze style and color coordination in fashion images.
+        Analyze style and color coordination in fashion images with base64 encoding.
         
         Args:
             image_paths: List of paths to image files
@@ -524,21 +507,29 @@ Return ONLY valid JSON (no markdown, no extra text):
         try:
             logger.info(f"🎨 Analyzing style and color in {len(image_paths)} image(s)")
             
-            # Upload images to Gemini
-            uploaded_files = []
-            for image_path in image_paths:
-                uploaded_file = await asyncio.to_thread(
-                    genai.upload_file,
-                    path=image_path,
-                    display_name=f"style_color_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                uploaded_files.append(uploaded_file)
+            # Prepare images in base64 format
+            mime_type_map = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.webp': 'image/webp',
+                '.heic': 'image/heic',
+                '.heif': 'image/heif'
+            }
             
-            # Wait for processing
-            for uploaded_file in uploaded_files:
-                while uploaded_file.state.name == "PROCESSING":
-                    await asyncio.sleep(1)
-                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+            image_content = []
+            for image_path in image_paths:
+                async with aiofiles.open(image_path, 'rb') as f:
+                    image_data = await f.read()
+                
+                image_base64 = base64.standard_b64encode(image_data).decode('utf-8')
+                file_ext = Path(image_path).suffix.lower()
+                mime_type = mime_type_map.get(file_ext, 'image/jpeg')
+                
+                image_content.append({
+                    "mime_type": mime_type,
+                    "data": image_base64
+                })
             
             # Create style and color analysis prompt
             prompt = """You are a fashion style and color expert for Fashion Mart.
@@ -580,7 +571,7 @@ Return ONLY valid JSON:
             
             # Create Gemini model and analyze
             model = genai.GenerativeModel('gemini-2.5-flash')
-            content_parts = [prompt] + uploaded_files
+            content_parts = [prompt] + image_content
             
             response = await asyncio.to_thread(model.generate_content, content_parts)
             
@@ -593,13 +584,6 @@ Return ONLY valid JSON:
             
             analysis = json.loads(response_text)
             
-            # Cleanup uploaded files
-            for uploaded_file in uploaded_files:
-                try:
-                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-                except Exception:
-                    pass
-            
             logger.info(f"✅ Style and color analysis complete")
             return analysis
             
@@ -609,7 +593,7 @@ Return ONLY valid JSON:
 
     async def estimate_size_from_image(self, image_paths: List[str], caption: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """
-        Estimate size from fashion images for size recommendations.
+        Estimate size from fashion images for size recommendations using base64 encoding.
         
         Args:
             image_paths: List of paths to image files
@@ -618,24 +602,41 @@ Return ONLY valid JSON:
         Returns:
             Dictionary with size estimation analysis
         """
+        start_time = datetime.now()
+        
         try:
             logger.info(f"📏 Estimating size from {len(image_paths)} image(s)")
             
-            # Upload images to Gemini
-            uploaded_files = []
-            for image_path in image_paths:
-                uploaded_file = await asyncio.to_thread(
-                    genai.upload_file,
-                    path=image_path,
-                    display_name=f"size_estimation_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                )
-                uploaded_files.append(uploaded_file)
+            # Prepare image content in base64 format
+            image_content = []
+            mime_type_map = {
+                '.jpg': 'image/jpeg',
+                '.jpeg': 'image/jpeg',
+                '.png': 'image/png',
+                '.webp': 'image/webp',
+                '.heic': 'image/heic',
+                '.heif': 'image/heif'
+            }
             
-            # Wait for processing
-            for uploaded_file in uploaded_files:
-                while uploaded_file.state.name == "PROCESSING":
-                    await asyncio.sleep(1)
-                    uploaded_file = await asyncio.to_thread(genai.get_file, uploaded_file.name)
+            for i, image_path in enumerate(image_paths):
+                file_size_kb = os.path.getsize(image_path) / 1024
+                logger.info(f"📤 Processing image {i+1}/{len(image_paths)}: {file_size_kb:.2f} KB")
+                
+                # Read and encode image as base64
+                async with aiofiles.open(image_path, 'rb') as f:
+                    image_data = await f.read()
+                
+                image_base64 = base64.standard_b64encode(image_data).decode('utf-8')
+                
+                # Determine MIME type
+                file_ext = Path(image_path).suffix.lower()
+                mime_type = mime_type_map.get(file_ext, 'image/jpeg')
+                
+                image_content.append({
+                    "mime_type": mime_type,
+                    "data": image_base64
+                })
+                logger.info(f"✅ Image {i+1} encoded: {file_ext} -> {mime_type}")
             
             # Create size estimation prompt
             prompt = """You are a fashion size expert for Fashion Mart.
@@ -675,8 +676,9 @@ Return ONLY valid JSON:
             
             # Create Gemini model and analyze
             model = genai.GenerativeModel('gemini-2.5-flash')
-            content_parts = [prompt] + uploaded_files
+            content_parts = [prompt] + image_content
             
+            logger.info("🤖 Sending to Gemini for size estimation...")
             response = await asyncio.to_thread(model.generate_content, content_parts)
             
             # Parse response
@@ -688,18 +690,20 @@ Return ONLY valid JSON:
             
             analysis = json.loads(response_text)
             
-            # Cleanup uploaded files
-            for uploaded_file in uploaded_files:
-                try:
-                    await asyncio.to_thread(genai.delete_file, uploaded_file.name)
-                except Exception:
-                    pass
+            # Calculate processing time
+            processing_time = (datetime.now() - start_time).total_seconds()
+            analysis["processing_time"] = processing_time
             
-            logger.info(f"✅ Size estimation complete: {analysis.get('estimated_size', 'Unknown')}")
+            logger.info(f"✅ Size estimation complete ({processing_time:.2f}s): {analysis.get('estimated_size', 'Unknown')}")
             return analysis
             
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse JSON response: {e}")
+            if 'response_text' in locals():
+                logger.error(f"Response text: {response_text[:500]}")
+            return None
         except Exception as e:
-            logger.error(f"Error in size estimation: {e}")
+            logger.error(f"Error in size estimation: {e}", exc_info=True)
             return None
 
     async def _enhance_fashion_analysis(self, base_analysis: Dict[str, Any], image_paths: List[str]) -> Dict[str, Any]:

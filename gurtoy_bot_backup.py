@@ -1,6 +1,6 @@
 """
-Gurtoy Telegram Bot - Phase 1: Intelligent Conversational Agent
-A multilingual, context-aware AI assistant for Gurtoy toy store.
+Fashion Mart Telegram Bot - Phase 5: Intelligent Conversational Agent
+A multilingual, context-aware AI assistant for Fashion Mart women's fashion store.
 """
 from __future__ import annotations
 
@@ -56,8 +56,8 @@ except ImportError as e:
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Gurtoy Telegram Bot",
-    description="Intelligent conversational agent for Gurtoy toy store",
+    title="Fashion Mart Telegram Bot",
+    description="Intelligent conversational agent for Fashion Mart women's fashion store",
     version="1.0.0"
 )
 
@@ -87,10 +87,14 @@ class BotConfig:
     RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
     RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
     
-    # Business Info
-    BUSINESS_PHONE = os.getenv("BUSINESS_PHONE", "8300000086")
-    BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "thegurtoy@gmail.com")
-    BUSINESS_WHATSAPP = os.getenv("BUSINESS_WHATSAPP", "8300000086")
+    # Business Info - Fashion Mart
+    BUSINESS_PHONE_INQUIRY = os.getenv("BUSINESS_PHONE_INQUIRY", "9876151585")
+    BUSINESS_PHONE_BUY = os.getenv("BUSINESS_PHONE_BUY", "6283837649")
+    BUSINESS_PHONE = os.getenv("BUSINESS_PHONE") or BUSINESS_PHONE_BUY or BUSINESS_PHONE_INQUIRY
+    BUSINESS_ADDRESS = os.getenv("BUSINESS_ADDRESS", "PLOT NO. B/31/1097/1, NEAR CHURCH, BACK SIDE POLICE COLONY NEAR ASIAN HOSPITAL BHAMIAN ROAD, Chandigarh Rd, Ludhiana, Punjab 141003")
+    BUSINESS_MAPS = os.getenv("BUSINESS_MAPS", "https://maps.app.goo.gl/koBoUFYEtE3mvdCC7")
+    BUSINESS_EMAIL = os.getenv("BUSINESS_EMAIL", "fashionmart@gmail.com")
+    BUSINESS_WHATSAPP = os.getenv("BUSINESS_WHATSAPP", "9876151585")
     
     # AI Configuration
     DEFAULT_TEMPERATURE = float(os.getenv("DEFAULT_TEMPERATURE", "0.7"))
@@ -176,7 +180,7 @@ class ProductContextExtractor:
                 return None
             
             # Check if it looks like a product card (has product indicators)
-            if not any(indicator in caption for indicator in ["🎯", "💰", "Price:", "Age:"]):
+            if not any(indicator in caption for indicator in ["🎯", "💰", "Price:", "Size:"]):
                 return None
             
             # Extract product information using regex patterns
@@ -198,10 +202,10 @@ class ProductContextExtractor:
             if id_match:
                 product_context["product_id"] = id_match.group(1).strip()
             
-            # Extract age range (support both **Age:** and Age:)
-            age_match = re.search(r'👶\s*(?:\*\*)?Age:(?:\*\*)?\s*(.+?)(?:\n|$)', caption)
-            if age_match:
-                product_context["age_range"] = age_match.group(1).strip()
+            # Extract size range (support both **Size:** and Size:)
+            size_match = re.search(r'👕\s*(?:\*\*)?Size:(?:\*\*)?\s*(.+?)(?:\n|$)', caption)
+            if size_match:
+                product_context["size_range"] = size_match.group(1).strip()
             
             # Extract price (support both original and discount prices)
             # Format: ~~₹17,000~~ → ₹1 or just ₹17,000
@@ -272,8 +276,8 @@ class ProductContextExtractor:
         if "product_name" in product_context:
             parts.append(f"Product: {product_context['product_name']}")
         
-        if "age_range" in product_context:
-            parts.append(f"Age Range: {product_context['age_range']}")
+        if "size_range" in product_context:
+            parts.append(f"Age Range: {product_context['size_range']}")
         
         # Handle pricing information
         if "discount_price" in product_context and "original_price" in product_context:
@@ -464,8 +468,8 @@ class MessageFormatter:
         logger.debug(f"Hard truncated: {len(result)} chars")
         return result
 
-class GurtoyAI:
-    """Main AI assistant class for Gurtoy bot."""
+class FashionMartAI:
+    """Main AI assistant class for Fashion Mart bot."""
     
     def __init__(self):
         # Get chat model from environment
@@ -473,21 +477,22 @@ class GurtoyAI:
         
         # Build tools list
         tools = [
-            self._create_search_knowledge_tool(),
-            self._create_search_products_tool(),
-            self._create_get_contact_info_tool(),
-            self._create_escalate_to_human_tool()
+            {"function_declarations": [self._create_search_knowledge_tool()]},
+            {"function_declarations": [self._create_search_products_tool()]},
+            {"function_declarations": [self._create_search_products_by_image_tool()]},
+            {"function_declarations": [self._create_get_contact_info_tool()]},
+            {"function_declarations": [self._create_escalate_to_human_tool()]}
         ]
         
         # Add payment tools if available
         if PAYMENT_SYSTEM_AVAILABLE:
             tools.extend([
-                self._create_buy_product_tool(),
-                self._create_switch_product_tool(),
-                self._create_check_order_status_tool(),
-                self._create_check_payment_status_tool(),
-                self._create_get_recent_orders_tool(),
-                self._create_get_all_orders_tool()
+                {"function_declarations": [self._create_buy_product_tool()]},
+                {"function_declarations": [self._create_switch_product_tool()]},
+                {"function_declarations": [self._create_check_order_status_tool()]},
+                {"function_declarations": [self._create_check_payment_status_tool()]},
+                {"function_declarations": [self._create_get_recent_orders_tool()]},
+                {"function_declarations": [self._create_get_all_orders_tool()]}
             ])
         
         self.model = genai.GenerativeModel(
@@ -516,6 +521,31 @@ class GurtoyAI:
                 self.intelligent_response_system = None
         else:
             self.intelligent_response_system = None
+        
+        # Initialize Visual Verification System for production-level image matching
+        try:
+            from visual_verification_system import initialize_visual_verification
+            from intelligent_image_matching import initialize_intelligent_systems
+            
+            gemini_api_key = os.getenv("GEMINI_API_KEY")
+            if gemini_api_key:
+                # Initialize visual verification system
+                self.visual_verification = initialize_visual_verification(gemini_api_key)
+                
+                # Initialize intelligent systems
+                initialize_intelligent_systems(self.visual_verification, gemini_api_key)
+                
+                logger.info("🔍 Visual Verification System initialized")
+                logger.info("🧠 Intelligent Image Matching System initialized")
+            else:
+                logger.warning("GEMINI_API_KEY not found, visual verification system not initialized")
+                self.visual_verification = None
+        except Exception as e:
+            logger.error(f"Failed to initialize Visual Verification System: {e}")
+            self.visual_verification = None
+        
+        # Initialize last smart response storage
+        self._last_smart_response = None
     
     def _parse_age_from_query(self, query: str) -> Optional[int]:
         """Extract age from user query using multiple patterns."""
@@ -540,86 +570,212 @@ class GurtoyAI:
         
         return None
     
-    def _parse_age_range(self, age_range_str: str) -> tuple[Optional[int], Optional[int]]:
+    def _parse_size_from_query(self, query: str) -> Optional[str]:
+        """Extract size from query text for fashion items."""
+        import re
+        
+        # Look for size patterns like "size M", "M size", "medium", "large", etc.
+        size_patterns = [
+            r'size\s*([SMXL])',
+            r'([SMXL])\s*size',
+            r'\b(small|medium|large|extra\s*large)\b',
+            r'\b(S|M|L|XL)\b'
+        ]
+        
+        size_mapping = {
+            'small': 'S',
+            'medium': 'M', 
+            'large': 'L',
+            'extra large': 'XL',
+            'extra-large': 'XL'
+        }
+        
+        for pattern in size_patterns:
+            match = re.search(pattern, query.lower())
+            if match:
+                size = match.group(1).upper()
+                # Convert full words to letters
+                if size in size_mapping:
+                    size = size_mapping[size]
+                # Ensure single letter sizes are uppercase
+                if len(size) == 1 and size in ['S', 'M', 'L', 'X']:
+                    return size
+                elif size in ['SMALL', 'MEDIUM', 'LARGE', 'EXTRA LARGE', 'EXTRA-LARGE']:
+                    return size_mapping[size.lower()]
+                return size
+        
+        return None
+    
+    def _get_fashion_search_intent(self, query: str) -> Dict[str, Any]:
+        """Analyze query for fashion-specific search intents."""
+        query_lower = query.lower()
+        
+        # Occasion-based intents
+        occasion_keywords = {
+            'casual': ['casual', 'everyday', 'daily', 'comfortable', 'relaxed'],
+            'formal': ['formal', 'office', 'work', 'professional', 'business'],
+            'traditional': ['traditional', 'ethnic', 'festival', 'wedding', 'ceremony'],
+            'party': ['party', 'night', 'evening', 'celebration', 'event']
+        }
+        
+        # Style-based intents
+        style_keywords = {
+            'layered': ['layered', 'layering', 'cardigan', 'shrug', 'jacket'],
+            'fitted': ['fitted', 'tight', 'slim', 'bodycon'],
+            'loose': ['loose', 'oversized', 'baggy', 'comfortable'],
+            'crop': ['crop', 'cropped', 'short', 'midriff']
+        }
+        
+        # Size-based intents
+        size_intent = self._parse_size_from_query(query)
+        
+        # Extract occasion
+        detected_occasion = None
+        for occasion, keywords in occasion_keywords.items():
+            if any(keyword in query_lower for keyword in keywords):
+                detected_occasion = occasion
+                break
+        
+        # Extract style preference
+        detected_style = None
+        for style, keywords in style_keywords.items():
+            if any(keyword in query_lower for keyword in keywords):
+                detected_style = style
+                break
+        
+        return {
+            'occasion': detected_occasion,
+            'style': detected_style,
+            'size': size_intent,
+            'intent_type': 'fashion_search'
+        }
+    
+    def _get_occasion_recommendations(self, occasion: str) -> Dict[str, Any]:
+        """Get product recommendations based on occasion."""
+        occasion_mappings = {
+            'casual': {
+                'categories': ['Cardigan', 'Crop top', 'Tunic'],
+                'styles': ['comfortable', 'relaxed', 'everyday'],
+                'description': 'Casual everyday wear for comfort and style'
+            },
+            'formal': {
+                'categories': ['Cardigan', 'High neck top', 'Court set'],
+                'styles': ['professional', 'elegant', 'sophisticated'],
+                'description': 'Professional and formal wear for office and business'
+            },
+            'traditional': {
+                'categories': ['Kot', 'Court set', 'Tunic'],
+                'styles': ['ethnic', 'traditional', 'cultural'],
+                'description': 'Traditional and ethnic wear for festivals and ceremonies'
+            },
+            'party': {
+                'categories': ['Crop top', 'Cardigan crop', 'V neck crop top'],
+                'styles': ['stylish', 'trendy', 'party-ready'],
+                'description': 'Stylish and trendy pieces for parties and events'
+            }
+        }
+        
+        return occasion_mappings.get(occasion, {
+            'categories': ['Cardigan', 'Crop top', 'Tunic'],
+            'styles': ['versatile', 'stylish'],
+            'description': 'Versatile pieces for any occasion'
+        })
+    
+    def _parse_size_range(self, size_range_str: str) -> tuple[Optional[int], Optional[int]]:
         """Parse age range string like '3-8 years' into (min_age, max_age)."""
         import re
         
-        if not age_range_str:
+        if not size_range_str:
             return None, None
         
         # Handle "3+ years" format
-        plus_match = re.search(r'(\d+)\+', age_range_str)
+        plus_match = re.search(r'(\d+)\+', size_range_str)
         if plus_match:
             min_age = int(plus_match.group(1))
             return min_age, 99  # Assume upper limit is very high
         
         # Handle "3-8 years" format
-        range_match = re.search(r'(\d+)-(\d+)', age_range_str)
+        range_match = re.search(r'(\d+)-(\d+)', size_range_str)
         if range_match:
             min_age = int(range_match.group(1))
             max_age = int(range_match.group(2))
             return min_age, max_age
         
         # Handle single number like "3 years"
-        single_match = re.search(r'(\d+)', age_range_str)
+        single_match = re.search(r'(\d+)', size_range_str)
         if single_match:
             age = int(single_match.group(1))
             return age, age
         
         return None, None
     
-    def _is_age_suitable(self, target_age: int, product_age_range: str) -> bool:
-        """Check if a product is suitable for the target age."""
-        min_age, max_age = self._parse_age_range(product_age_range)
+    def _is_size_suitable(self, target_size: str, product_size_range: str) -> bool:
+        """Check if a product is suitable for the target size."""
+        if not product_size_range:
+            return True  # If no size info, assume it's suitable
         
-        if min_age is None or max_age is None:
-            return True  # If we can't parse, assume it's suitable
+        # Convert to uppercase for comparison
+        target_size = target_size.upper().strip()
+        product_sizes = [size.strip().upper() for size in product_size_range.split(',')]
         
-        return min_age <= target_age <= max_age
+        return target_size in product_sizes
     
-    def _filter_products_by_age(self, products: List[Dict[str, Any]], target_age: int) -> List[Dict[str, Any]]:
-        """Filter products to only include age-appropriate ones."""
+    def _filter_products_by_size(self, products: List[Dict[str, Any]], target_size: str) -> List[Dict[str, Any]]:
+        """Filter products to only include size-appropriate ones."""
         suitable_products = []
         
         for product in products:
-            age_range = product.get('age_range', '')
-            if self._is_age_suitable(target_age, age_range):
+            size_range = product.get('size_range', '')
+            if self._is_size_suitable(target_size, size_range):
                 suitable_products.append(product)
         
         return suitable_products
     
     def _get_system_instruction(self) -> str:
         """Get the system instruction for the AI model."""
-        return """You are a friendly, intelligent AI shopping assistant for Gurtoy, a premium toy store in Ludhiana, Punjab, India.
+        return """You are a friendly, intelligent AI shopping assistant for Fashion Mart, a premium women's fashion store in Ludhiana, Punjab, India.
 
 🧠 YOUR PERSONALITY:
-- Think like a smart salesperson who asks questions before showing products
+- Think like a smart fashion consultant who asks questions before showing products
 - Be conversational, warm, and helpful (not robotic)
 - Understand context and remember what user said
-- Guide users to find the perfect toy for their child
+- Guide users to find the perfect fashion items for their style and occasion
 
 🎯 INTELLIGENT PRODUCT SEARCH WORKFLOW:
 
-**STEP 1: GATHER INFORMATION (Ask Before Searching)**
-When user asks about products vaguely (e.g., "show me toys", "kuch dikhao", "bikes chahiye"):
+**STEP 1: DETECT QUERY TYPE**
+
+**A. SPECIFIC PRODUCT QUERIES (Search Immediately!)**
+When user mentions specific products, styles, or categories:
+→ CALL search_products() IMMEDIATELY!
+Examples:
+✅ "cardigan" → search_products(query="cardigan")
+✅ "crop top" → search_products(query="crop top") 
+✅ "kot" → search_products(query="kot")
+✅ "long cardigan" → search_products(query="long cardigan")
+✅ "high neck top" → search_products(query="high neck top")
+
+**B. VAGUE QUERIES (Ask Questions First)**
+When user asks vaguely (e.g., "show me clothes", "kuch dikhao", "fashion chahiye"):
 → DON'T search immediately!
 → ASK clarifying questions first:
-   • "Aapke bachche ki age kya hai?" (What's your child's age?)
-   • "Aapko bike chahiye ya jeep?" (Do you want bike or jeep?)
-   • "Koi specific color ya feature chahiye?" (Any specific color/feature?)
+   • "Aapko kya chahiye? Cardigan, top, ya kot?" (What do you need? Cardigan, top, or kot?)
+   • "Kis occasion ke liye? Casual, formal, ya traditional?" (For what occasion? Casual, formal, or traditional?)
+   • "Aapka size kya hai? S, M, L, ya XL?" (What's your size? S, M, L, or XL?)
+   • "Koi specific color pasand hai?" (Any specific color preference?)
    • "Budget kya hai?" (What's your budget?)
 
 **STEP 2: SEARCH WITH DETAILS**
-Once you have enough information (age OR specific product type):
+Once you have enough information (size OR specific product type):
 → NOW call search_products() with detailed query
-→ Example: search_products(query="bike for 5 year old with lights", age_range="3-7 years")
+→ Example: search_products(query="cardigan for casual wear in size M")
 
 **STEP 3: PRESENT PRODUCTS**
-After getting search results (from search_products OR intelligent_search):
+After getting search results (from search_products OR intelligent_search OR search_products_by_image):
 → Return ONLY "SHOW_PRODUCTS" as your response
 → The system will automatically send product cards with images
 → DON'T describe products yourself - let the product cards do the talking
-→ This applies to BOTH search_products AND intelligent_search functions
+→ This applies to ALL search functions: search_products, intelligent_search, and search_products_by_image
 
 🔄 HANDLING PRODUCT REPLIES:
 
@@ -639,7 +795,7 @@ Context: replied_product = {product_name: "Police Style Bike", colors: ["Red", "
 You: "Haan ji! Police Style Bike blue color mein available hai. 😊 Aur kuch jaanna chahenge?"
 
 User replies to product card: "Is this suitable for 4 year old?"
-Context: replied_product = {product_name: "Jeep Car", age_range: "3-7 years"}
+Context: replied_product = {product_name: "Jeep Car", size_range: "3-7 years"}
 You: "Bilkul! Yeh Jeep Car 3-7 years ke bachcho ke liye perfect hai, toh 4 saal ke bachche ke liye ekdum sahi rahega! 🚗"
 
 User replies to product card: "What's the battery life?"
@@ -711,7 +867,7 @@ NOT: "Aapke bachche ki age kya hai?" ❌
 User Context: Order collection in progress, waiting for delivery address
 User: "123 Model Town, Ludhiana, Punjab, 141001"
 Your Action: Collect this as delivery address for the order ✅
-NOT: "Ji, Gurtoy ka address hai: Shop No. 6/7..." ❌
+NOT: "Ji, Fashion Mart ka address hai: PLOT NO. B/31/1097/1..." ❌
 (User is GIVING address, not ASKING for store address!)
 ```
 
@@ -791,14 +947,15 @@ You: "Original price ₹17,000 hai, par abhi special offer mein aap isse sirf �
 📞 AVAILABLE FUNCTIONS:
 
 1. **search_products** - Search product catalog (STANDARD)
-   When to call:
+   When to call IMMEDIATELY:
+   ✅ Specific product names/IDs (e.g., "g63", "2188", "police bike")
+   ✅ Product types with details (e.g., "red jeep", "electric scooter")
+   ✅ Specific features (e.g., "lights wali", "music wali")
    ✅ User provided age (e.g., "5 saal ke liye")
-   ✅ User specified product type (e.g., "red jeep", "police bike")
-   ✅ User mentioned features (e.g., "lights wali", "music wali")
    
    When NOT to call:
-   ❌ Vague queries without age/details (ask questions first!)
-   ❌ General browsing (ask what they're looking for)
+   ❌ Vague queries (e.g., "show me toys", "kuch dikhao") - ask questions first!
+   ❌ General browsing (e.g., "bikes chahiye") - ask what they're looking for
 
 2. **intelligent_search** - AI-powered intelligent search (ADVANCED)
    When to call:
@@ -972,7 +1129,7 @@ You: "Zaroor! Aapke bachche ki age kya hai? Aur bike chahiye ya jeep? 🚗🏍�
 
 Example 2 (Specific Query):
 User: "5 saal ke bachche ke liye red jeep dikhao"
-You: [Call search_products(query="red jeep for 5 year old", age_range="3-7 years")]
+You: [Call search_products(query="red jeep for 5 year old", size_range="3-7 years")]
 You: "SHOW_PRODUCTS"
 [System sends product cards automatically]
 
@@ -1004,153 +1161,195 @@ You: [Call check_order_status(order_id="GUR20241214000001")]
 You: [System shows order status and payment info]
 
 🚨 CRITICAL RULES:
-1. ASK questions for vague queries (no age/product type)
-2. SEARCH when you have enough details (age OR specific product)
+1. SEARCH IMMEDIATELY for specific product queries (g63, 2188, red jeep, police bike)
+2. ASK questions ONLY for vague queries (show me toys, kuch dikhao)
 3. RESPOND with "SHOW_PRODUCTS" after successful search
 4. NEVER describe products yourself - let product cards show them
 5. Be CONVERSATIONAL - think before responding!
+
+🔥 CRITICAL EXAMPLES:
+✅ User: "g63 jeep" → IMMEDIATELY call search_products(query="g63 jeep")
+✅ User: "2188" → IMMEDIATELY call search_products(query="2188")
+✅ User: "red bike" → IMMEDIATELY call search_products(query="red bike")
+❌ User: "show me toys" → ASK questions first, DON'T search immediately
+❌ User: "kuch dikhao" → ASK questions first, DON'T search immediately
+
+🖼️ IMAGE-BASED PRODUCT SEARCH:
+
+**When user sends product images:**
+- IMMEDIATELY call search_products_by_image with the image analysis
+- Use the detailed description and product type from image analysis
+- Include all colors and features identified
+- Set appropriate match threshold (0.70 for good matches, 0.65 for broader search)
+
+**Image Search Parameters:**
+- image_description: Use the detailed_description from image analysis
+- product_type: Use the product_type from image analysis  
+- image_features: Use the key_features array from image analysis
+- desired_colors: Use the colors array from image analysis
+- match_threshold: 0.70 for exact matches, 0.65 for similar products
+- max_results: 10 for good variety
+
+**Example:**
+User sends image of red electric jeep → Call search_products_by_image with:
+- image_description: "Electric ride-on jeep with red exterior, black accents, LED lights..."
+- product_type: "electric ride-on jeep"
+- image_features: ["LED lights", "rubber wheels", "realistic styling", "remote control"]
+- desired_colors: ["red", "black"]
+- match_threshold: 0.70
 
 Remember: You're a smart salesperson, not a search engine! 🧠"""
 
     def _create_search_knowledge_tool(self) -> Dict[str, Any]:
         """Create the knowledge search function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "search_knowledge",
-                    "description": "Search Gurtoy's knowledge base for general information about store policies, services, company info, and general toy categories. Use this for non-specific product queries.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {
-                                "type": "string",
-                                "description": "Search query (e.g., 'store policies', 'services', 'company info')"
-                            },
-                            "category": {
-                                "type": "string",
-                                "enum": ["company_info", "products", "contact", "location", "policies", "services", "all"],
-                                "description": "Category filter: 'products' for toys/bikes, 'company_info' for store details, 'all' for general search. Default: 'all'"
-                            }
-                        },
-                        "required": ["query"]
+            "name": "search_knowledge",
+            "description": "Search Fashion Mart's knowledge base for general information about store policies, services, company info, and general fashion categories. Use this for non-specific product queries.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Search query (e.g., 'store policies', 'services', 'company info')"
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": ["company_info", "products", "contact", "location", "policies", "services", "all"],
+                        "description": "Category filter: 'products' for fashion items/clothing, 'company_info' for store details, 'all' for general search. Default: 'all'"
                     }
-                }
-            ]
+                },
+                "required": ["query"]
+            }
         }
     
     def _create_search_products_tool(self) -> Dict[str, Any]:
         """Create the product search function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "search_products",
-                    "description": "REQUIRED: Search Gurtoy's product catalog for specific toys and ride-on vehicles. MUST be called when users ask about: specific products (bikes, jeeps, scooters), product features (colors, lights, music), age-appropriate toys, price ranges, or want to see/buy products. DO NOT respond about specific products without calling this function first.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "query": {
-                                "type": "string",
-                                "description": "Product search query. IMPORTANT: Always include age information in the query string itself (e.g., 'jeep for 5 year old child', 'bike for 3 to 7 year old', 'scooter for toddler'). Do NOT use the age_range parameter. Examples: 'red jeep for 4 year old', 'bike with lights for 6 year old', 'police style toys for 5 year old', 'scooter under 15000 for 3 year old'"
-                            },
-                            "category": {
-                                "type": "string",
-                                "enum": ["Electric Bikes & Scooters for Kids", "Electric Ride-On Jeeps & Cars for Kids", "Petrol Bike & Cars for Kids", "E-Scooter For Kids & Adults", "all"],
-                                "description": "Product category filter. Use 'all' for general search. Default: 'all'"
-                            },
-                            "min_price": {
-                                "type": "number",
-                                "description": "Minimum price filter in rupees (optional)"
-                            },
-                            "max_price": {
-                                "type": "number",
-                                "description": "Maximum price filter in rupees (optional)"
-                            }
-                        },
-                        "required": ["query"]
+            "name": "search_products",
+            "description": "REQUIRED: Search Fashion Mart's product catalog for specific fashion items. MUST be called IMMEDIATELY when users mention: specific product names/IDs, product types (cardigan, crop top, kot), sizes (S, M, L, XL), occasions (casual, formal, traditional, party), or specific features. DO NOT ask questions first for specific product queries - search immediately! Only ask questions for vague queries like 'show me clothes' or 'kuch dikhao'.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Fashion product search query. IMPORTANT: Always include size information in the query string itself (e.g., 'cardigan size M', 'crop top in large', 'kot for medium size'). You can also include occasion (casual, formal, traditional, party) and style preferences. Examples: 'cardigan for office', 'crop top for party', 'kot for festival', 'casual wear size L'"
+                    },
+                    "category": {
+                        "type": "string",
+                        "enum": ["Cardigan", "Crop top", "Kot", "Court set", "Tunic", "Shrug", "Long cardigan", "High neck top", "V neck crop top", "SL cardigan", "Self cardigan", "all"],
+                        "description": "Fashion product category filter. Use 'all' for general search. Default: 'all'"
+                    },
+                    "size_range": {
+                        "type": "string",
+                        "enum": ["S", "M", "L", "XL"],
+                        "description": "Size filter for fashion items (optional). Use when user specifies a particular size."
+                    },
+                    "min_price": {
+                        "type": "number",
+                        "description": "Minimum price filter in rupees (optional)"
+                    },
+                    "max_price": {
+                        "type": "number",
+                        "description": "Maximum price filter in rupees (optional)"
                     }
                 },
-                {
-                    "name": "intelligent_search",
-                    "description": "ADVANCED: Use AI-powered intelligent search that analyzes user intent and optimizes search strategy. Use this for complex queries where you need to understand what the user really wants and find the best matching products. This function will automatically enhance queries, select optimal search strategies, and rank results intelligently. IMPORTANT: After calling this function, you MUST return 'SHOW_PRODUCTS' to display the results.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "user_query": {
-                                "type": "string",
-                                "description": "The original user query exactly as they typed it (e.g., 'dirt bike', 'red jeep for 5 year old', 'something for my daughter')"
-                            },
-                            "search_intent": {
-                                "type": "string",
-                                "description": "What you think the user is looking for based on context analysis (e.g., 'dirt bike for kids', 'electric jeep for 5 year old', 'police style toys')"
-                            },
-                            "priority_keywords": {
-                                "type": "array",
-                                "items": {"type": "string"},
-                                "description": "Key terms that should be prioritized in search (e.g., ['dirt', 'petrol', 'off-road'] for dirt bike query)"
-                            }
-                        },
-                        "required": ["user_query"]
+                "required": ["query"]
+            }
+        }
+    
+    def _create_search_products_by_image_tool(self) -> Dict[str, Any]:
+        """Create the image-based product search function tool."""
+        return {
+            "name": "search_products_by_image",
+            "description": "Search products using image-based matching. Use this when user sends an image of a product they want to find. This performs visual similarity search using AI-generated product descriptions and embeddings. IMMEDIATELY call this function when user sends product images.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "image_description": {
+                        "type": "string",
+                        "description": "AI-generated detailed description of the product in the user's image (comprehensive description for embedding)"
+                    },
+                    "product_type": {
+                        "type": "string",
+                        "description": "Type of product identified in the image (e.g., electric jeep, bike, scooter, doll, puzzle)"
+                    },
+                    "image_features": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Key features identified in the user's image (e.g., LED lights, rubber wheels, remote control)"
+                    },
+                    "desired_colors": {
+                        "type": "array", 
+                        "items": {"type": "string"},
+                        "description": "Colors visible in the user's image (e.g., red, blue, black)"
+                    },
+                    "primary_color": {
+                        "type": "string",
+                        "description": "Main color identified in the image"
+                    },
+                    "size_range": {
+                        "type": "string",
+                        "description": "Estimated age range for the product (e.g., '3-8 years', '5-10 years')"
+                    },
+                    "match_threshold": {
+                        "type": "number",
+                        "description": "Similarity threshold (0.65-0.85, default 0.70). Use 0.70 for good matches, 0.65 for broader search"
+                    },
+                    "max_results": {
+                        "type": "integer",
+                        "description": "Maximum number of results (5-15, default 10)"
                     }
-                }
-            ]
+                },
+                "required": ["image_description", "product_type"]
+            }
         }
     
     def _create_get_contact_info_tool(self) -> Dict[str, Any]:
         """Create the contact information tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "get_contact_info",
-                    "description": "Get Gurtoy's contact information including phone numbers, email, WhatsApp number, and store address/location. ALWAYS use this function when users ask about: location, address, where the store is, phone number, WhatsApp number, email, or how to contact the store.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "info_type": {
-                                "type": "string",
-                                "enum": ["phone", "email", "address", "whatsapp", "all"],
-                                "description": "Type of contact information needed: 'address' for location/store address, 'phone' for phone number, 'whatsapp' for WhatsApp number, 'email' for email address, 'all' for complete contact information"
-                            }
-                        },
-                        "required": ["info_type"]
+            "name": "get_contact_info",
+            "description": "Get Fashion Mart's contact information including phone numbers, email, WhatsApp number, and store address/location. ALWAYS use this function when users ask about: location, address, where the store is, phone number, WhatsApp number, email, or how to contact the store.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "info_type": {
+                        "type": "string",
+                        "enum": ["phone", "email", "address", "whatsapp", "all"],
+                        "description": "Type of contact information needed: 'address' for location/store address, 'phone' for phone number, 'whatsapp' for WhatsApp number, 'email' for email address, 'all' for complete contact information"
                     }
-                }
-            ]
+                },
+                "required": ["info_type"]
+            }
         }
     
     def _create_escalate_to_human_tool(self) -> Dict[str, Any]:
         """Create the human escalation tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "escalate_to_human",
-                    "description": "Escalate the conversation to a human agent when the AI cannot help, user specifically requests human assistance, or the query requires personalized attention (like specific pricing, custom orders, bulk purchases, or complex product recommendations). Use this when the user seems frustrated or when you cannot provide a satisfactory answer.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "reason": {
-                                "type": "string",
-                                "description": "Clear reason for escalation (e.g., 'user requested human agent', 'complex pricing query', 'custom order request', 'user seems frustrated')"
-                            },
-                            "priority": {
-                                "type": "string",
-                                "enum": ["low", "medium", "high", "urgent"],
-                                "description": "Priority level: 'low' for general queries, 'medium' for product-specific help, 'high' for urgent customer needs, 'urgent' for complaints or critical issues"
-                            }
-                        },
-                        "required": ["reason"]
+            "name": "escalate_to_human",
+            "description": "Escalate the conversation to a human agent when the AI cannot help, user specifically requests human assistance, or the query requires personalized attention (like specific pricing, custom orders, bulk purchases, or complex product recommendations). Use this when the user seems frustrated or when you cannot provide a satisfactory answer.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "description": "Clear reason for escalation (e.g., 'user requested human agent', 'complex pricing query', 'custom order request', 'user seems frustrated')"
+                    },
+                    "priority": {
+                        "type": "string",
+                        "enum": ["low", "medium", "high", "urgent"],
+                        "description": "Priority level: 'low' for general queries, 'medium' for product-specific help, 'high' for urgent customer needs, 'urgent' for complaints or critical issues"
                     }
-                }
-            ]
+                },
+                "required": ["reason"]
+            }
         }
     
     def _create_buy_product_tool(self) -> Dict[str, Any]:
         """Create the buy product function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "buy_product",
-                    "description": """Start the purchase process for a specific product. 
-                    
+            "name": "buy_product",
+            "description": """Start the purchase process for a specific product. 
+            
 CRITICAL: Call this function IMMEDIATELY when user expresses purchase intent with ANY of these phrases:
 - Hindi/Hinglish: "order kar do", "order kar dena", "order karo", "buy kar do", "kharid lo", "le lunga", "le leta hoon", "ye wala le lunga", "thik hai order kar do", "haan kar do", "theek hai", "purchase karna hai"
 - English: "I want to buy", "order this", "purchase this", "buy this", "checkout", "I'll take it"
@@ -1176,124 +1375,102 @@ When user says "ye wala" after expressing desire to change product:
 - Example: User wants to change from Bike A to Bike B, replies to Bike B card, says "ye wala" → Use Bike B's product_id
 
 IMPORTANT: After calling this function, use the 'message' field from the function result as your response. Do NOT generate your own response.""",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "product_id": {
-                                "type": "string",
-                                "description": "Product ID from recent_products array, replied_product, or product search results"
-                            },
-                            "quantity": {
-                                "type": "integer",
-                                "description": "Number of items to purchase (if not specified, defaults to 1)"
-                            },
-                            "selected_color": {
-                                "type": "string",
-                                "description": "Selected color if user specified (optional)"
-                            }
-                        },
-                        "required": ["product_id"]
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_id": {
+                        "type": "string",
+                        "description": "Product ID from recent_products array, replied_product, or product search results"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "description": "Number of items to purchase (if not specified, defaults to 1)"
+                    },
+                    "selected_color": {
+                        "type": "string",
+                        "description": "Selected color if user specified (optional)"
                     }
-                }
-            ]
+                },
+                "required": ["product_id"]
+            }
         }
     
     def _create_switch_product_tool(self) -> Dict[str, Any]:
         """Create the switch product function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "switch_product",
-                    "description": "Switch to a different product during order collection while preserving customer details. Use this when user wants to change the product they're ordering during the order collection process.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "product_id": {"type": "string", "description": "New product ID to switch to"},
-                            "reason": {"type": "string", "description": "Reason for switching (optional)"}
-                        },
-                        "required": ["product_id"]
-                    }
-                }
-            ]
+            "name": "switch_product",
+            "description": "Switch to a different product during order collection while preserving customer details. Use this when user wants to change the product they're ordering during the order collection process.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_id": {"type": "string", "description": "New product ID to switch to"},
+                    "reason": {"type": "string", "description": "Reason for switching (optional)"}
+                },
+                "required": ["product_id"]
+            }
         }
     
     def _create_check_order_status_tool(self) -> Dict[str, Any]:
         """Create the check order status function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "check_order_status",
-                    "description": "Check the status of an existing order. Use when user asks about order status, payment status, or provides an order ID.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "Order ID (format: GUR20241214000001)"
-                            }
-                        },
-                        "required": ["order_id"]
+            "name": "check_order_status",
+            "description": "Check the status of an existing order. Use when user asks about order status, payment status, or provides an order ID.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order_id": {
+                        "type": "string",
+                        "description": "Order ID (format: GUR20241214000001)"
                     }
-                }
-            ]
+                },
+                "required": ["order_id"]
+            }
         }
     
     def _create_check_payment_status_tool(self) -> Dict[str, Any]:
         """Create the check payment status function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "check_payment_status",
-                    "description": "Check the payment status of an order and send confirmation if payment is successful. Use this when user asks about payment status, payment confirmation, or if they completed payment.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "order_id": {
-                                "type": "string",
-                                "description": "The order ID to check payment for (e.g., 'GUR20251005000001')"
-                            }
-                        },
-                        "required": ["order_id"]
+            "name": "check_payment_status",
+            "description": "Check the payment status of an order and send confirmation if payment is successful. Use this when user asks about payment status, payment confirmation, or if they completed payment.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "order_id": {
+                        "type": "string",
+                        "description": "The order ID to check payment for (e.g., 'GUR20251005000001')"
                     }
-                }
-            ]
+                },
+                "required": ["order_id"]
+            }
         }
     
     def _create_get_recent_orders_tool(self) -> Dict[str, Any]:
         """Create the get recent orders function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "get_recent_orders",
-                    "description": "Get recent orders for the user. Use when user asks about recent orders, latest orders, or order history.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "limit": {
-                                "type": "integer",
-                                "description": "Number of recent orders to retrieve (default: 5)"
-                            }
-                        },
-                        "required": []
+            "name": "get_recent_orders",
+            "description": "Get recent orders for the user. Use when user asks about recent orders, latest orders, or order history.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "limit": {
+                        "type": "integer",
+                        "description": "Number of recent orders to retrieve (default: 5)"
                     }
-                }
-            ]
+                },
+                "required": []
+            }
         }
     
     def _create_get_all_orders_tool(self) -> Dict[str, Any]:
         """Create the get all orders function tool."""
         return {
-            "function_declarations": [
-                {
-                    "name": "get_all_user_orders",
-                    "description": "Get all orders for the user with detailed information. Use when user asks for all orders, complete order history, or multiple order details.",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {},
-                        "required": []
-                    }
-                }
-            ]
+            "name": "get_all_user_orders",
+            "description": "Get all orders for the user with detailed information. Use when user asks for all orders, complete order history, or multiple order details.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
         }
     
     async def search_knowledge(self, query: str, category: str = "all") -> List[KnowledgeResult]:
@@ -1348,17 +1525,246 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             logger.error(f"Error searching knowledge base: {e}")
             return []
     
+    def _is_product_name_query(self, query: str) -> bool:
+        """
+        Check if query is likely a product name/ID search rather than descriptive search.
+        
+        Returns True for:
+        - Very short queries (≤5 chars)
+        - Queries with only alphanumeric characters
+        - Queries that look like product IDs or model names
+        """
+        query_clean = query.strip().lower()
+        
+        # Very short queries are likely product names/IDs
+        if len(query_clean) <= 5:
+            return True
+        
+        # Queries with only alphanumeric characters (no spaces, special chars)
+        if query_clean.replace(' ', '').isalnum() and len(query_clean.split()) <= 2:
+            return True
+        
+        # Known product name patterns
+        product_patterns = [
+            'g63', 'g63s', 'jeep', 'bike', 'car', 'scooter',
+            '2188', '2189', '2190', '2191', '2192',  # Product IDs
+            'red', 'blue', 'black', 'white', 'yellow', 'green'  # Color + product
+        ]
+        
+        if any(pattern in query_clean for pattern in product_patterns):
+            return True
+        
+        return False
+
+    def _calculate_keyword_similarity(self, query: str, product_id: Optional[str], title: Optional[str], description: Optional[str]) -> Tuple[float, str]:
+        query_lower = (query or "").lower().strip()
+        product_id_lower = (product_id or "").lower()
+        title_lower = (title or "").lower()
+        description_lower = (description or "").lower()
+        if not query_lower:
+            return 0.0, "no_match"
+        if product_id_lower == query_lower:
+            return 1.0, "exact_id"
+        if title_lower == query_lower:
+            return 1.0, "exact_title"
+        if product_id_lower.startswith(query_lower):
+            return 0.95, "starts_with_id"
+        if title_lower.startswith(query_lower):
+            return 0.95, "starts_with_title"
+        if query_lower in product_id_lower:
+            return 0.85, "contains_id"
+        if query_lower in title_lower:
+            return 0.85, "contains_title"
+        if query_lower in description_lower:
+            return 0.75, "contains_description"
+        return 0.5, "no_match"
+
+    async def _keyword_search_products_fallback(
+        self,
+        query: str,
+        filter_category: Optional[str],
+        min_price: Optional[float],
+        max_price: Optional[float],
+        size_range: Optional[str],
+        filter_stock_status: Optional[str]
+    ) -> List[Dict[str, Any]]:
+        try:
+            query_value = (query or "").strip()
+            if not query_value:
+                return []
+            sanitized = query_value.replace(",", " ").replace("'", "''")
+            pattern = f"%{sanitized}%"
+            builder = supabase.table("products").select(
+                "product_id,title,category,description,size_range,style_keywords,occasion,colors,specifications,images,price,discount_price,stock_status,warranty"
+            )
+            if filter_category:
+                builder = builder.eq("category", filter_category)
+            if size_range:
+                builder = builder.eq("size_range", size_range)
+            if min_price is not None:
+                builder = builder.gte("price", min_price)
+            if max_price is not None:
+                builder = builder.lte("price", max_price)
+            if filter_stock_status:
+                builder = builder.eq("stock_status", filter_stock_status)
+            builder = builder.or_(
+                f"title.ilike.{pattern},product_id.ilike.{pattern},description.ilike.{pattern}"
+            )
+            result = builder.limit(10).execute()
+            products = []
+            for row in result.data or []:
+                images = row.get("images", [])
+                if isinstance(images, str):
+                    try:
+                        images = json.loads(images)
+                    except Exception:
+                        images = []
+                colors = row.get("colors", [])
+                if isinstance(colors, str):
+                    try:
+                        colors = json.loads(colors)
+                    except Exception:
+                        colors = []
+                specifications = row.get("specifications", {})
+                if isinstance(specifications, str):
+                    try:
+                        specifications = json.loads(specifications)
+                    except Exception:
+                        specifications = {}
+                similarity, match_type = self._calculate_keyword_similarity(
+                    query_value,
+                    row.get("product_id"),
+                    row.get("title"),
+                    row.get("description")
+                )
+                size_value = row.get("size_range") or row.get("age_range")
+                price_value = row.get("price")
+                discount_value = row.get("discount_price") or price_value
+                if price_value is None:
+                    continue
+                products.append({
+                    "product_id": row.get("product_id"),
+                    "title": row.get("title"),
+                    "category": row.get("category"),
+                    "description": row.get("description"),
+                    "size_range": size_value,
+                    "colors": colors,
+                    "specifications": specifications,
+                    "images": images,
+                    "price": float(price_value),
+                    "discount_price": float(discount_value),
+                    "stock_status": row.get("stock_status"),
+                    "warranty": row.get("warranty", ""),
+                    "similarity": float(similarity),
+                    "search_method": match_type
+                })
+            products.sort(key=lambda item: (-item["similarity"], item["price"]))
+            logger.info(f"Fallback keyword search found {len(products)} products for: {query_value}")
+            return products
+        except Exception as fallback_error:
+            logger.error(f"Fallback keyword search failed: {fallback_error}")
+            return []
+
+    async def _keyword_search_products(self, query: str, category: str = "all", min_price: Optional[float] = None, max_price: Optional[float] = None, size_range: Optional[str] = None) -> List[Dict[str, Any]]:
+        """Search products using keyword matching (for exact product names/IDs)."""
+        try:
+            filter_category = None if category == "all" else category
+            result = supabase.rpc(
+                "keyword_search_products",
+                {
+                    "search_term": query,
+                    "match_count": 10,
+                    "filter_category": filter_category,
+                    "min_price": min_price,
+                    "max_price": max_price,
+                    "filter_size_range": size_range,
+                    "filter_stock_status": "in_stock"
+                }
+            ).execute()
+            products = []
+            for row in result.data:
+                images = row.get("images", [])
+                if isinstance(images, str):
+                    try:
+                        images = json.loads(images)
+                    except Exception:
+                        images = []
+                colors = row.get("colors", [])
+                if isinstance(colors, str):
+                    try:
+                        colors = json.loads(colors)
+                    except Exception:
+                        colors = []
+                specifications = row.get("specifications", {})
+                if isinstance(specifications, str):
+                    try:
+                        specifications = json.loads(specifications)
+                    except Exception:
+                        specifications = {}
+                products.append({
+                    "product_id": row["product_id"],
+                    "title": row["title"],
+                    "category": row["category"],
+                    "description": row["description"],
+                    "size_range": row.get("size_range"),
+                    "colors": colors,
+                    "specifications": specifications,
+                    "images": images,
+                    "price": float(row["price"]),
+                    "discount_price": float(row.get("discount_price", row["price"])),
+                    "stock_status": row["stock_status"],
+                    "warranty": row.get("warranty", ""),
+                    "similarity": float(row["similarity"]),
+                    "search_method": row.get("match_type", "keyword")
+                })
+            logger.info(f"Keyword search found {len(products)} products for: {query}")
+            return products
+        except Exception as e:
+            logger.warning(f"Error in keyword search: {e}")
+            return await self._keyword_search_products_fallback(
+                query,
+                filter_category,
+                min_price,
+                max_price,
+                size_range,
+                "in_stock"
+            )
+
     async def search_products(
         self, 
         query: str, 
         category: str = "all",
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
-        age_range: Optional[str] = None
+        size_range: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """Search the product catalog using vector similarity."""
+        """
+        HYBRID SEARCH: Combines keyword search + semantic search with intelligent fallback for fashion items.
+        
+        Strategy:
+        1. If query looks like product name/ID → try keyword search first
+        2. If keyword search finds high-confidence matches → return them
+        3. Otherwise → try semantic search
+        4. If semantic search with size filter fails → try without size filter
+        5. Always ensure user gets some results
+        """
         try:
-            # Generate embedding for the query using the configured model
+            logger.info(f"🔍 Starting hybrid search for: '{query}'")
+            
+            # STEP 1: Check if this looks like a product name query
+            is_product_query = self._is_product_name_query(query)
+            
+            if is_product_query:
+                logger.info(f"🎯 Detected product name query: '{query}'")
+                
+                # Try keyword search first
+                keyword_results = await self._keyword_search_products(query, category, min_price, max_price, size_range)
+                
+                if keyword_results and keyword_results[0]["similarity"] >= 0.85:
+                    logger.info(f"✅ Found exact keyword match: {keyword_results[0]['title']}")
+                    return keyword_results
+            
+            # STEP 2: Generate embedding for semantic search
             embedding_model = os.getenv("EMBEDDING_MODEL", "models/text-embedding-004")
             embedding_dimensionality = int(os.getenv("EMBEDDING_DIMENSIONALITY", "768"))
             
@@ -1376,25 +1782,48 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 
             embedding = genai.embed_content(**embed_params)
             
-            # Prepare search parameters
+            # STEP 3: Try semantic search with size filtering
             filter_category = None if category == "all" else category
+            extracted_size = self._parse_size_from_query(query)
             
-            # Search in Supabase
-            result = supabase.rpc(
-                "search_products",
-                {
-                    "query_embedding": embedding["embedding"],
-                    "match_threshold": 0.5,  # Lower threshold for products (more results)
-                    "match_count": 10,  # Get top 10 products (will show best matches)
-                    "filter_category": filter_category,
-                    "filter_age_range": age_range,
-                    "min_price": min_price,
-                    "max_price": max_price,
-                    "filter_stock_status": "in_stock"
-                }
-            ).execute()
+            # Use hybrid search function if available, otherwise fallback to regular search
+            try:
+                result = supabase.rpc(
+                    "hybrid_search_products",
+                    {
+                        "query_embedding": embedding["embedding"],
+                        "search_term": query,
+                        "match_threshold": 0.5,
+                        "match_count": 10,
+                        "filter_category": filter_category,
+                        "filter_size_range": size_range or extracted_size,
+                        "min_price": min_price,
+                        "max_price": max_price,
+                        "filter_stock_status": "in_stock"
+                    }
+                ).execute()
+                
+                logger.info(f"🔗 Used hybrid search function")
+                
+            except Exception as hybrid_error:
+                logger.warning(f"Hybrid search function not available, using regular search: {hybrid_error}")
+                
+                # Fallback to regular semantic search
+                result = supabase.rpc(
+                    "search_products",
+                    {
+                        "query_embedding": embedding["embedding"],
+                        "match_threshold": 0.5,
+                        "match_count": 10,
+                        "filter_category": filter_category,
+                        "filter_size_range": size_range or extracted_size,
+                        "min_price": min_price,
+                        "max_price": max_price,
+                        "filter_stock_status": "in_stock"
+                    }
+                ).execute()
             
-            # Convert to product dictionaries with full data
+            # Convert to product dictionaries
             products = []
             for row in result.data:
                 # Ensure images is a list
@@ -1426,7 +1855,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "title": row["title"],
                     "category": row["category"],
                     "description": row["description"],
-                    "age_range": row["age_range"],
+                    "size_range": row["size_range"],
                     "colors": colors,
                     "specifications": specifications,
                     "images": images,
@@ -1434,22 +1863,399 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "discount_price": float(row.get("discount_price", row["price"])),
                     "stock_status": row["stock_status"],
                     "warranty": row.get("warranty", ""),
-                    "similarity": row["similarity"]
+                    "similarity": row["similarity"],
+                    "search_method": row.get("search_method", "semantic")
                 })
             
-            # Extract age from query and filter products if age is specified
-            extracted_age = self._parse_age_from_query(query)
-            if extracted_age:
+            # STEP 4: Smart size filtering with fallback
+            if extracted_size and products:
                 original_count = len(products)
-                products = self._filter_products_by_age(products, extracted_age)
-                logger.info(f"Age filtering: {extracted_age} years old - {len(products)} suitable products (from {original_count} total)")
+                size_filtered = self._filter_products_by_size(products, extracted_size)
+                
+                if size_filtered:
+                    products = size_filtered
+                    logger.info(f"✅ Size filtering: {extracted_size} - {len(products)} suitable products (from {original_count} total)")
+                else:
+                    # FALLBACK: Keep all products if size filter removes everything
+                    logger.warning(f"⚠️ Size filter removed all products, showing all {original_count} products")
             
-            logger.info(f"Found {len(products)} products for query: {query}")
+            # STEP 5: If still no results, try without any filters
+            if not products:
+                logger.warning(f"⚠️ No results found, trying fallback search without filters")
+                
+                fallback_result = supabase.rpc(
+                    "search_products",
+                    {
+                        "query_embedding": embedding["embedding"],
+                        "match_threshold": 0.3,  # Lower threshold
+                        "match_count": 5,
+                        "filter_category": None,
+                        "filter_size_range": None,
+                        "min_price": None,
+                        "max_price": None,
+                        "filter_stock_status": "in_stock"
+                    }
+                ).execute()
+                
+                # Convert fallback results
+                for row in fallback_result.data:
+                    images = row.get("images", [])
+                    if isinstance(images, str):
+                        try:
+                            images = json.loads(images)
+                        except:
+                            images = []
+                    
+                    colors = row.get("colors", [])
+                    if isinstance(colors, str):
+                        try:
+                            colors = json.loads(colors)
+                        except:
+                            colors = []
+                    
+                    specifications = row.get("specifications", {})
+                    if isinstance(specifications, str):
+                        try:
+                            specifications = json.loads(specifications)
+                        except:
+                            specifications = {}
+                    
+                    products.append({
+                        "product_id": row["product_id"],
+                        "title": row["title"],
+                        "category": row["category"],
+                        "description": row["description"],
+                        "size_range": row["size_range"],
+                        "colors": colors,
+                        "specifications": specifications,
+                        "images": images,
+                        "price": float(row["price"]),
+                        "discount_price": float(row.get("discount_price", row["price"])),
+                        "stock_status": row["stock_status"],
+                        "warranty": row.get("warranty", ""),
+                        "similarity": row["similarity"],
+                        "search_method": "fallback"
+                    })
+            
+            logger.info(f"🎯 Hybrid search completed: Found {len(products)} products for query: '{query}'")
             return products
             
         except Exception as e:
-            logger.error(f"Error searching products: {e}")
+            logger.error(f"Error in hybrid search: {e}")
             return []
+    
+    async def search_products_by_image(
+        self,
+        image_description: str,
+        product_type: str,
+        image_features: Optional[List[str]] = None,
+        desired_colors: Optional[List[str]] = None,
+        primary_color: Optional[str] = None,
+        size_range: Optional[str] = None,
+        match_threshold: float = 0.70,
+        max_results: int = 10,
+        user_image_path: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """
+        Search products using image-based matching with AI-generated embeddings and visual verification.
+        
+        Args:
+            image_description: AI-generated detailed description of the product in user's image
+            product_type: Type of product identified in the image
+            image_features: Key features identified in the user's image
+            desired_colors: Colors visible in the user's image
+            primary_color: Main color identified in the image
+            size_range: Estimated age range for the product
+            match_threshold: Similarity threshold (0.65-0.85)
+            max_results: Maximum number of results
+            user_image_path: Path to user's image for visual verification
+            
+        Returns:
+            List of matching products with similarity scores and visual verification
+        """
+        try:
+            logger.info(f"🖼️ Starting enhanced image-based product search for: {product_type}")
+            logger.info(f"   Description: {image_description[:100]}...")
+            logger.info(f"   Features: {image_features}")
+            logger.info(f"   Colors: {desired_colors}")
+            logger.info(f"   Threshold: {match_threshold}")
+            logger.info(f"   User image path: {user_image_path}")
+            
+            # Generate embedding from image description
+            embedding = await self._generate_image_embedding(image_description)
+            if not embedding:
+                logger.error("Failed to generate image embedding")
+                return []
+            
+            # Search database using image embeddings
+            products = await self._search_products_by_image_embedding(
+                embedding, match_threshold, int(max_results), size_range
+            )
+            
+            if not products:
+                logger.info("No products found with image-based search")
+                return []
+            
+            logger.info(f"✅ Image-based search found {len(products)} products")
+            
+            # If user image path is provided, perform visual verification
+            if user_image_path:
+                logger.info(f"🔍 Checking image path for visual verification: {user_image_path}")
+                logger.info(f"🔍 Image file exists: {os.path.exists(user_image_path)}")
+                
+                if os.path.exists(user_image_path):
+                    try:
+                        # Import the production-level visual verification system
+                        from visual_verification_system import get_visual_verification
+                        from intelligent_image_matching import get_production_system
+                        
+                        visual_verification = get_visual_verification()
+                        production_system = get_production_system()
+                        
+                        logger.info(f"🔍 Visual verification system available: {visual_verification is not None}")
+                        logger.info(f"🔍 Production system available: {production_system is not None}")
+                        
+                        if visual_verification and production_system:
+                            logger.info("🔍 Performing production-level visual verification")
+                            
+                            # Create user analysis from the image description and features
+                            # Convert protobuf objects to regular Python lists
+                            colors_list = list(desired_colors) if desired_colors else []
+                            features_list = list(image_features) if image_features else []
+                            
+                            user_analysis = {
+                                "product_type": product_type,
+                                "detailed_description": image_description,
+                                "colors": colors_list,
+                                "key_features": features_list,
+                                "size_range": size_range,
+                                "primary_color": primary_color
+                            }
+                            
+                            # Process with visual verification
+                            smart_response, verified_products = await production_system.process_image_search(
+                                user_image_path,
+                                products,
+                                user_analysis
+                            )
+                            
+                            logger.info(f"🔍 Visual verification returned: {len(verified_products)} verified products")
+                            
+                            # Filter products to show only verified matches
+                            if verified_products:
+                                # Create a mapping of product_id to verified product data
+                                verified_product_map = {vp.get('product_id'): vp for vp in verified_products}
+                                
+                                # Filter original products to only include verified ones
+                                filtered_products = []
+                                for product in products:
+                                    product_id = product.get('product_id')
+                                    if product_id in verified_product_map:
+                                        # Add visual verification data to the product
+                                        verified_data = verified_product_map[product_id]
+                                        product['visual_verification'] = {
+                                            'match_type': verified_data.get('match_type', 'unknown'),
+                                            'confidence': verified_data.get('confidence', 'low'),
+                                            'customer_message': verified_data.get('customer_message', ''),
+                                            'explanation': verified_data.get('explanation', '')
+                                        }
+                                        filtered_products.append(product)
+                                
+                                logger.info(f"🎯 Filtered to {len(filtered_products)} verified products for display")
+                                products = filtered_products
+                            else:
+                                logger.warning("No verified products found, showing all database products")
+                            
+                            logger.info(f"✅ Visual verification completed: {smart_response.match_summary}")
+                            
+                            # Store the smart response for use in response generation
+                            self._last_smart_response = smart_response
+                            
+                        else:
+                            logger.warning("Visual verification system not available, using basic search")
+                            
+                    except Exception as e:
+                        logger.error(f"Error in visual verification: {e}", exc_info=True)
+                        logger.info("Falling back to basic image search")
+                else:
+                    logger.warning(f"Image file does not exist for visual verification: {user_image_path}")
+            else:
+                logger.info("No user image path provided for visual verification")
+            
+            return products
+                
+        except Exception as e:
+            logger.error(f"Error in enhanced image-based product search: {e}", exc_info=True)
+            return []
+    
+    def _enhance_products_with_visual_verification(
+        self, 
+        products: List[Dict[str, Any]], 
+        smart_response, 
+        match_type: str
+    ) -> List[Dict[str, Any]]:
+        """
+        Enhance products with visual verification data for production-level display.
+        
+        Args:
+            products: List of products from database search
+            smart_response: Smart response from visual verification
+            match_type: Type of match (exact_match, color_variant, etc.)
+            
+        Returns:
+            Enhanced products with visual verification data
+        """
+        try:
+            logger.info(f"🔍 Enhancing {len(products)} products with visual verification data")
+            
+            enhanced_products = []
+            
+            for i, product in enumerate(products):
+                # Create enhanced product with visual verification data
+                enhanced_product = product.copy()
+                
+                # Add visual verification metadata
+                enhanced_product['visual_verification'] = {
+                    'match_type': match_type,
+                    'confidence': smart_response.confidence_level if hasattr(smart_response, 'confidence_level') else 'high',
+                    'smart_response': {
+                        'primary_message': smart_response.primary_message,
+                        'secondary_message': smart_response.secondary_message,
+                        'match_summary': smart_response.match_summary,
+                        'response_type': smart_response.response_type.value
+                    },
+                    'is_exact_match': match_type == "exact_match",
+                    'is_color_variant': match_type == "color_variant",
+                    'is_similar_product': match_type == "similar_products",
+                    'is_related_product': match_type == "related_products"
+                }
+                
+                # Add match-specific badges and indicators
+                if match_type == "exact_match":
+                    enhanced_product['match_badge'] = "🎯 EXACT MATCH"
+                    enhanced_product['match_priority'] = 1  # Highest priority
+                elif match_type == "color_variant":
+                    enhanced_product['match_badge'] = "🎨 COLOR VARIANT"
+                    enhanced_product['match_priority'] = 2
+                elif match_type == "similar_products":
+                    enhanced_product['match_badge'] = "👀 SIMILAR PRODUCT"
+                    enhanced_product['match_priority'] = 3
+                elif match_type == "related_products":
+                    enhanced_product['match_badge'] = "🔍 RELATED PRODUCT"
+                    enhanced_product['match_priority'] = 4
+                else:
+                    enhanced_product['match_badge'] = "📦 AVAILABLE"
+                    enhanced_product['match_priority'] = 5
+                
+                # Add visual verification explanation
+                enhanced_product['visual_explanation'] = smart_response.match_summary
+                
+                enhanced_products.append(enhanced_product)
+            
+            # Sort products by match priority (exact matches first)
+            enhanced_products.sort(key=lambda x: x.get('match_priority', 5))
+            
+            logger.info(f"✅ Enhanced {len(enhanced_products)} products with visual verification data")
+            return enhanced_products
+            
+        except Exception as e:
+            logger.error(f"Error enhancing products with visual verification: {e}", exc_info=True)
+            return products  # Return original products if enhancement fails
+    
+    async def _generate_image_embedding(self, description: str) -> Optional[List[float]]:
+        """Generate embedding from product description."""
+        try:
+            embed_params = {
+                "model": "models/text-embedding-004",
+                "content": description,
+                "task_type": "retrieval_document",  # FIXED: Changed from retrieval_query to retrieval_document
+                "output_dimensionality": 768
+            }
+            
+            result = await asyncio.to_thread(genai.embed_content, **embed_params)
+            return result['embedding']
+            
+        except Exception as e:
+            logger.error(f"Error generating image embedding: {e}", exc_info=True)
+            return None
+    
+    async def _search_products_by_image_embedding(
+        self,
+        query_embedding: List[float],
+        match_threshold: float = 0.70,
+        max_results: int = 10,
+        size_range: Optional[str] = None
+    ) -> Optional[List[Dict[str, Any]]]:
+        """Search products using image embeddings."""
+        try:
+            result = supabase.rpc(
+                "search_products_by_image",
+                {
+                    "query_embedding": query_embedding,
+                    "match_threshold": match_threshold,
+                    "match_count": int(max_results),  # Ensure integer type
+                    "filter_stock_status": "in_stock"
+                }
+            ).execute()
+            
+            if result.data:
+                products = []
+                for product in result.data:
+                    # Parse JSON fields
+                    colors = product.get("colors", [])
+                    if isinstance(colors, str):
+                        try:
+                            colors = json.loads(colors)
+                        except:
+                            colors = []
+                    
+                    specifications = product.get("specifications", {})
+                    if isinstance(specifications, str):
+                        try:
+                            specifications = json.loads(specifications)
+                        except:
+                            specifications = {}
+                    
+                    images = product.get("images", [])
+                    if isinstance(images, str):
+                        try:
+                            images = json.loads(images)
+                        except:
+                            images = []
+                    
+                    ai_image_metadata = product.get("ai_image_metadata", {})
+                    if isinstance(ai_image_metadata, str):
+                        try:
+                            ai_image_metadata = json.loads(ai_image_metadata)
+                        except:
+                            ai_image_metadata = {}
+                    
+                    products.append({
+                        "product_id": product["product_id"],
+                        "title": product["title"],
+                        "category": product["category"],
+                        "description": product["description"],
+                        "size_range": product["size_range"],
+                        "colors": colors,
+                        "specifications": specifications,
+                        "images": images,
+                        "price": float(product["price"]),
+                        "discount_price": float(product["discount_price"]) if product["discount_price"] else None,
+                        "stock_status": product["stock_status"],
+                        "warranty": product["warranty"],
+                        "similarity": float(product["similarity"]),
+                        "ai_image_description": product.get("ai_image_description"),
+                        "ai_image_metadata": ai_image_metadata,
+                        "search_method": "image_based_matching"
+                    })
+                
+                return products
+            else:
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error searching products by image: {e}", exc_info=True)
+            return None
     
     async def intelligent_search(
         self, 
@@ -1521,10 +2327,11 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
         {context_str}
         
         Available product categories:
-        - Electric Bikes & Scooters for Kids (15 products)
-        - Electric Ride-On Jeeps & Cars for Kids (14 products) 
-        - Petrol Bike & Cars for Kids (3 products - includes dirt bikes)
-        - E-Scooter For Kids & Adults (1 product)
+        - Cardigan (various styles including regular, long, crop, SL, self)
+        - Crop Top (high neck, V neck, casual styles)
+        - Traditional Wear (Kot, Court sets, Tunics)
+        - Layering Pieces (Shrugs, Long cardigans)
+        - Contemporary Tops (High neck, V neck styles)
         
         IMPORTANT: Return ONLY a JSON object as text. Do NOT make any function calls.
         
@@ -1535,15 +2342,15 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             "category": "best matching category or null",
             "enhanced_query": "optimized search terms for embeddings",
             "search_strategy": "semantic_search|category_search|keyword_search|multi_strategy",
-            "filters": {{"age_range": "X-Y years", "color": "color_name"}},
+            "filters": {{"size_range": "S|M|L|XL", "color": "color_name", "occasion": "casual|formal|traditional"}},
             "priority_keywords": ["keyword1", "keyword2"],
             "confidence": 0.8
         }}
         
         Examples:
-        - "dirt bike" → category: "Petrol Bike & Cars for Kids", enhanced_query: "dirt bike petrol 50cc off-road motorcycle kids"
-        - "red jeep for 5 year old" → category: "Electric Ride-On Jeeps & Cars for Kids", enhanced_query: "red jeep electric ride-on car for 5 year old"
-        - "something for my daughter" → strategy: "multi_strategy", enhanced_query: "toys for girls kids children"
+        - "cardigan" → category: "Cardigan", enhanced_query: "cardigan wool cotton sweater jacket"
+        - "crop top in size M" → category: "Crop Top", enhanced_query: "crop top size M casual women fashion"
+        - "something for office" → strategy: "multi_strategy", enhanced_query: "formal office work professional women clothing"
         """
         
         try:
@@ -1620,16 +2427,16 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             }
     
     async def _semantic_search_with_enhancement(self, enhanced_query: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Execute semantic search with enhanced query."""
-        logger.info(f"🔍 Semantic search with enhanced query: '{enhanced_query}'")
+        """Execute hybrid search with enhanced query."""
+        logger.info(f"🔍 Hybrid search with enhanced query: '{enhanced_query}'")
         
-        # Use the enhanced query for embedding search
+        # Use the enhanced query for hybrid search (keyword + semantic)
         return await self.search_products(
             query=enhanced_query,
             category=filters.get("category", "all"),
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _category_specific_search(self, category: str, filters: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1642,7 +2449,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             category=category,
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _keyword_based_search(self, priority_keywords: List[str], filters: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1656,7 +2463,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             category=filters.get("category", "all"),
             min_price=filters.get("min_price"),
             max_price=filters.get("max_price"),
-            age_range=filters.get("age_range")
+            size_range=filters.get("size_range")
         )
     
     async def _multi_strategy_search(self, analysis: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -1710,7 +2517,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     "product_id": result["product_id"],
                     "title": result["title"],
                     "category": result["category"],
-                    "age_range": result["age_range"],
+                    "size_range": result["size_range"],
                     "similarity": result["similarity"]
                 })
             
@@ -1801,7 +2608,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
     def get_contact_info(self, info_type: str = "all") -> Dict[str, str]:
         """Get contact information."""
         contact_info = {
-            "phone": f"📞 Call us at {config.BUSINESS_PHONE} (Owner Direct) or 9056010298 (General)",
+            "phone": f"📞 Call us at {config.BUSINESS_PHONE_BUY} (Owner Direct) or {config.BUSINESS_PHONE_INQUIRY} (General)",
             "email": f"📧 Email: {config.BUSINESS_EMAIL}",
             "whatsapp": f"💬 WhatsApp: wa.me/{config.BUSINESS_WHATSAPP}",
             "address": "📍 Shop No. 6/7, Char Khamba Road, Model Town, Ludhiana, Punjab, India"
@@ -1885,7 +2692,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 "title": product_data["title"],
                 "category": product_data["category"],
                 "description": product_data["description"],
-                "age_range": product_data["age_range"],
+                "size_range": product_data["size_range"],
                 "colors": colors,
                 "specifications": specifications,
                 "images": images,
@@ -2481,7 +3288,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     category=args.get("category", "all"),
                     min_price=args.get("min_price"),
                     max_price=args.get("max_price"),
-                    age_range=None  # Don't use age_range parameter - age should be in query string
+                    size_range=args.get("size_range")  # Use size_range parameter for fashion items
                 )
                 return {
                     "function": function_name,
@@ -2492,14 +3299,14 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                             "title": p["title"],
                             "category": p["category"],
                             "description": p["description"],
-                            "age_range": p["age_range"],
+                            "size_range": p["size_range"],
                             "price": p["price"],
                             "discount_price": p["discount_price"],
                             "colors": p["colors"],
                             "specifications": p["specifications"],
-                            "images": p["images"],  # FIXED: Added missing images field
-                            "stock_status": p["stock_status"],  # FIXED: Added missing stock_status field
-                            "warranty": p["warranty"],  # FIXED: Added missing warranty field
+                            "images": p["images"],
+                            "stock_status": p["stock_status"],
+                            "warranty": p["warranty"],
                             "similarity": p["similarity"]
                         }
                         for p in products
@@ -2522,7 +3329,7 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                             "title": p["title"],
                             "category": p["category"],
                             "description": p["description"],
-                            "age_range": p["age_range"],
+                            "size_range": p["size_range"],
                             "price": p["price"],
                             "discount_price": p["discount_price"],
                             "colors": p["colors"],
@@ -2538,6 +3345,48 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     ],
                     "count": len(products),
                     "search_method": "intelligent_llm_driven"
+                }
+            
+            elif function_name == "search_products_by_image":
+                # Get user image path from context for visual verification
+                user_image_path = user_context.get("user_image_path") if user_context else None
+                
+                products = await self.search_products_by_image(
+                    image_description=args.get("image_description"),
+                    product_type=args.get("product_type"),
+                    image_features=args.get("image_features", []),
+                    desired_colors=args.get("desired_colors", []),
+                    primary_color=args.get("primary_color"),
+                    size_range=args.get("size_range"),
+                    match_threshold=float(args.get("match_threshold", 0.70)),
+                    max_results=int(args.get("max_results", 10)),
+                    user_image_path=user_image_path
+                )
+                return {
+                    "function": function_name,
+                    "success": True,
+                    "products": [
+                        {
+                            "product_id": p["product_id"],
+                            "title": p["title"],
+                            "category": p["category"],
+                            "description": p["description"],
+                            "size_range": p["size_range"],
+                            "price": p["price"],
+                            "discount_price": p["discount_price"],
+                            "colors": p["colors"],
+                            "specifications": p["specifications"],
+                            "images": p["images"],
+                            "stock_status": p["stock_status"],
+                            "warranty": p["warranty"],
+                            "similarity": p["similarity"],
+                            "ai_image_description": p.get("ai_image_description"),
+                            "ai_image_metadata": p.get("ai_image_metadata", {})
+                        }
+                        for p in products
+                    ],
+                    "count": len(products),
+                    "search_method": "image_based_matching"
                 }
             
             elif function_name == "get_contact_info":
@@ -2945,12 +3794,12 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                 else:
                     # Max retries reached
                     logger.error(f"Rate limit exceeded after {max_retries} attempts: {e}")
-                    return ("I'm currently experiencing high demand. Please try again in a moment, or contact us directly at 8300000086. 🙏", None)
+                    return ("I'm currently experiencing high demand. Please try again in a moment, or contact us directly at 9876151585. 🙏", None)
             
             except Exception as e:
                 # Other errors - don't retry
                 logger.error(f"Error generating AI response: {e}", exc_info=True)
-                return ("I'm experiencing some technical difficulties. Please contact us directly at 8300000086 for immediate assistance. 🙏", None)
+                return ("I'm experiencing some technical difficulties. Please contact us directly at 9876151585 for immediate assistance. 🙏", None)
         
         try:
             
@@ -2991,6 +3840,56 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
                     if function_call.name == "intelligent_search" and "products" in function_result:
                         products_to_show = function_result["products"]
                         logger.info(f"Stored {len(products_to_show)} products from intelligent search to show")
+                    
+                    # Store products if search_products_by_image was called
+                    if function_call.name == "search_products_by_image" and "products" in function_result:
+                        products_to_show = function_result["products"]
+                        logger.info(f"Stored {len(products_to_show)} products from image-based search to show")
+                        
+                        # Check if we have a smart response from visual verification
+                        if hasattr(self, '_last_smart_response') and self._last_smart_response:
+                            logger.info("Using smart response from visual verification")
+                            smart_response = self._last_smart_response
+                            
+                            # For production-level functionality, always show product cards with smart response
+                            if smart_response.response_type.value == "exact_match_found":
+                                # Add visual verification data to products for exact matches
+                                enhanced_products = self._enhance_products_with_visual_verification(
+                                    products_to_show, smart_response, "exact_match"
+                                )
+                                logger.info("Generated enhanced products for exact match with visual verification")
+                                return ("SHOW_PRODUCTS", enhanced_products)
+                            elif smart_response.response_type.value == "color_variant_found":
+                                # Add visual verification data to products for color variants
+                                enhanced_products = self._enhance_products_with_visual_verification(
+                                    products_to_show, smart_response, "color_variant"
+                                )
+                                logger.info("Generated enhanced products for color variant with visual verification")
+                                return ("SHOW_PRODUCTS", enhanced_products)
+                            elif smart_response.response_type.value == "similar_products_found":
+                                # Add visual verification data to products for similar products
+                                enhanced_products = self._enhance_products_with_visual_verification(
+                                    products_to_show, smart_response, "similar_products"
+                                )
+                                logger.info("Generated enhanced products for similar products with visual verification")
+                                return ("SHOW_PRODUCTS", enhanced_products)
+                            elif smart_response.response_type.value == "related_products_found":
+                                # Add visual verification data to products for related products
+                                enhanced_products = self._enhance_products_with_visual_verification(
+                                    products_to_show, smart_response, "related_products"
+                                )
+                                logger.info("Generated enhanced products for related products with visual verification")
+                                return ("SHOW_PRODUCTS", enhanced_products)
+                            elif smart_response.response_type.value == "no_matches_found":
+                                # Show products anyway but with no match message
+                                enhanced_products = self._enhance_products_with_visual_verification(
+                                    products_to_show, smart_response, "no_matches"
+                                )
+                                logger.info("Generated enhanced products for no matches with visual verification")
+                                return ("SHOW_PRODUCTS", enhanced_products)
+                            
+                            # Clear the smart response after use
+                            self._last_smart_response = None
                     
                     # CRITICAL FIX: For buy_product, use function result directly
                     # The AI was calling the function but then generating its own response
@@ -3072,10 +3971,11 @@ IMPORTANT: After calling this function, use the 'message' field from the functio
             
         except Exception as e:
             logger.error(f"Error generating AI response: {e}", exc_info=True)
-            return ("I'm experiencing some technical difficulties. Please contact us directly at 8300000086 for immediate assistance. 🙏", None)
+            return ("I'm experiencing some technical difficulties. Please contact us directly at 9876151585 for immediate assistance. 🙏", None)
 
 # Initialize AI assistant
-gurtoy_ai = GurtoyAI()
+gurtoy_ai = FashionMartAI()
+fashion_mart_ai = gurtoy_ai
 
 class UserManager:
     """Manages user data and sessions."""
@@ -3199,6 +4099,56 @@ class TelegramAPI:
     """Handles Telegram API interactions."""
     
     @staticmethod
+    def _normalize_image_url(image_ref: Any) -> Optional[str]:
+        if not image_ref:
+            return None
+        if isinstance(image_ref, dict):
+            for key in ("url", "public_url", "signed_url"):
+                candidate = image_ref.get(key)
+                if candidate:
+                    normalized = TelegramAPI._normalize_image_url(candidate)
+                    if normalized:
+                        return normalized
+            path = image_ref.get("path")
+            if path:
+                bucket = image_ref.get("bucket_id") or image_ref.get("bucket") or "product-images"
+                if path.startswith("storage/v1/object/public/"):
+                    return TelegramAPI._normalize_image_url(path)
+                return TelegramAPI._normalize_image_url(f"storage/v1/object/public/{bucket.rstrip('/')}/{path.lstrip('/')}")
+            return None
+        if not isinstance(image_ref, str):
+            return None
+        value = image_ref.strip()
+        if not value:
+            return None
+        if value.startswith("http://") or value.startswith("https://"):
+            return value.replace(" ", "%20")
+        path = value.lstrip("/")
+        base = config.SUPABASE_URL.rstrip("/")
+        if path.startswith("storage/v1/object/public/"):
+            return f"{base}/{path.replace(' ', '%20')}"
+        return f"{base}/storage/v1/object/public/{path.replace(' ', '%20')}"
+    
+    @staticmethod
+    def _extract_image_urls(image_data: Any) -> List[str]:
+        value = image_data
+        if isinstance(value, str):
+            try:
+                value = json.loads(value)
+            except Exception:
+                normalized = TelegramAPI._normalize_image_url(value)
+                return [normalized] if normalized else []
+        if isinstance(value, dict):
+            value = [value]
+        urls: List[str] = []
+        if isinstance(value, list):
+            for entry in value:
+                normalized = TelegramAPI._normalize_image_url(entry)
+                if normalized:
+                    urls.append(normalized)
+        return urls
+    
+    @staticmethod
     async def send_message(chat_id: int, text: str, reply_markup: Dict[str, Any] = None) -> bool:
         """Send message to Telegram chat."""
         try:
@@ -3311,8 +4261,30 @@ class TelegramAPI:
                 )
                 return False
             
-            # Send intro message
+            # Send intro message with visual verification information
             intro_text = f"✨ Maine **{len(products)} products** dhoondhе hain aapke liye:\n\n"
+            
+            # Check if any products have visual verification data
+            has_visual_verification = any('visual_verification' in product for product in products)
+            
+            if has_visual_verification:
+                # Count different match types
+                exact_matches = sum(1 for p in products if p.get('visual_verification', {}).get('is_exact_match', False))
+                color_variants = sum(1 for p in products if p.get('visual_verification', {}).get('is_color_variant', False))
+                similar_products = sum(1 for p in products if p.get('visual_verification', {}).get('is_similar_product', False))
+                related_products = sum(1 for p in products if p.get('visual_verification', {}).get('is_related_product', False))
+                
+                if exact_matches > 0:
+                    intro_text += f"🎯 **{exact_matches} Exact Match(es)** - Yeh bilkul same product hai!\n"
+                if color_variants > 0:
+                    intro_text += f"🎨 **{color_variants} Color Variant(s)** - Same product, different colors\n"
+                if similar_products > 0:
+                    intro_text += f"👀 **{similar_products} Similar Product(s)** - Similar style and features\n"
+                if related_products > 0:
+                    intro_text += f"🔍 **{related_products} Related Product(s)** - Related category\n"
+                
+                intro_text += "\n"
+            
             await TelegramAPI.send_message(chat_id, intro_text)
             
             # Small delay to ensure intro message is sent first
@@ -3322,16 +4294,21 @@ class TelegramAPI:
             for idx, product in enumerate(products, 1):
                 try:
                     # Get first image URL
-                    images = product.get("images", [])
-                    if isinstance(images, str):
-                        import json
-                        images = json.loads(images)
+                    raw_images = product.get("images", [])
+                    images = TelegramAPI._extract_image_urls(raw_images)
+                    if not images:
+                        fallback_image = TelegramAPI._normalize_image_url(product.get("image"))
+                        if fallback_image:
+                            images = [fallback_image]
+                    product["images"] = images
                     
-                    image_url = images[0] if images and len(images) > 0 else None
+                    image_url = images[0] if images else None
+                    if not image_url:
+                        logger.warning(f"No valid image URL for product {product.get('product_id')}, falling back to text message")
                     
                     # Format product caption
                     title = product.get("title", "Product")
-                    age_range = product.get("age_range", "N/A")
+                    size_range = product.get("size_range", "N/A")
                     price = product.get("price", 0)
                     discount_price = product.get("discount_price", price)
                     description = product.get("description", "")
@@ -3353,9 +4330,20 @@ class TelegramAPI:
                         import json
                         colors = json.loads(colors)
                     
-                    # Build caption
+                    # Build caption with visual verification information
                     caption = f"🎯 **{title}**\n\n"
-                    caption += f"👶 **Age:** {age_range}\n"
+                    
+                    # Add visual verification badge if available
+                    if 'visual_verification' in product:
+                        visual_data = product['visual_verification']
+                        match_badge = product.get('match_badge', '📦 AVAILABLE')
+                        caption += f"{match_badge}\n\n"
+                        
+                        # Add visual verification explanation
+                        if 'visual_explanation' in product:
+                            caption += f"🔍 **Visual Analysis:** {product['visual_explanation']}\n\n"
+                    
+                    caption += f"👶 **Age:** {size_range}\n"
                     # Add product ID for purchase functionality (hidden in caption)
                     caption += f"🆔 **ID:** {product.get('product_id', 'N/A')}\n"
                     
@@ -3395,7 +4383,6 @@ class TelegramAPI:
                     if image_url:
                         success = await TelegramAPI.send_photo(chat_id, image_url, caption)
                     else:
-                        # If no image, send as text message
                         success = await TelegramAPI.send_message(chat_id, caption)
                     
                     if not success:
@@ -3494,7 +4481,7 @@ class SessionManager:
                     "product_name": product.get("title", ""),
                     "price": product.get("price", 0),
                     "discount_price": product.get("discount_price"),
-                    "age_range": product.get("age_range", ""),
+                    "size_range": product.get("size_range", ""),
                     "colors": product.get("colors", []),
                     "shown_at": datetime.now(timezone.utc).isoformat()
                 })
@@ -3594,7 +4581,7 @@ async def root():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "Gurtoy Telegram Bot",
+        "service": "Fashion Mart Telegram Bot",
         "version": "1.0.0",
         "timestamp": datetime.utcnow().isoformat()
     }
@@ -3832,7 +4819,7 @@ async def process_telegram_message(update: TelegramUpdate):
 
 🔗 **Payment Link:** {payment_result["payment_link_url"]}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                     else:
                                         # Fallback to QR code if payment link not available
                                         # Get product details from order data
@@ -3855,7 +4842,7 @@ Need help? Contact us at 8300000086"""
 
 📱 **QR Code:** {payment_result.get("qr_code_url", "QR code not available")}
 
-Need help? Contact us at 8300000086"""
+Need help? Contact us at 9876151585"""
                                     
                                     success = await TelegramAPI.send_message(chat_id, payment_message)
                                     
@@ -3988,7 +4975,7 @@ Need help? Contact us at 8300000086"""
         try:
             await TelegramAPI.send_message(
                 update.message.chat["id"],
-                "I'm experiencing technical difficulties. Please contact us at 8300000086 for immediate assistance. 🙏"
+                "I'm experiencing technical difficulties. Please contact us at 9876151585 for immediate assistance. 🙏"
             )
         except:
             pass
@@ -4058,9 +5045,9 @@ async def process_razorpay_webhook(webhook_data: Dict[str, Any]):
 📞 **Next Steps:**
 • We'll process your order within 24 hours
 • You'll receive shipping updates on this chat
-• For any queries, contact us at 8300000086
+• For any queries, contact us at 9876151585
 
-Thank you for shopping with Gurtoy! 🎉"""
+Thank you for shopping with Fashion Mart! 👗✨"""
                         
                         success = await TelegramAPI.send_message(telegram_id, confirmation_msg)
                         
@@ -4101,7 +5088,7 @@ if __name__ == "__main__":
     port = int(os.getenv("APP_PORT", 8000))
     host = os.getenv("APP_HOST", "0.0.0.0")
     
-    logger.info(f"Starting Gurtoy Telegram Bot on {host}:{port}")
+    logger.info(f"Starting Fashion Mart Telegram Bot on {host}:{port}")
     
     uvicorn.run(
         "gurtoy_bot:app",

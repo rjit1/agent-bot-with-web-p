@@ -1,4 +1,4 @@
-PS E:\github\agent-bot-with-web-p> python run_bot.py
+PS E:\project\agent-bot-with-web-p> python run_bot.py
 
 ============================================================
 GURTOY TELEGRAM BOT
@@ -11,104 +11,196 @@ Perfect for local development and testing!
 🚀 Starting bot in polling mode...
 💡 Tip: This mode doesn't require ngrok or public URL
 
-2025-10-17 13:32:04,739 - ai_order_collector - INFO - AI Order Collector initialized with Gemini 2.5 Flash
-2025-10-17 13:32:04,740 - gurtoy_bot - INFO - 🧠 Phase 3: Intelligent Response System initialized
-2025-10-17 13:32:04,741 - gurtoy_bot - ERROR - Failed to initialize Visual Verification System: No module named 'visual_verification_system'
-2025-10-17 13:32:06,939 - audio_handler - INFO - 🎤 AudioHandler initialized
-2025-10-17 13:32:06,940 - gurtoy_bot - INFO - 🎤 Audio handler initialized for voice messages
-2025-10-17 13:32:06,960 - image_handler - INFO - 📸 ImageHandler initialized
-2025-10-17 13:32:06,960 - gurtoy_bot - INFO - 📸 Image handler initialized for image messages
-2025-10-17 13:32:06,960 - gurtoy_bot - INFO - Telegram Polling Bot initialized
-2025-10-17 13:32:06,961 - gurtoy_bot - INFO - 🤖 Starting Fashion Mart Telegram Bot in POLLING mode...
-2025-10-17 13:32:06,962 - gurtoy_bot - INFO - ============================================================
-2025-10-17 13:32:12,386 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/deleteWebhook "HTTP/1.1 200 OK"
-2025-10-17 13:32:12,390 - gurtoy_bot - INFO - ✅ Webhook deleted, polling mode enabled
-2025-10-17 13:32:14,513 - httpx - INFO - HTTP Request: GET https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getMe "HTTP/1.1 200 OK"
-2025-10-17 13:32:14,515 - gurtoy_bot - INFO - ✅ Bot: @memelive1_bot (Real meme bot)
-2025-10-17 13:32:14,515 - gurtoy_bot - INFO - 📱 Bot ID: 7504641562
-2025-10-17 13:32:14,516 - gurtoy_bot - INFO - ============================================================
-2025-10-17 13:32:14,516 - gurtoy_bot - INFO - 🟢 Bot is now running and listening for messages...
-2025-10-17 13:32:14,517 - gurtoy_bot - INFO - Press Ctrl+C to stop
-2025-10-17 13:32:14,517 - gurtoy_bot - INFO - ============================================================
-2025-10-17 13:32:15,641 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
-2025-10-17 13:32:17,340 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:17,716 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
-2025-10-17 13:32:17,921 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
-2025-10-17 13:32:17,923 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
-2025-10-17 13:32:18,022 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:18,027 - gurtoy_bot - INFO - [DEBUG] No order session found for user 8078397925
-2025-10-17 13:32:18,027 - gurtoy_bot - INFO - 📨 Message from Gurtoy (8078397925): hello...
-2025-10-17 13:32:18,058 - image_queue_manager - INFO - 📋 ImageQueueManager initialized
-2025-10-17 13:32:18,059 - gurtoy_bot - INFO - 🔍 Checking for reply: reply_to_message=absent
-2025-10-17 13:32:18,183 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
-2025-10-17 13:32:18,187 - gurtoy_bot - INFO - [ORDER_COLLECTION] Checking for active order session for user 8078397925
-2025-10-17 13:32:18,330 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:18,332 - gurtoy_bot - INFO - [ORDER_COLLECTION] Session check result for user 8078397925: Not found
-2025-10-17 13:32:18,332 - gurtoy_bot - INFO - [ORDER_COLLECTION] No active order session found for user 8078397925, proceeding with normal AI processing
-2025-10-17 13:32:18,431 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=session_data&id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:18,433 - gurtoy_bot - INFO - 📂 Retrieved session context for session 2: {'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00'}
-2025-10-17 13:32:18,535 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=session_data&id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:18,636 - httpx - INFO - HTTP Request: PATCH https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:18,637 - gurtoy_bot - INFO - 💾 Saved session context for session 2: {'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00', 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'conversation_stage': 'browsing'}
-2025-10-17 13:32:18,637 - gurtoy_bot - INFO - 📂 Session context: {'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00'}
-2025-10-17 13:32:18,638 - gurtoy_bot - INFO - 🔍 Extracted context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'browsing'}
-2025-10-17 13:32:18,638 - gurtoy_bot - INFO - 🔄 Merged context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'browsing', 'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00'}
-2025-10-17 13:32:18,638 - gurtoy_bot - INFO - 📝 Recent messages count: 76
-2025-10-17 13:32:21,331 - gurtoy_bot - INFO - 🤖 AI raw response: 'Hello ji! Fashion Mart mein aapka fir se swagat hai! 👋
+2025-10-17 20:48:40,359 - ai_order_collector - INFO - AI Order Collector initialized with Gemini 2.5 Flash
+2025-10-17 20:48:40,360 - gurtoy_bot - INFO - 🧠 Phase 3: Intelligent Response System initialized
+2025-10-17 20:48:40,369 - visual_verification_system - INFO - 🔍 VisualVerificationSystem initialized
+2025-10-17 20:48:40,370 - intelligent_image_matching - INFO - 🧠 IntelligentMatchClassifier initialized
+2025-10-17 20:48:40,370 - intelligent_image_matching - INFO - 💬 SmartResponseGenerator initialized
+2025-10-17 20:48:40,370 - intelligent_image_matching - INFO - 🧠 IntelligentMatchClassifier initialized
+2025-10-17 20:48:40,371 - intelligent_image_matching - INFO - 💬 SmartResponseGenerator initialized
+2025-10-17 20:48:40,371 - intelligent_image_matching - INFO - 🚀 ProductionImageMatchingSystem initialized
+2025-10-17 20:48:40,371 - intelligent_image_matching - INFO - 🧠 All intelligent systems initialized
+2025-10-17 20:48:40,372 - gurtoy_bot - INFO - 🔍 Visual Verification System initialized
+2025-10-17 20:48:40,372 - gurtoy_bot - INFO - 🧠 Intelligent Image Matching System initialized     
+2025-10-17 20:48:40,787 - audio_handler - INFO - 🎤 AudioHandler initialized
+2025-10-17 20:48:40,787 - gurtoy_bot - INFO - 🎤 Audio handler initialized for voice messages
+2025-10-17 20:48:40,790 - image_handler - INFO - 📸 ImageHandler initialized
+2025-10-17 20:48:40,790 - gurtoy_bot - INFO - 📸 Image handler initialized for image messages      
+2025-10-17 20:48:40,790 - gurtoy_bot - INFO - Telegram Polling Bot initialized
+2025-10-17 20:48:40,791 - gurtoy_bot - INFO - 🤖 Starting Fashion Mart Telegram Bot in POLLING mode...
+2025-10-17 20:48:40,791 - gurtoy_bot - INFO - ============================================================
+2025-10-17 20:48:42,072 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/deleteWebhook "HTTP/1.1 200 OK"
+2025-10-17 20:48:42,073 - gurtoy_bot - INFO - ✅ Webhook deleted, polling mode enabled
+2025-10-17 20:48:43,319 - httpx - INFO - HTTP Request: GET https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getMe "HTTP/1.1 200 OK"
+2025-10-17 20:48:43,320 - gurtoy_bot - INFO - ✅ Bot: @memelive1_bot (Real meme bot)
+2025-10-17 20:48:43,321 - gurtoy_bot - INFO - 📱 Bot ID: 7504641562
+2025-10-17 20:48:43,321 - gurtoy_bot - INFO - ============================================================
+2025-10-17 20:48:43,322 - gurtoy_bot - INFO - 🟢 Bot is now running and listening for messages...  
+2025-10-17 20:48:43,322 - gurtoy_bot - INFO - Press Ctrl+C to stop
+2025-10-17 20:48:43,322 - gurtoy_bot - INFO - ============================================================
+2025-10-17 20:48:46,287 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
+2025-10-17 20:48:47,107 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:48:47,211 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users "HTTP/2 201 Created"
+2025-10-17 20:48:47,415 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-17 20:48:47,420 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
+2025-10-17 20:48:47,516 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:48:47,517 - gurtoy_bot - INFO - [DEBUG] No order session found for user 1308116659
+2025-10-17 20:48:47,518 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): hlo...
+2025-10-17 20:48:47,522 - image_queue_manager - INFO - 📋 ImageQueueManager initialized
+2025-10-17 20:48:47,522 - gurtoy_bot - INFO - 🔍 Checking for reply: reply_to_message=absent       
+2025-10-17 20:48:47,618 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-17 20:48:47,620 - gurtoy_bot - INFO - [ORDER_COLLECTION] Checking for active order session for user 1308116659
+2025-10-17 20:48:47,721 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:48:47,722 - gurtoy_bot - INFO - [ORDER_COLLECTION] Session check result for user 1308116659: Not found
+2025-10-17 20:48:47,723 - gurtoy_bot - INFO - [ORDER_COLLECTION] No active order session found for user 1308116659, proceeding with normal AI processing
+2025-10-17 20:48:47,723 - gurtoy_bot - INFO - 📂 Session context: {}
+2025-10-17 20:48:47,723 - gurtoy_bot - INFO - 🔍 Extracted context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': '', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'initial'}
+2025-10-17 20:48:47,724 - gurtoy_bot - INFO - 🔄 Merged context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': '', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'initial'}
+2025-10-17 20:48:47,724 - gurtoy_bot - INFO - 📝 Recent messages count: 0
+2025-10-17 20:48:51,409 - gurtoy_bot - INFO - 🤖 AI raw response: 'Hello! Fashion Mart mein aapka swagat hai! 😊 Main Sarvesh, aapki personal fashion assistant.
 
-Aapne pehle kuch tops dekhe the, kya unmein se koi pasand aaya ya main aapko kuch aur dikhaun?'
-2025-10-17 13:32:21,331 - gurtoy_bot - INFO - 🤖 Products to show: 0
-2025-10-17 13:32:21,332 - gurtoy_bot - WARNING - ⚠️ AI did NOT return SHOW_PRODUCTS. Response: 'Hello ji! Fashion Mart mein aapka fir se swaagat hai! 👋
+Aapko kya chahiye? Cardigan, top, ya kot? Ya koi specific occasion ke liye kuch dekh rahe hain?'   
+2025-10-17 20:48:51,410 - gurtoy_bot - INFO - 🤖 Products to show: 0
+2025-10-17 20:48:51,410 - gurtoy_bot - WARNING - ⚠️ AI did NOT return SHOW_PRODUCTS. Response: 'Helllo! Fashion Mart mein aapka swagat hai! 😊 Main Sarvesh, aapki personal fashion assistant.
 
-Aapne pehle kuch tops dekhe the, kya unmein se koi pasand aaya ya main aapko kuch aur dikhaun?'
-2025-10-17 13:32:23,514 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
-2025-10-17 13:32:23,520 - gurtoy_bot - INFO - ✅ Response sent to Gurtoy
-2025-10-17 13:32:23,654 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
-2025-10-17 13:32:23,658 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 1
-2025-10-17 13:32:30,630 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
-2025-10-17 13:32:30,890 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:31,005 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
-2025-10-17 13:32:31,130 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
-2025-10-17 13:32:31,132 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
-2025-10-17 13:32:31,334 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:31,336 - gurtoy_bot - INFO - [DEBUG] No order session found for user 8078397925
-2025-10-17 13:32:31,336 - gurtoy_bot - INFO - 📨 Message from Gurtoy (8078397925): show me some tops...
-2025-10-17 13:32:31,337 - gurtoy_bot - INFO - 🔍 Checking for reply: reply_to_message=absent
-2025-10-17 13:32:31,429 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
-2025-10-17 13:32:31,432 - gurtoy_bot - INFO - [ORDER_COLLECTION] Checking for active order session for user 8078397925
-2025-10-17 13:32:31,541 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:31,543 - gurtoy_bot - INFO - [ORDER_COLLECTION] Session check result for user 8078397925: Not found
-2025-10-17 13:32:31,543 - gurtoy_bot - INFO - [ORDER_COLLECTION] No active order session found for user 8078397925, proceeding with normal AI processing
-2025-10-17 13:32:31,609 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=session_data&id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:31,611 - gurtoy_bot - INFO - 📂 Retrieved session context for session 2: {'key_preferences': [], 'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00', 'conversation_stage': 'browsing', 'conversation_summary': 'Initial conversation', 'delivery_address_mentioned': False}
-2025-10-17 13:32:31,718 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=session_data&id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:31,782 - httpx - INFO - HTTP Request: PATCH https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:31,783 - gurtoy_bot - INFO - 💾 Saved session context for session 2: {'key_preferences': [], 'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00', 'conversation_stage': 'browsing', 'conversation_summary': 'Initial conversation', 'delivery_address_mentioned': False}
-2025-10-17 13:32:31,784 - gurtoy_bot - INFO - 📂 Session context: {'key_preferences': [], 'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00', 'conversation_stage': 'browsing', 'conversation_summary': 'Initial conversation', 'delivery_address_mentioned': False}
-2025-10-17 13:32:31,785 - gurtoy_bot - INFO - 🔍 Extracted context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'browsing'}
-2025-10-17 13:32:31,785 - gurtoy_bot - INFO - 🔄 Merged context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'browsing', 'recent_products': [{'price': 800.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179399+00:00', 'product_id': '2001', 'size_range': 'S, M, L, XL', 'product_name': 'G F O', 'discount_price': 1000.0}, {'price': 450.0, 'colors': ['Black', 'White', 'Pink', 'Red'], 'shown_at': '2025-10-17T05:04:15.179423+00:00', 'product_id': '2000', 'size_range': 'S, M, L, XL', 'product_name': 'G F  O', 'discount_price': 500.0}], 'last_product_show': '2025-10-17T05:04:15.179430+00:00'}
-2025-10-17 13:32:31,786 - gurtoy_bot - INFO - 📝 Recent messages count: 78
-2025-10-17 13:32:34,911 - gurtoy_bot - INFO - AI called function: search_products
-2025-10-17 13:32:34,912 - gurtoy_bot - INFO - 🔍 Starting hybrid search for: 'tops'
-2025-10-17 13:32:34,912 - gurtoy_bot - INFO - 🎯 Detected product name query: 'tops'
-2025-10-17 13:32:35,146 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/keyword_search_products "HTTP/2 400 Bad Request"
-2025-10-17 13:32:35,150 - gurtoy_bot - ERROR - Error in keyword search: {'message': 'structure of query does not match function result type', 'code': '42804', 'hint': None, 'details': 'Returned type numeric does not match expected type double precision in column 15.'}
-2025-10-17 13:32:35,839 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/hybrid_search_products "HTTP/2 200 OK"
-2025-10-17 13:32:35,839 - gurtoy_bot - INFO - 🔗 Used hybrid search function
-2025-10-17 13:32:35,840 - gurtoy_bot - INFO - 🎯 Hybrid search completed: Found 2 products for query: 'tops'
-2025-10-17 13:32:35,840 - gurtoy_bot - INFO - Stored 2 products to show
-2025-10-17 13:32:38,091 - gurtoy_bot - INFO - Function search_products executed successfully
-2025-10-17 13:32:38,091 - gurtoy_bot - INFO - 🤖 AI raw response: 'SHOW_PRODUCTS'
-2025-10-17 13:32:38,092 - gurtoy_bot - INFO - 🤖 Products to show: 2
-2025-10-17 13:32:38,092 - gurtoy_bot - INFO - ✅ AI returned SHOW_PRODUCTS marker
-2025-10-17 13:32:39,621 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
-2025-10-17 13:32:39,929 - gurtoy_bot - ERROR - Error sending product card 1: 'BotConfig' object has no attribute 'BUSINESS_PHONE'
-2025-10-17 13:32:39,930 - gurtoy_bot - ERROR - Error sending product card 2: 'BotConfig' object has no attribute 'BUSINESS_PHONE'
-2025-10-17 13:32:41,665 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
-2025-10-17 13:32:41,878 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=id&telegram_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:41,984 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=id&user_id=eq.2&telegram_chat_id=eq.8078397925 "HTTP/2 200 OK"
-2025-10-17 13:32:42,189 - httpx - INFO - HTTP Request: PATCH https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?id=eq.2 "HTTP/2 200 OK"
-2025-10-17 13:32:42,190 - gurtoy_bot - INFO - ✅ Stored 2 recent products for user 8078397925
-2025-10-17 13:32:42,291 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
-2025-10-17 13:32:42,294 - gurtoy_bot - INFO - ✅ Showed 2 products to Gurtoy
-2025-10-17 13:32:42,295 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 2
+Aapko kya chahiye? Cardigan, top, ya kot? Ya koi specific occasion ke liye kuch dekh rahe hain?'   
+2025-10-17 20:48:53,046 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:48:53,048 - gurtoy_bot - INFO - ✅ Response sent to Sarvesh
+2025-10-17 20:48:53,251 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-17 20:48:53,255 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 1
+2025-10-17 20:49:01,135 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
+2025-10-17 20:49:01,342 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:01,417 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-17 20:49:01,545 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-17 20:49:01,546 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
+2025-10-17 20:49:01,649 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:01,651 - gurtoy_bot - INFO - [DEBUG] No order session found for user 1308116659
+2025-10-17 20:49:01,651 - gurtoy_bot - INFO - 📨 Message from Sarvesh (1308116659): Show me some tops...
+2025-10-17 20:49:01,652 - gurtoy_bot - INFO - 🔍 Checking for reply: reply_to_message=absent       
+2025-10-17 20:49:01,748 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-17 20:49:01,749 - gurtoy_bot - INFO - [ORDER_COLLECTION] Checking for active order session for user 1308116659
+2025-10-17 20:49:01,854 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:01,855 - gurtoy_bot - INFO - [ORDER_COLLECTION] Session check result for user 1308116659: Not found
+2025-10-17 20:49:01,856 - gurtoy_bot - INFO - [ORDER_COLLECTION] No active order session found for user 1308116659, proceeding with normal AI processing
+2025-10-17 20:49:01,858 - gurtoy_bot - INFO - 📂 Session context: {}
+2025-10-17 20:49:01,858 - gurtoy_bot - INFO - 🔍 Extracted context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'initial'}
+2025-10-17 20:49:01,859 - gurtoy_bot - INFO - 🔄 Merged context: {'age': None, 'gender': None, 'color_preference': None, 'budget_max': None, 'product_type': None, 'delivery_address_mentioned': False, 'conversation_summary': 'Initial conversation', 'key_preferences': [], 'recent_intent': None, 'conversation_stage': 'initial'}
+2025-10-17 20:49:01,859 - gurtoy_bot - INFO - 📝 Recent messages count: 2
+2025-10-17 20:49:05,540 - gurtoy_bot - INFO - AI called function: search_products
+2025-10-17 20:49:05,554 - gurtoy_bot - INFO - 🔍 Starting hybrid search for: 'top'
+2025-10-17 20:49:05,555 - gurtoy_bot - INFO - 🎯 Detected product name query: 'top'
+2025-10-17 20:49:05,625 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/keyword_search_products "HTTP/2 400 Bad Request"
+2025-10-17 20:49:05,627 - gurtoy_bot - WARNING - Error in keyword search: {'message': 'structure of query does not match function result type', 'code': '42804', 'hint': None, 'details': 'Returned type numeric does not match expected type double precision in column 15.'}
+2025-10-17 20:49:05,746 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/products?select=product_id%2Ctitle%2Ccategory%2Cdescription%2Csize_range%2Cstyle_keywords%2Coccasion%2Ccolors%2Cspecifications%2Cimages%2Cprice%2Cdiscount_price%2Cstock_status%2Cwarranty&category=eq.Crop%20top&stock_status=eq.in_stock&or=%28title.ilike.%25top%25%2Cproduct_id.ilike.%25top%25%2Cdescription.ilike.%25top%25%29&limit=10 "HTTP/2 200 OK"
+2025-10-17 20:49:05,749 - gurtoy_bot - INFO - Fallback keyword search found 2 products for: top
+2025-10-17 20:49:06,272 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/hybrid_search_products "HTTP/2 200 OK"
+2025-10-17 20:49:06,275 - gurtoy_bot - INFO - 🔗 Used hybrid search function
+2025-10-17 20:49:06,275 - gurtoy_bot - INFO - 🎯 Hybrid search completed: Found 2 products for query: 'top'
+2025-10-17 20:49:06,276 - gurtoy_bot - INFO - Stored 2 products to show
+2025-10-17 20:49:08,099 - gurtoy_bot - INFO - Function search_products executed successfully
+2025-10-17 20:49:08,100 - gurtoy_bot - INFO - 🤖 AI raw response: 'SHOW_PRODUCTS'
+2025-10-17 20:49:08,100 - gurtoy_bot - INFO - 🤖 Products to show: 2
+2025-10-17 20:49:08,100 - gurtoy_bot - INFO - ✅ AI returned SHOW_PRODUCTS marker
+2025-10-17 20:49:09,842 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:49:11,786 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendPhoto "HTTP/1.1 200 OK"
+2025-10-17 20:49:13,936 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendPhoto "HTTP/1.1 200 OK"
+2025-10-17 20:49:15,817 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:49:15,988 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=id&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:16,086 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions?select=id&user_id=eq.3&telegram_chat_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:16,189 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/sessions "HTTP/2 201 Created"
+2025-10-17 20:49:16,191 - gurtoy_bot - INFO - ✅ Stored 2 recent products for user 1308116659
+2025-10-17 20:49:16,260 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/conversation_logs "HTTP/2 201 Created"
+2025-10-17 20:49:16,261 - gurtoy_bot - INFO - ✅ Showed 2 products to Sarvesh
+2025-10-17 20:49:16,261 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 2
+2025-10-17 20:49:29,603 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
+2025-10-17 20:49:29,809 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:29,884 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-17 20:49:30,013 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-17 20:49:30,014 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
+2025-10-17 20:49:30,116 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:30,117 - gurtoy_bot - INFO - [DEBUG] No order session found for user 1308116659
+2025-10-17 20:49:30,117 - gurtoy_bot - INFO - 🎤 Voice message from Sarvesh (1308116659)
+2025-10-17 20:49:31,754 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:49:31,755 - audio_handler - INFO - 📥 Downloading voice message (file_id: AwACAgUAAxkBAAIDJGjyXoS4ml4L14HNBvnkrhK_0_nIAAK0GgACsvORV-x9j9AveCIkNgQ)
+2025-10-17 20:49:34,109 - httpx - INFO - HTTP Request: GET https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getFile?file_id=AwACAgUAAxkBAAIDJGjyXoS4ml4L14HNBvnkrhK_0_nIAAK0GgACsvORV-x9j9AveCIkNgQ "HTTP/1.1 200 OK"
+2025-10-17 20:49:34,110 - audio_handler - INFO - File info: voice/file_22.oga (40898 bytes, 2s)
+2025-10-17 20:49:35,851 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/voice/file_22.oga "HTTP/1.1 200 OK"
+2025-10-17 20:49:35,855 - audio_handler - INFO - ✅ Voice file saved: E:\project\agent-bot-with-web-p\temp_audio\1308116659_20251017_204935_852897.ogg (40898 bytes)
+2025-10-17 20:49:35,856 - audio_handler - INFO - 🎧 Processing audio: 39.94 KB
+2025-10-17 20:49:35,856 - audio_handler - INFO - 📤 Uploading audio file to Gemini...
+2025-10-17 20:49:37,777 - audio_handler - ERROR - Error transcribing audio: Missing required parameter "ragStoreName"
+Traceback (most recent call last):
+  File "E:\project\agent-bot-with-web-p\audio_handler.py", line 148, in transcribe_audio
+    uploaded_file = await asyncio.to_thread(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\asyncio\threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\generativeai\files.py", line 85, in upload_file
+    response = client.create_file(
+        path=path, mime_type=mime_type, name=name, display_name=display_name, resumable=resumable  
+    )
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\generativeai\client.py", line 118, in create_file
+    request = self._discovery_api.media().upload(body={"file": file}, media_body=media)
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\googleapiclient\discovery.py", line 1114, in method
+    raise TypeError('Missing required parameter "%s"' % name)
+TypeError: Missing required parameter "ragStoreName"
+2025-10-17 20:49:37,901 - audio_handler - INFO - 🗑️ Cleaned up audio file: E:\project\agent-bot-witth-web-p\temp_audio\1308116659_20251017_204935_852897.ogg
+2025-10-17 20:49:39,536 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:49:39,538 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 3
+2025-10-17 20:49:39,538 - gurtoy_bot - INFO - [PAYMENT_CHECKER] Running payment status check (counter reached 3)
+2025-10-17 20:49:39,539 - gurtoy_bot - INFO - [PAYMENT_CHECKER] Starting payment status check...   
+2025-10-17 20:49:39,947 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/orders?select=order_id%2Crazorpay_order_id%2Cstatus%2Ctotal_amount%2Cuser_id%2Cusers%21inner%28telegram_id%2Cfirst_name%29&status=eq.pending_payment&razorpay_order_id=not.is.null&created_at=gte.2025-10-17T13%3A19%3A39.539871 "HTTP/2 200 OK"
+2025-10-17 20:49:39,950 - gurtoy_bot - INFO - [PAYMENT_CHECKER] No pending orders found to check
+2025-10-17 20:49:39,950 - gurtoy_bot - INFO - [PAYMENT_CHECKER] Payment status check completed     
+2025-10-17 20:49:39,950 - gurtoy_bot - INFO - [PAYMENT_CHECKER] Payment status check completed     
+2025-10-17 20:49:58,072 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
+2025-10-17 20:49:58,278 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/users?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:58,379 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/update_user_activity "HTTP/2 204 No Content"
+2025-10-17 20:49:58,481 - httpx - INFO - HTTP Request: POST https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/rpc/get_user_context "HTTP/2 200 OK"
+2025-10-17 20:49:58,483 - gurtoy_bot - INFO - [DEBUG] PAYMENT_SYSTEM_AVAILABLE is True, checking for order session
+2025-10-17 20:49:58,584 - httpx - INFO - HTTP Request: GET https://uejyfpzabmlrgkdayfrn.supabase.co/rest/v1/order_collection_sessions?select=%2A&telegram_id=eq.1308116659 "HTTP/2 200 OK"
+2025-10-17 20:49:58,585 - gurtoy_bot - INFO - [DEBUG] No order session found for user 1308116659
+2025-10-17 20:49:58,585 - gurtoy_bot - INFO - 📸 Image from Sarvesh (1308116659)
+2025-10-17 20:49:58,586 - image_handler - INFO - 📥 Downloading image (file_id: AgACAgUAAxkBAAIDJ2jyXqB6PbWJW4-QJ2iySA2u1tn_AAKkDGsbsvORV7QlMvmgr69tAQADAgADeAADNgQ)
+2025-10-17 20:50:00,231 - httpx - INFO - HTTP Request: GET https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getFile?file_id=AgACAgUAAxkBAAIDJ2jyXqB6PbWJW4-QJ2iySA2u1tn_AAKkDGsbsvORV7QlMvmgr69tAQADAgADeAADNgQ "HTTP/1.1 200 OK"
+2025-10-17 20:50:00,233 - image_handler - INFO - File info: photos/file_23.jpg (46255 bytes)
+2025-10-17 20:50:01,966 - httpx - INFO - HTTP Request: GET https://api.telegram.org/file/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/photos/file_23.jpg "HTTP/1.1 200 OK"
+2025-10-17 20:50:01,970 - image_handler - INFO - ✅ Image saved: E:\project\agent-bot-with-web-p\temp_images\1308116659_20251017_205001_967951.jpg (46255 bytes)
+2025-10-17 20:50:01,971 - image_queue_manager - INFO - 📸 New pending image for user 1308116659    
+2025-10-17 20:50:01,971 - gurtoy_bot - INFO - 📸 Image 1/6 queued for user 1308116659, waiting 7.5s for more images or text...
+2025-10-17 20:50:01,973 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 1
+2025-10-17 20:50:10,168 - image_queue_manager - INFO - 🗑️ Removed pending images for user 13081166559
+2025-10-17 20:50:10,168 - gurtoy_bot - INFO - ⏰ Timeout reached for user 1308116659, processing 1 image(s)
+2025-10-17 20:50:10,169 - image_handler - INFO - 🖼️ Generating product search description for 1 imaage(s)
+2025-10-17 20:50:10,238 - image_handler - ERROR - Error generating product search description: Missing required parameter "ragStoreName"
+Traceback (most recent call last):
+  File "E:\project\agent-bot-with-web-p\image_handler.py", line 267, in generate_product_search_description
+    uploaded_file = await asyncio.to_thread(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\asyncio\threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\generativeai\files.py", line 85, in upload_file
+    response = client.create_file(
+        path=path, mime_type=mime_type, name=name, display_name=display_name, resumable=resumable  
+    )
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\google\generativeai\client.py", line 118, in create_file
+    request = self._discovery_api.media().upload(body={"file": file}, media_body=media)
+  File "C:\Users\kumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\googleapiclient\discovery.py", line 1114, in method
+    raise TypeError('Missing required parameter "%s"' % name)
+TypeError: Missing required parameter "ragStoreName"
+2025-10-17 20:50:10,284 - image_handler - INFO - 🗑️ Cleaned up image file: E:\project\agent-bot-witth-web-p\temp_images\1308116659_20251017_205001_967951.jpg
+2025-10-17 20:50:11,998 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/sendMessage "HTTP/1.1 200 OK"
+2025-10-17 20:50:33,196 - httpx - INFO - HTTP Request: POST https://api.telegram.org/bot7504641562:AAEm8-Au1d7rk9d8yJLeASnkQJuDQ6y6M7s/getUpdates "HTTP/1.1 200 OK"
+2025-10-17 20:50:33,198 - gurtoy_bot - INFO - [POLLING_DEBUG] Counter: 2

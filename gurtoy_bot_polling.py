@@ -269,7 +269,11 @@ class TelegramPollingBot:
         
         # Initialize audio handler for voice message processing
         from audio_handler import initialize_audio_handler
-        initialize_audio_handler(config.TELEGRAM_BOT_TOKEN, config.GEMINI_API_KEY)
+        initialize_audio_handler(
+            telegram_bot_token=config.TELEGRAM_BOT_TOKEN,
+            gemini_api_key=config.GEMINI_API_KEY,
+            voice_model_name=os.getenv("VOICE_MODEL_NAME") or "gemini-2.5-flash",
+        )
         logger.info("🎤 Audio handler initialized for voice messages")
         
         # Initialize image handler for image processing
@@ -1048,7 +1052,7 @@ Need help? Contact us at 9876151585"""
             )
 
             # Generate AI response using the initialized instance
-            ai_response, products = await gurtoy_ai.generate_response(image_context, user_context)
+            ai_response, products = await fashion_mart_ai.generate_response(image_context, user_context)
 
             # Check if we need to show products
             if ai_response == "SHOW_PRODUCTS":
